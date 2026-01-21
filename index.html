@@ -158,7 +158,9 @@
         #level-complete {
             position: absolute;
             inset: 0;
-            background: #0f0a1e url('logo.png') no-repeat center center;
+            background-color: #0f0a1e;
+            background-position: center center;
+            background-repeat: no-repeat;
             background-size: contain;
             display: flex;
             flex-direction: column;
@@ -169,6 +171,18 @@
             z-index: 100;
             overflow-y: auto;
             font-family: 'Pixel Sans Medium', sans-serif !important;
+        }
+
+        #menu {
+            background-image: url('logo.png');
+        }
+
+        #gameover {
+            background-image: url('logo2.png');
+        }
+
+        #level-complete {
+            background-image: url('logo2.png');
         }
 
         /* Usunięto przyciemnienie i blur na życzenie użytkownika */

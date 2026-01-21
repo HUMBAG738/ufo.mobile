@@ -262,6 +262,7 @@
 
         <div id="gameover" class="hidden">
             <div class="modal-content">
+                <img src="gameover.png" alt="GAME OVER" style="max-width: 250px; margin-bottom: 10px;">
                 <button class="start-btn" onclick="startGame()"></button>
             </div>
         </div>
@@ -474,7 +475,9 @@
         const imgDialog4 = new Image(); imgDialog4.src = 'dialog4.png';
         const imgAniol = new Image(); imgAniol.src = 'aniol.png';
         const imgAniol2 = new Image(); imgAniol2.src = 'aniol2.png';
-        const imgDziekuje = new Image(); imgDziekuje.src = 'dziekuje.png';
+        const imgDziekuje = new Image(); imgDziekuje.src = 'dziekuje.jpg';
+        const imgGrajPonownie = new Image(); imgGrajPonownie.src = 'grajponownie.png';
+        const imgWyjscie = new Image(); imgWyjscie.src = 'wyjscie.png';
         const imgWPrawo = new Image(); imgWPrawo.src = 'w_prawo.png';
         const sfxDrzwi = new Audio('drzwi.mp3');
 
@@ -491,7 +494,7 @@
         let playerAbductY = 0;
         let playerAbductStartTime = 0;
 
-        let player = { x: 50, y: 500, vx: 0, vy: 0, width: 70, height: 70, onGround: false, facingRight: true, lastShootTime: 0, shieldLevel: 0, isSober: false };
+        let player = { x: 50, y: 500, vx: 0, vy: 0, width: 70, height: 70, onGround: false, facingRight: true, lastShootTime: 0, shieldLevel: 0, isSober: false, invincibilityTimer: 0 };
         let platforms = [];
         let coins = [];
         let enemies = [];
@@ -534,6 +537,9 @@
                 if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'Space' || e.key === ' ') {
                     keys.jump = true;
                     playSFX(sfxJump);
+                }
+                if (e.key === 'l' || e.key === 'L') {
+                    nextLevel();
                 }
 
             });
@@ -819,10 +825,23 @@
         }
 
         function loseLife() {
+            if (player.invincibilityTimer > 0) return; // Ignore damage if invincible
+
+            if (player.isSober && level === 5) {
+                if (player.soberArmor < 4) {
+                    player.soberArmor++;
+                    playSFX(sfxShot); // Dźwięk uderzenia w pancerz
+                    effects.push({ x: player.x + player.width / 2, y: player.y + player.height / 2, type: 'cloud', timer: 30 });
+                    player.invincibilityTimer = 60; // 1 second of i-frames (60 frames)
+                    return;
+                }
+            }
+
             if (player.shieldLevel > 0) {
                 // If Blue (3), 1st hit drops to Green (2). 2nd hit stays Green (1). 3rd hit returns to Normal (0).
                 player.shieldLevel--;
                 effects.push({ x: player.x + player.width / 2, y: player.y + player.height / 2, type: 'cloud', timer: 30 });
+                player.invincibilityTimer = 60; // 1 second of i-frames
                 updateUI();
                 return;
             }
@@ -835,6 +854,7 @@
                 document.getElementById('final-stats').innerText = `Poziom: ${level}, Wynik: ${totalScore + score}`;
             } else {
                 initLevel();
+                player.invincibilityTimer = 120; // Longer i-frames after respawm (2 seconds)
             }
         }
 
@@ -882,6 +902,11 @@
             // Sober Freeze Timer
             if (soberFreezeTimer > 0) {
                 soberFreezeTimer--;
+            }
+
+            // Invincibility Timer
+            if (player.invincibilityTimer > 0) {
+                player.invincibilityTimer--;
             }
 
             // Movement
@@ -1017,9 +1042,11 @@
                             player.shieldLevel = 3; // 3 hits for Blue armor
                         }
                         if (it.type === 'sober') {
+                            const oldHeight = player.height;
                             player.isSober = true;
                             player.height = 105;
                             player.width = 105; // Update width as well for hitbox
+                            player.y -= (player.height - oldHeight); // Lift player so feet stay at same Y
                             // Text notification removed as requested
 
                             // DYNAMICZNY SPAWN (Level 5) - Na życzenie użytkownika
@@ -1128,9 +1155,9 @@
                         // Shooting Phase
                         const bx = boss.x;
                         let by = 0;
-                        if (boss.phaseIndex === 0) by = 230 + 10; // Upper beam
-                        else if (boss.phaseIndex === 1) by = 380 + 10; // Middle beam
-                        else if (boss.phaseIndex === 2) by = 500 + 10; // Lower beam
+                        if (boss.phaseIndex === 0) by = 210 + 10; // Upper beam
+                        else if (boss.phaseIndex === 1) by = 360 + 10; // Middle beam
+                        else if (boss.phaseIndex === 2) by = 480 + 10; // Lower beam
 
                         bullets.push({ x: bx, y: by, vx: -3, vy: 0, img: imgDetoks });
                         boss.phaseIndex++;
@@ -1196,18 +1223,6 @@
                     player.y < cy + bSize && player.y + player.height > cy - bSize) {
                     bullets.splice(i, 1);
 
-                    // Pancerz Boss logic
-                    if (player.isSober && level === 5) {
-                        if (player.soberArmor < 4) {
-                            player.soberArmor++;
-                            playSFX(sfxShot); // Dźwięk uderzenia w pancerz
-                            if (player.soberArmor === 4) {
-                                // Keep size big as requested
-                            }
-                            return;
-                        }
-                    }
-
                     loseLife();
                     return;
                 }
@@ -1271,6 +1286,9 @@
             let pHeight = 157;
             let px = 100;
             let py = 775;
+            let pvy = 0;
+            const groundY = 775;
+            let pOnGround = true;
             let pFacingRight = true;
             let finalSceneActive = false;
             let finalCutsceneStep = 0;
@@ -1280,6 +1298,8 @@
             let currentDialogImg = null;
             let currentBackgroundImg = null;
             let upliftStartTimer = 180; // 3 seconds to show imgWPrawo
+            let buttonsAdded = false;
+            let shootKeyWasPressed = false;
 
             upliftCameraX = 0;
             upliftFade = 0;
@@ -1305,8 +1325,34 @@
                             px += 4;
                             pFacingRight = true;
                         }
+                        if (keys.jump && pOnGround) {
+                            pvy = -12;
+                            pOnGround = false;
+                            playSFX(sfxJump);
+                        }
                     }
+
+                    // Gravity and physics
+                    pvy += 0.5;
+                    py += pvy;
+                    if (py >= groundY) {
+                        py = groundY;
+                        pvy = 0;
+                        pOnGround = true;
+                    } else {
+                        pOnGround = false;
+                    }
+
                     if (px < 50) px = 50;
+
+                    // Boundary check for the end of the level
+                    if (imgPlansza.complete) {
+                        const bgHeight = 600;
+                        const bgScale = bgHeight / imgPlansza.height;
+                        const bgWidth = imgPlansza.width * bgScale;
+                        const rightLimit = bgWidth - pWidth - 20;
+                        if (px > rightLimit) px = rightLimit;
+                    }
 
                     // Scrolling: Follow player
                     const screenCenterX = 400;
@@ -1331,6 +1377,16 @@
                         }
                     }
                 } else {
+                    // Allow skipping dialogs with shoot key
+                    if (keys.shoot && !shootKeyWasPressed) {
+                        // Skip many frames if it's a dialog or pause step
+                        // (Steps 2, 3, 4, 7 are dialogs)
+                        if ([1, 2, 3, 4, 7, 9].includes(finalCutsceneStep)) {
+                            finalTimer += 1000; // Jump ahead
+                        }
+                    }
+                    shootKeyWasPressed = keys.shoot;
+
                     finalTimer++;
                     // FINAL CUTSCENE STATE MACHINE
                     if (finalCutsceneStep === 1) { // Show ostatnia_scena.png
@@ -1372,8 +1428,11 @@
                             finalCutsceneStep = 11;
                             finalTimer = 0;
                         }
-                    } else if (finalCutsceneStep === 11) { // Show "dziekuje.png" and end
-                        // No logic needed, just draw it centered in drawUplift
+                    } else if (finalCutsceneStep === 11) { // Show "dziekuje.jpg" and end
+                        if (!buttonsAdded) {
+                            buttonsAdded = true;
+                            addFinalScreenButtons();
+                        }
                     }
 
                     if (shakeTimer > 0) shakeTimer--;
@@ -1440,9 +1499,10 @@
                     // Final "Dziekuje"
                     if (finalCutsceneStep === 11) {
                         if (imgDziekuje.complete) {
-                            let dw = imgDziekuje.width / 3;
-                            let dh = imgDziekuje.height / 3;
-                            uctx.drawImage(imgDziekuje, 400 - dw / 2, 300 - dh / 2, dw, dh);
+                            const scale = Math.max(800 / imgDziekuje.width, 600 / imgDziekuje.height);
+                            const w = imgDziekuje.width * scale;
+                            const h = imgDziekuje.height * scale;
+                            uctx.drawImage(imgDziekuje, (800 - w) / 2, (600 - h) / 2, w, h);
                         }
                     }
 
@@ -1500,6 +1560,40 @@
             }
 
             updateUplift();
+
+            function addFinalScreenButtons() {
+                const container = document.createElement('div');
+                container.id = 'final-buttons-container';
+                container.style.position = 'absolute';
+                container.style.bottom = '15%';
+                container.style.left = '50%';
+                container.style.transform = 'translateX(-50%)';
+                container.style.display = 'flex';
+                container.style.flexDirection = 'column';
+                container.style.gap = '20px';
+                container.style.zIndex = '300';
+                container.style.alignItems = 'center';
+
+                const btnAgain = document.createElement('img');
+                btnAgain.src = 'grajponownie.png';
+                btnAgain.style.width = '250px';
+                btnAgain.style.cursor = 'pointer';
+                btnAgain.onclick = () => location.reload();
+
+                const btnExit = document.createElement('img');
+                btnExit.src = 'wyjscie.png';
+                btnExit.style.width = '150px';
+                btnExit.style.cursor = 'pointer';
+                btnExit.onclick = () => {
+                    window.close();
+                    alert("Dziękujemy za grę! Możesz teraz zamknąć kartę przeglądarki.");
+                };
+
+                container.appendChild(btnAgain);
+                container.appendChild(btnExit);
+                const finalScreen = document.getElementById('final-screen');
+                if (finalScreen) finalScreen.appendChild(container);
+            }
         }
 
         function drawPlayerOnCtx(c, px, py, right, surprised) {
@@ -1527,6 +1621,12 @@
                 }
 
                 c.save();
+
+                // Blinking effect when invincible
+                if (player.invincibilityTimer > 0 && Math.floor(Date.now() / 100) % 2 === 0) {
+                    c.globalAlpha = 0.3;
+                }
+
                 if (!right) {
                     c.translate(px + pw, py);
                     c.scale(-1, 1);

@@ -1,5 +1,7 @@
 # 🛸 UFO MOBILE - Gra Antyalkoholowa
 
+![UFO MOBILE](logo.png)
+
 ## 📖 O Grze
 
 **UFO MOBILE** to amatorska gra platformowa 2D z przesłaniem antyalkoholowym, osadzona w klimatach science fiction. Wciel się w bohatera, który musi uratować ludzkość przed zagrożeniem alkoholowym, zbierając kosmitów i walcząc z wrogimi kuflamipiwa!
@@ -11,10 +13,10 @@ Gra łączy klasyczną mechanikę platformówek z unikalną fabułą o kosmitach
 ### Sterowanie
 
 #### Klawiatura (PC):
-- **Strzałki** / - Ruch w lewo/prawo
-- **Strzałka w górę** / **Spacja** - Skok
+- **Strzałki** / **A, D** - Ruch w lewo/prawo
+- **Strzałka w górę** / **W** / **Spacja** - Skok
 - **X** - Strzał
-- **Strzałka w dół** / **S** - Zeskok w dół
+- **Strzałka w dół** / **S** - Schylenie/interakcja
 
 #### Ekran dotykowy (Mobile):
 - **Wirtualny D-Pad** - Poruszanie się
@@ -135,12 +137,13 @@ Gra została stworzona w technologii:
 
 Czy potrafisz:
 - ✨ Przejść grę bez straty życia?
+- ⚡ Zebrać wszystkie kosmity na czas?
 - 🎯 Pokonać bossa bez użycia pancerza?
 - 🌟 Ukończyć grę w jednym podejściu?
 
 ## 👨‍💻 O Projekcie
 
-**UFO MOBILE** to amatorski projekt stworzony z pasją do gier retro i chęci przekazania ważnego społecznego przesłania. Gra łączy nostalgię za klasycznymi platformówkami z tematyką antyalkoholową.
+**UFO MOBILE** to amatorski projekt stworzony z pasją do gier retro i chęci przekazania ważnego społecznego przesłania. Gra łączy nostalgię za klasycznymi platformówkami z nowoczesnym podejściem do tematyki antyalkoholowej.
 
 ## 📜 Licencja
 

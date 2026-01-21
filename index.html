@@ -575,10 +575,12 @@
             updateUI();
 
             setTimeout(() => {
-                if (level === 1) showGenericNotification('<img src="zbierz.png" style="max-width: 100%;">', 'transparent');
-                else if (level === 2) showShootNotification();
-                else if (level === 3) showGenericNotification('<img src="alkohol_nie.png" style="max-width: 100%;">', 'transparent');
-                else if (level === 4) showGenericNotification('<img src="alkohol_szkodzi.png" style="max-width: 100%;">', 'transparent');
+                if (gameState === 'playing') {
+                    if (level === 1) showGenericNotification('<img src="zbierz.png" style="max-width: 100%;">', 'transparent');
+                    else if (level === 2) showShootNotification();
+                    else if (level === 3) showGenericNotification('<img src="alkohol_nie.png" style="max-width: 100%;">', 'transparent');
+                    else if (level === 4) showGenericNotification('<img src="alkohol_szkodzi.png" style="max-width: 100%;">', 'transparent');
+                }
             }, 1000);
         }
         function generateLevel(lvl) {
@@ -851,7 +853,6 @@
                 gameState = 'gameover';
                 document.body.classList.remove('playing');
                 document.getElementById('gameover').classList.remove('hidden');
-                document.getElementById('final-stats').innerText = `Poziom: ${level}, Wynik: ${totalScore + score}`;
             } else {
                 initLevel();
                 player.invincibilityTimer = 120; // Longer i-frames after respawm (2 seconds)

@@ -11,10 +11,10 @@ Gra łączy klasyczną mechanikę platformówek z unikalną fabułą o kosmitach
 ### Sterowanie
 
 #### Klawiatura (PC):
-- **Strzałki** / **A, D** - Ruch w lewo/prawo
-- **Strzałka w górę** / **W** / **Spacja** - Skok
+- **Strzałki** / - Ruch w lewo/prawo
+- **Strzałka w górę** / **Spacja** - Skok
 - **X** - Strzał
-- **Strzałka w dół** / **S** - Schylenie/interakcja
+- **Strzałka w dół** / **S** - Zeskok w dół
 
 #### Ekran dotykowy (Mobile):
 - **Wirtualny D-Pad** - Poruszanie się
@@ -135,13 +135,12 @@ Gra została stworzona w technologii:
 
 Czy potrafisz:
 - ✨ Przejść grę bez straty życia?
-- ⚡ Zebrać wszystkie kosmity na czas?
 - 🎯 Pokonać bossa bez użycia pancerza?
 - 🌟 Ukończyć grę w jednym podejściu?
 
 ## 👨‍💻 O Projekcie
 
-**UFO MOBILE** to amatorski projekt stworzony z pasją do gier retro i chęci przekazania ważnego społecznego przesłania. Gra łączy nostalgię za klasycznymi platformówkami z nowoczesnym podejściem do tematyki antyalkoholowej.
+**UFO MOBILE** to amatorski projekt stworzony z pasją do gier retro i chęci przekazania ważnego społecznego przesłania. Gra łączy nostalgię za klasycznymi platformówkami z tematyką antyalkoholową.
 
 ## 📜 Licencja
 

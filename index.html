@@ -277,7 +277,7 @@
         <div id="menu">
             <div class="modal-content">
                 <h1 style="display: none;"></h1>
-                <button class="start-btn" onclick="startGame()" style="margin-bottom: 30px;">GRAJ!</button>
+                <button class="start-btn" onclick="startGame()" style="margin-bottom: 30px;">ŁADOWANIE...</button>
             </div>
         </div>
 
@@ -437,70 +437,127 @@
             { bg: '#1e0a0a', platforms: '#7f1d1d', accent: '#ef4444', ground: '#450a0a', stars: '#fecaca' }, // Level 5 (Czerwień)
         ];
 
-        // Assets
-        const imgTlo = [];
-        for (let i = 1; i <= 5; i++) {
+        // Assets Loader
+        const assets = {
+            images: {},
+            total: 0,
+            loaded: 0,
+            isReady: false
+        };
+
+        function loadImage(name, src) {
+            assets.total++;
             const img = new Image();
-            img.src = `tlo_${i}.webp`;
-            imgTlo.push(img);
+            img.onload = () => {
+                assets.loaded++;
+                checkAssetsLoaded();
+            };
+            img.onerror = () => {
+                console.error(`Błąd ładowania: ${src}`);
+                assets.loaded++;
+                checkAssetsLoaded();
+            };
+            img.src = src;
+            assets.images[name] = img;
+            return img;
         }
 
-        // Indywidualne grafiki dla poziomów 1-4
+        function checkAssetsLoaded() {
+            const btn = document.querySelector('.start-btn');
+            if (assets.loaded >= assets.total) {
+                assets.isReady = true;
+                if (btn) {
+                    btn.innerText = 'GRAJ!';
+                    btn.style.color = 'transparent'; // Hide text as per original design
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                }
+            } else {
+                if (btn) {
+                    btn.innerText = 'ŁADOWANIE...';
+                    btn.style.color = 'white'; // Make sure loading text is visible
+                    btn.style.opacity = '0.7';
+                    btn.style.pointerEvents = 'none';
+                    btn.style.fontSize = '20px';
+                }
+            }
+        }
+
+        // Preload Images
+        const imgTlo = [];
+        for (let i = 1; i <= 5; i++) imgTlo.push(loadImage(`tlo_${i}`, `tlo_${i}.webp`));
+
         const imgPodlogiLevel = [];
-        // Używamy tych samych grafik dla podłóg i belek (na życzenie użytkownika)
-        for (let i = 1; i <= 4; i++) {
-            const p = new Image(); p.src = `podloga_${i}.webp`;
-            imgPodlogiLevel[i] = p;
-        }
+        for (let i = 1; i <= 4; i++) imgPodlogiLevel[i] = loadImage(`podloga_${i}`, `podloga_${i}.webp`);
 
-        const imgBelka = new Image(); imgBelka.src = 'belka.webp';
-        const imgBelkaBoss = new Image(); imgBelkaBoss.src = 'belka_boss.webp';
-        const imgPiwo = new Image(); imgPiwo.src = 'piwo.webp';
-        const imgPiwoRed = new Image(); imgPiwoRed.src = 'piwo_red.webp';
-        const imgPodloga = new Image(); imgPodloga.src = 'podloga.webp';
-        const imgPodlogaBoss = new Image(); imgPodlogaBoss.src = 'podloga_boss.webp';
-        const imgUfo = new Image(); imgUfo.src = 'ufo.webp';
-        const imgBohater = new Image(); imgBohater.src = 'bohater.webp';
-        const imgKosmita = new Image(); imgKosmita.src = 'kosmita.webp';
+        const imgBelka = { complete: true }; // Składnik wirtualny, używamy podłóg
+        const imgBelkaBoss = loadImage('belka_boss', 'belka_boss.webp');
+        const imgPiwo = loadImage('piwo', 'piwo.webp');
+        const imgPiwoRed = loadImage('piwo_red', 'piwo_red.webp');
+        const imgPodloga = { complete: true }; // Składnik wirtualny
+        const imgPodlogaBoss = loadImage('podloga_boss', 'podloga_boss.webp');
+        const imgUfo = loadImage('ufo', 'ufo.webp');
+        const imgBohater = loadImage('bohater', 'bohater.webp');
+        const imgKosmita = loadImage('kosmita', 'kosmita.webp');
+        const imgTarczaZielona = loadImage('tarcza_zielona', 'tarcza_zielona.png');
+        const imgTarczaNiebieska = loadImage('tarcza_niebieska', 'tarcza_niebieska.png');
+        const imgPiwoStrzela = loadImage('piwo_strzela', 'piwo_strzela.webp');
+        const imgPiwoFaint = loadImage('piwo_faint', 'piwo_faint.webp');
+        const imgBoss = loadImage('boss', 'boss.webp');
+        const imgDetoks = loadImage('detoks', 'detoks.png');
+        const imgZbierz = loadImage('zbierz', 'zbierz.webp');
+        const imgStrzelaj = loadImage('strzelaj', 'strzelaj.webp');
+        const imgAlkoholNie = loadImage('alkohol_nie', 'alkohol_nie.webp');
+        const imgAlkoholSzkodzi = loadImage('alkohol_szkodzi', 'alkohol_szkodzi.webp');
+        const imgBossInfo = loadImage('boss_info', 'boss_info.webp');
+        const imgPancerzZielony = loadImage('pancerz_zielony', 'pancerz_zielony.webp');
+        const imgPancerzNiebieski = loadImage('pancerz_niebieski', 'pancerz_niebieski.webp');
+        const imgPancerzCzerwony = loadImage('pancerz_czerwony', 'pancerz_czerwony.webp');
+        const imgTrzezwosc = loadImage('trzezwosc', 'trzezwosc.webp');
+        const imgEndTitle = { complete: true }; // Brak pliku
+        const imgSzarak = { complete: true }; // Brak pliku
+        const imgPlomien = loadImage('plomien', 'plomien.webp');
+        const imgPlansza = loadImage('plansza', 'plansza.webp');
+        const imgPrzyciskStrzelania = loadImage('przycisk_strzelania', 'przycisk_strzelania.webp');
+        const imgOni = loadImage('oni', 'oni.webp');
+        const imgOstatniaScena = loadImage('ostatnia_scena', 'ostatnia_scena.webp');
+        const imgPancerzPeka1 = loadImage('pancerz_peka1', 'pancerz_peka1.webp');
+        const imgPancerzPeka2 = loadImage('pancerz_peka2', 'pancerz_peka2.webp');
+        const imgPancerzPeka3 = loadImage('pancerz_peka3', 'pancerz_peka3.webp');
+        const imgPancerzPeka4 = loadImage('pancerz_peka4', 'pancerz_peka4.webp');
+        const imgDialog1 = loadImage('dialog1', 'dialog1.png');
+        const imgDialog2 = loadImage('dialog2', 'dialog2.png');
+        const imgDialog3 = loadImage('dialog3', 'dialog3.png');
+        const imgDialog4 = loadImage('dialog4', 'dialog4.png');
+        const imgAniol = loadImage('aniol', 'aniol.webp');
+        const imgAniol2 = loadImage('aniol2', 'aniol2.webp');
+        const imgDziekuje = loadImage('dziekuje', 'dziekuje.webp');
+        const imgGrajPonownie = loadImage('grajponownie', 'grajponownie.webp');
+        const imgWyjscie = loadImage('wyjscie', 'wyjscie.webp');
+        const imgWPrawo = loadImage('w_prawo', 'w_prawo.webp');
 
-        const imgTarczaZielona = new Image(); imgTarczaZielona.src = 'tarcza_zielona.png';
-        const imgTarczaNiebieska = new Image(); imgTarczaNiebieska.src = 'tarcza_niebieska.png';
-        const imgPiwoStrzela = new Image(); imgPiwoStrzela.src = 'piwo_strzela.webp';
-        const imgPiwoFaint = new Image(); imgPiwoFaint.src = 'piwo_faint.webp';
-        const imgBoss = new Image(); imgBoss.src = 'boss.webp';
-        const imgDetoks = new Image(); imgDetoks.src = 'detoks.png';
-        const imgZbierz = new Image(); imgZbierz.src = 'zbierz.webp';
-        const imgStrzelaj = new Image(); imgStrzelaj.src = 'strzelaj.webp';
-        const imgAlkoholNie = new Image(); imgAlkoholNie.src = 'alkohol_nie.webp';
-        const imgAlkoholSzkodzi = new Image(); imgAlkoholSzkodzi.src = 'alkohol_szkodzi.webp'; // To remove logic, keeping loading for safety or remove if unused
-        const imgBossInfo = new Image(); imgBossInfo.src = 'boss_info.webp'; // New Image
-        const imgPancerzZielony = new Image(); imgPancerzZielony.src = 'pancerz_zielony.webp';
-        const imgPancerzNiebieski = new Image(); imgPancerzNiebieski.src = 'pancerz_niebieski.webp';
-        const imgPancerzCzerwony = new Image(); imgPancerzCzerwony.src = 'pancerz_czerwony.webp';
-        const imgTrzezwosc = new Image(); imgTrzezwosc.src = 'trzezwosc.webp';
-        const imgEndTitle = new Image(); imgEndTitle.src = 'end_title.webp';
-        const imgSzarak = new Image(); imgSzarak.src = 'szarak.webp';
-        const imgPlomien = new Image(); imgPlomien.src = 'plomien.webp';
-        const imgPlansza = new Image(); imgPlansza.src = 'plansza.webp';
-        const imgPrzyciskStrzelania = new Image(); imgPrzyciskStrzelania.src = 'przycisk_strzelania.webp';
-        const imgOni = new Image(); imgOni.src = 'oni.webp';
-        const imgOstatniaScena = new Image(); imgOstatniaScena.src = 'ostatnia_scena.webp';
-        const imgPancerzPeka1 = new Image(); imgPancerzPeka1.src = 'pancerz_peka1.webp';
-        const imgPancerzPeka2 = new Image(); imgPancerzPeka2.src = 'pancerz_peka2.webp';
-        const imgPancerzPeka3 = new Image(); imgPancerzPeka3.src = 'pancerz_peka3.webp';
-        const imgPancerzPeka4 = new Image(); imgPancerzPeka4.src = 'pancerz_peka4.webp';
+        checkAssetsLoaded(); // Initial check
         const sfxTrzezwosc = new Audio('dzwiek_trzezwosci.opus'); sfxTrzezwosc.volume = 0.6;
-        const imgDialog1 = new Image(); imgDialog1.src = 'dialog1.png';
-        const imgDialog2 = new Image(); imgDialog2.src = 'dialog2.png';
-        const imgDialog3 = new Image(); imgDialog3.src = 'dialog3.png';
-        const imgDialog4 = new Image(); imgDialog4.src = 'dialog4.png';
-        const imgAniol = new Image(); imgAniol.src = 'aniol.webp';
-        const imgAniol2 = new Image(); imgAniol2.src = 'aniol2.webp';
-        const imgDziekuje = new Image(); imgDziekuje.src = 'dziekuje.webp';
-        const imgGrajPonownie = new Image(); imgGrajPonownie.src = 'grajponownie.webp';
-        const imgWyjscie = new Image(); imgWyjscie.src = 'wyjscie.webp';
-        const imgWPrawo = new Image(); imgWPrawo.src = 'w_prawo.webp';
         const sfxDrzwi = new Audio('drzwi.opus');
+
+        // Performance Optimization: Offscreen Canvas for Stars
+        const starsCanvas = document.createElement('canvas');
+        starsCanvas.width = GAME_WIDTH;
+        starsCanvas.height = GAME_HEIGHT;
+        const starsCtx = starsCanvas.getContext('2d');
+
+        function generateStars(scheme) {
+            starsCtx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+            const starSeed = level * 999;
+            for (let i = 0; i < 50; i++) {
+                const sx = Math.abs(Math.sin(starSeed + i * 73));
+                const sy = Math.abs(Math.sin(starSeed + i * 137));
+                starsCtx.fillStyle = scheme.stars;
+                starsCtx.beginPath();
+                starsCtx.arc(sx * GAME_WIDTH, sy * (GAME_HEIGHT - 100), 1 + (i % 3), 0, Math.PI * 2);
+                starsCtx.fill();
+            }
+        }
 
         // Game State
         let gameState = 'menu';
@@ -516,6 +573,7 @@
         let playerAbductStartTime = 0;
 
         let player = { x: 50, y: 500, vx: 0, vy: 0, width: 70, height: 70, onGround: false, facingRight: true, lastShootTime: 0, shieldLevel: 0, isSober: false, invincibilityTimer: 0 };
+        let currentLevelTlo, currentLevelPodloga, currentLevelBelka;
         let platforms = [];
         let coins = [];
         let enemies = [];
@@ -577,6 +635,19 @@
             document.querySelectorAll('.game-notification').forEach(n => n.remove());
 
             generateLevel(level);
+
+            // Cache level assets for performance
+            const scheme = COLOR_SCHEMES[(level - 1) % COLOR_SCHEMES.length];
+            generateStars(scheme);
+            currentLevelTlo = imgTlo[level - 1] || imgTlo[0];
+            if (level === 5) {
+                currentLevelPodloga = imgPodlogaBoss;
+                currentLevelBelka = imgBelkaBoss;
+            } else {
+                currentLevelPodloga = imgPodlogiLevel[level] || imgPodloga;
+                currentLevelBelka = imgPodlogiLevel[level] || imgBelka;
+            }
+
             player.x = 50;
             player.y = GAME_HEIGHT - player.height - 50;
             player.vx = 0;
@@ -751,6 +822,7 @@
         }
 
         function startGame() {
+            if (!assets.isReady) return;
             playSFX(sfxButton);
             bgMusic.volume = 0.4;
             bgMusicBoss.pause();
@@ -1719,51 +1791,30 @@
             const scheme = COLOR_SCHEMES[(level - 1) % COLOR_SCHEMES.length];
 
             // Background image
-            const currentTlo = imgTlo[level - 1] || imgTlo[0];
-            if (currentTlo && currentTlo.complete) {
-                ctx.drawImage(currentTlo, 0, 0);
+            if (currentLevelTlo && currentLevelTlo instanceof HTMLImageElement && currentLevelTlo.complete) {
+                ctx.drawImage(currentLevelTlo, 0, 0);
             } else {
                 ctx.fillStyle = scheme.bg;
                 ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
             }
 
-            // Stars
-            const starSeed = level * 999;
-            for (let i = 0; i < 50; i++) {
-                const sx = Math.abs(Math.sin(starSeed + i * 73));
-                const sy = Math.abs(Math.sin(starSeed + i * 137));
-                ctx.fillStyle = scheme.stars;
-                ctx.globalAlpha = 0.3 + Math.sin(Date.now() / 500 + i) * 0.3;
-                ctx.beginPath();
-                ctx.arc(sx * GAME_WIDTH, sy * (GAME_HEIGHT - 100), 1 + (i % 3), 0, Math.PI * 2);
-                ctx.fill();
-            }
+            // Stars (Optimized: draw from offscreen canvas)
+            ctx.globalAlpha = 0.6 + Math.sin(Date.now() / 1000) * 0.2;
+            ctx.drawImage(starsCanvas, 0, 0);
             ctx.globalAlpha = 1;
 
             // Platforms
             platforms.forEach(p => {
                 if (p.isGround) {
-                    let currentPodloga = null;
-                    if (level === 5) currentPodloga = imgPodlogaBoss;
-                    else if (level >= 1 && level <= 4) currentPodloga = imgPodlogiLevel[level];
-
-                    if (currentPodloga && currentPodloga.complete && currentPodloga.naturalWidth !== 0) {
-                        ctx.drawImage(currentPodloga, p.x, p.y, p.width, p.height);
-                    } else if (imgPodloga.complete) {
-                        ctx.drawImage(imgPodloga, p.x, p.y, p.width, p.height);
+                    if (currentLevelPodloga && currentLevelPodloga instanceof HTMLImageElement && currentLevelPodloga.complete && currentLevelPodloga.naturalWidth !== 0) {
+                        ctx.drawImage(currentLevelPodloga, p.x, p.y, p.width, p.height);
                     } else {
                         ctx.fillStyle = scheme.ground;
                         ctx.fillRect(p.x, p.y, p.width, p.height);
                     }
                 } else {
-                    let currentBelka = null;
-                    if (level === 5) currentBelka = imgBelkaBoss;
-                    else if (level >= 1 && level <= 4) currentBelka = imgPodlogiLevel[level]; // Użycie podłogi jako belki
-
-                    if (currentBelka && currentBelka.complete && currentBelka.naturalWidth !== 0) {
-                        ctx.drawImage(currentBelka, p.x, p.y, p.width, p.height);
-                    } else if (imgBelka.complete) {
-                        ctx.drawImage(imgBelka, p.x, p.y, p.width, p.height); // Fallback
+                    if (currentLevelBelka && currentLevelBelka instanceof HTMLImageElement && currentLevelBelka.complete && currentLevelBelka.naturalWidth !== 0) {
+                        ctx.drawImage(currentLevelBelka, p.x, p.y, p.width, p.height);
                     } else {
                         ctx.fillStyle = scheme.platforms;
                         ctx.fillRect(p.x, p.y, p.width, p.height);

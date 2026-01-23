@@ -1429,9 +1429,9 @@
             let pWidth = 157 * (70 / 70);
             let pHeight = 157;
             let px = 100;
-            let py = 775;
+            let py = 500;
             let pvy = 0;
-            const groundY = 775;
+            const groundY = 500;
             let pOnGround = true;
             let pFacingRight = true;
             let finalSceneActive = false;
@@ -1451,11 +1451,11 @@
 
             // Background dimensions for scaling
             const bgHeightActual = 600;
-            const bgScale = imgPlansza.complete ? (bgHeightActual / imgPlansza.height) : 1;
+            const bgScale = (imgPlansza.complete && imgPlansza.height > 0) ? (bgHeightActual / imgPlansza.height) : 1;
             const doorXScaled = 4717 * bgScale;
 
-            let lastTimeUplift = 0;
-            function updateUplift(timestamp) {
+            let lastTimeUplift = performance.now();
+            function updateUplift(timestamp = performance.now()) {
                 if (!lastTimeUplift) lastTimeUplift = timestamp;
                 const dt = Math.min((timestamp - lastTimeUplift) / 16.6, 3);
                 lastTimeUplift = timestamp;
@@ -1670,19 +1670,14 @@
                     uctx.fillRect(0, 0, 800, 600);
                 }
 
-                // Player position scaled to the 600px height background
-                const bgHeightActual = 600;
-                const bgScale = bgHeightActual / imgPlansza.height;
-                const pyScaled = py * bgScale;
-
                 if (imgBohater.complete) {
                     uctx.save();
                     if (!pFacingRight) {
-                        uctx.translate(px - upliftCameraX + pWidth, pyScaled - pHeight);
+                        uctx.translate(px - upliftCameraX + pWidth, py - pHeight);
                         uctx.scale(-1, 1);
                         uctx.drawImage(imgBohater, 0, 0, pWidth, pHeight);
                     } else {
-                        uctx.drawImage(imgBohater, px - upliftCameraX, pyScaled - pHeight, pWidth, pHeight);
+                        uctx.drawImage(imgBohater, px - upliftCameraX, py - pHeight, pWidth, pHeight);
                     }
                     uctx.restore();
                 }
@@ -1725,17 +1720,17 @@
 
                 const btnAgain = document.createElement('img');
                 btnAgain.src = 'grajponownie.webp';
-                btnAgain.style.width = '250px';
+                btnAgain.style.width = '100px';
                 btnAgain.style.cursor = 'pointer';
                 btnAgain.onclick = () => location.reload();
 
                 const btnExit = document.createElement('img');
                 btnExit.src = 'wyjscie.webp';
-                btnExit.style.width = '150px';
+                btnExit.style.width = '100px';
                 btnExit.style.cursor = 'pointer';
                 btnExit.onclick = () => {
                     window.close();
-                    alert("Dziękujemy za grę! Możesz teraz zamknąć kartę przeglądarki.");
+                    alert("Dziękuję za grę! Możesz teraz zamknąć kartę przeglądarki.");
                 };
 
                 container.appendChild(btnAgain);

@@ -126,8 +126,9 @@
         }
 
         .control-btn {
-            width: 70px;
-            height: 70px;
+            width: 85px;
+            /* Powiększone z 70px dla lepszej responsywności */
+            height: 85px;
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(5px);
             border-radius: 50%;
@@ -137,6 +138,8 @@
             justify-content: center;
             pointer-events: auto;
             transition: transform 0.1s;
+            touch-action: none;
+            /* Blokuje gesty systemowe na przyciskach */
         }
 
         .control-btn:active {
@@ -624,17 +627,21 @@
         function setupControls() {
             const bind = (id, key) => {
                 const el = document.getElementById(id);
-                el.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
+                if (!el) return;
+
+                el.addEventListener('pointerdown', (e) => {
+                    e.target.setPointerCapture(e.pointerId); // "Przykleja" dotyk do przycisku
                     keys[key] = true;
                     if (key === 'jump') playSFX(sfxJump);
                 });
-                el.addEventListener('touchend', (e) => { e.preventDefault(); keys[key] = false; });
-                el.addEventListener('mousedown', () => {
-                    keys[key] = true;
-                    if (key === 'jump') playSFX(sfxJump);
-                });
-                el.addEventListener('mouseup', () => keys[key] = false);
+
+                const release = (e) => {
+                    keys[key] = false;
+                };
+
+                el.addEventListener('pointerup', release);
+                el.addEventListener('pointercancel', release);
+                // pointerleave usunięty, aby ruch nie przerywał się przy lekkim zsunięciu palca
             };
 
             bind('btn-left', 'left');

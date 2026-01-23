@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+        content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <title>UFO MOBILE</title>
     <style>
         :root {
@@ -45,7 +45,7 @@
             overflow: hidden;
         }
 
-        @media (orientation: landscape) {
+        @media (orientation: landscape) and (max-height: 500px) {
             #game-container {
                 height: 90vh;
                 width: auto;
@@ -195,15 +195,15 @@
         }
 
         #menu {
-            background-image: url('logo.png');
+            background-image: url('logo.webp');
         }
 
         #gameover {
-            background-image: url('logo2.png');
+            background-image: url('logo2.webp');
         }
 
         #level-complete {
-            background-image: url('logo2.png');
+            background-image: url('logo2.webp');
         }
 
         /* Usunięto przyciemnienie i blur na życzenie użytkownika */
@@ -221,7 +221,7 @@
         }
 
         button.start-btn {
-            background: url('ramka.png') no-repeat center center;
+            background: url('ramka.webp') no-repeat center center;
             background-size: 100% 100%;
             color: transparent;
             /* Ukrycie tekstu tekstowego */
@@ -234,7 +234,7 @@
             /* Obniżenie przycisku */
             transition: transform 0.2s;
             min-width: 250px;
-            /* Dopasowanie szerokości do grafiki ramka.png */
+            /* Dopasowanie szerokości do grafiki ramka.webp */
             min-height: 80px;
             /* Dopasowanie wysokości */
         }
@@ -257,17 +257,17 @@
         <div class="ui-overlay">
             <div class="stats-group">
                 <div class="stat-item">
-                    <img src="kosmita.png" class="stat-icon" alt="👽">
+                    <img src="kosmita.webp" class="stat-icon" alt="👽">
                     <span id="coins-ui">0 / 28</span>
                 </div>
                 <div class="stat-item">
-                    <img src="serce.png" class="stat-icon" alt="❤️">
+                    <img src="serce.webp" class="stat-icon" alt="❤️">
                     <span id="lives-ui">20</span>
                 </div>
             </div>
             <div class="stats-group">
                 <div class="stat-item">
-                    <img src="strzalka.png" class="stat-icon" alt="🚀">
+                    <img src="strzalka.webp" class="stat-icon" alt="🚀">
                     <span id="level-ui">1</span>
                 </div>
             </div>
@@ -283,14 +283,14 @@
 
         <div id="gameover" class="hidden">
             <div class="modal-content">
-                <img src="gameover.png" alt="GAME OVER" style="max-width: 250px; margin-bottom: 10px;">
+                <img src="gameover.webp" alt="GAME OVER" style="max-width: 250px; margin-bottom: 10px;">
                 <button class="start-btn" onclick="startGame()"></button>
             </div>
         </div>
 
         <div id="level-complete" class="hidden">
             <div class="modal-content">
-                <img src="przeszedles.png" alt="PRZESZEDŁEŚ!" style="max-width: 100%; margin-bottom: 20px;">
+                <img src="przeszedles.webp" alt="PRZESZEDŁEŚ!" style="max-width: 100%; margin-bottom: 20px;">
                 <div style="display: flex; justify-content: center; width: 100%;">
                     <button class="start-btn" onclick="nextLevel()"
                         style="font-size: 0; padding: 25px 60px; margin-top: 10px;"></button>
@@ -378,12 +378,12 @@
             };
         }
 
-        preloadSFX('skok', 'skok.mp3', 5);
-        preloadSFX('coin', 'coin.mp3', 8);
-        preloadSFX('shot', 'shot.mp3', 5);
-        preloadSFX('shot_enemy', 'shot_enemy.mp3', 5);
-        preloadSFX('przycisk', 'przycisk.mp3', 3);
-        preloadSFX('spodek', 'spodek.mp3', 1);
+        preloadSFX('skok', 'skok.opus', 5);
+        preloadSFX('coin', 'coin.opus', 8);
+        preloadSFX('shot', 'shot.opus', 5);
+        preloadSFX('shot_enemy', 'shot_enemy.opus', 5);
+        preloadSFX('przycisk', 'przycisk.opus', 3);
+        preloadSFX('spodek', 'spodek.opus', 1);
 
         function playSFX(name) {
             if (!sfxPools[name]) return;
@@ -401,15 +401,15 @@
         const sfxButton = 'przycisk';
         const sfxCoin = 'coin';
 
-        const bgMusic = new Audio('muzyka.mp3');
+        const bgMusic = new Audio('muzyka.opus');
         bgMusic.loop = true;
         bgMusic.volume = 0.3;
 
-        const bgMusicBoss = new Audio('muzyka_boss.mp3');
+        const bgMusicBoss = new Audio('muzyka_boss.opus');
         bgMusicBoss.loop = true;
         bgMusicBoss.volume = 0.4;
 
-        const bgMusicEnding = new Audio('ending.mp3');
+        const bgMusicEnding = new Audio('ending.opus');
         bgMusicEnding.loop = true;
         bgMusicEnding.volume = 0.4;
 
@@ -441,7 +441,7 @@
         const imgTlo = [];
         for (let i = 1; i <= 5; i++) {
             const img = new Image();
-            img.src = `tlo_${i}.png`;
+            img.src = `tlo_${i}.webp`;
             imgTlo.push(img);
         }
 
@@ -449,58 +449,58 @@
         const imgPodlogiLevel = [];
         // Używamy tych samych grafik dla podłóg i belek (na życzenie użytkownika)
         for (let i = 1; i <= 4; i++) {
-            const p = new Image(); p.src = `podloga_${i}.png`;
+            const p = new Image(); p.src = `podloga_${i}.webp`;
             imgPodlogiLevel[i] = p;
         }
 
-        const imgBelka = new Image(); imgBelka.src = 'belka.png';
-        const imgBelkaBoss = new Image(); imgBelkaBoss.src = 'belka_boss.png';
-        const imgPiwo = new Image(); imgPiwo.src = 'piwo.png';
-        const imgPiwoRed = new Image(); imgPiwoRed.src = 'piwo_red.png';
-        const imgPodloga = new Image(); imgPodloga.src = 'podloga.png';
-        const imgPodlogaBoss = new Image(); imgPodlogaBoss.src = 'podloga_boss.png';
-        const imgUfo = new Image(); imgUfo.src = 'ufo.png';
-        const imgBohater = new Image(); imgBohater.src = 'bohater.png';
-        const imgKosmita = new Image(); imgKosmita.src = 'kosmita.png';
+        const imgBelka = new Image(); imgBelka.src = 'belka.webp';
+        const imgBelkaBoss = new Image(); imgBelkaBoss.src = 'belka_boss.webp';
+        const imgPiwo = new Image(); imgPiwo.src = 'piwo.webp';
+        const imgPiwoRed = new Image(); imgPiwoRed.src = 'piwo_red.webp';
+        const imgPodloga = new Image(); imgPodloga.src = 'podloga.webp';
+        const imgPodlogaBoss = new Image(); imgPodlogaBoss.src = 'podloga_boss.webp';
+        const imgUfo = new Image(); imgUfo.src = 'ufo.webp';
+        const imgBohater = new Image(); imgBohater.src = 'bohater.webp';
+        const imgKosmita = new Image(); imgKosmita.src = 'kosmita.webp';
 
-        const imgTarczaZielona = new Image(); imgTarczaZielona.src = 'tarcza_zielona.png';
-        const imgTarczaNiebieska = new Image(); imgTarczaNiebieska.src = 'tarcza_niebieska.png';
-        const imgPiwoStrzela = new Image(); imgPiwoStrzela.src = 'piwo_strzela.png';
-        const imgPiwoFaint = new Image(); imgPiwoFaint.src = 'piwo_faint.png';
-        const imgBoss = new Image(); imgBoss.src = 'boss.png';
-        const imgDetoks = new Image(); imgDetoks.src = 'detoks.png';
-        const imgZbierz = new Image(); imgZbierz.src = 'zbierz.png';
-        const imgStrzelaj = new Image(); imgStrzelaj.src = 'strzelaj.png';
-        const imgAlkoholNie = new Image(); imgAlkoholNie.src = 'alkohol_nie.png';
-        const imgAlkoholSzkodzi = new Image(); imgAlkoholSzkodzi.src = 'alkohol_szkodzi.png'; // To remove logic, keeping loading for safety or remove if unused
-        const imgBossInfo = new Image(); imgBossInfo.src = 'boss_info.png'; // New Image
-        const imgPancerzZielony = new Image(); imgPancerzZielony.src = 'pancerz_zielony.png';
-        const imgPancerzNiebieski = new Image(); imgPancerzNiebieski.src = 'pancerz_niebieski.png';
-        const imgPancerzCzerwony = new Image(); imgPancerzCzerwony.src = 'pancerz_czerwony.png';
-        const imgTrzezwosc = new Image(); imgTrzezwosc.src = 'trzezwosc.png';
-        const imgEndTitle = new Image(); imgEndTitle.src = 'end_title.png';
-        const imgSzarak = new Image(); imgSzarak.src = 'szarak.png';
-        const imgPlomien = new Image(); imgPlomien.src = 'plomien.png';
-        const imgPlansza = new Image(); imgPlansza.src = 'plansza.png';
-        const imgPrzyciskStrzelania = new Image(); imgPrzyciskStrzelania.src = 'przycisk_strzelania.png';
-        const imgOni = new Image(); imgOni.src = 'oni.png';
-        const imgOstatniaScena = new Image(); imgOstatniaScena.src = 'ostatnia_scena.png';
-        const imgPancerzPeka1 = new Image(); imgPancerzPeka1.src = 'pancerz_peka1.png';
-        const imgPancerzPeka2 = new Image(); imgPancerzPeka2.src = 'pancerz_peka2.png';
-        const imgPancerzPeka3 = new Image(); imgPancerzPeka3.src = 'pancerz_peka3.png';
-        const imgPancerzPeka4 = new Image(); imgPancerzPeka4.src = 'pancerz_peka4.png';
-        const sfxTrzezwosc = new Audio('dzwiek_trzezwosci.mp3'); sfxTrzezwosc.volume = 0.6;
-        const imgDialog1 = new Image(); imgDialog1.src = 'dialog1.png';
-        const imgDialog2 = new Image(); imgDialog2.src = 'dialog2.png';
-        const imgDialog3 = new Image(); imgDialog3.src = 'dialog3.png';
-        const imgDialog4 = new Image(); imgDialog4.src = 'dialog4.png';
-        const imgAniol = new Image(); imgAniol.src = 'aniol.png';
-        const imgAniol2 = new Image(); imgAniol2.src = 'aniol2.png';
-        const imgDziekuje = new Image(); imgDziekuje.src = 'dziekuje.jpg';
-        const imgGrajPonownie = new Image(); imgGrajPonownie.src = 'grajponownie.png';
-        const imgWyjscie = new Image(); imgWyjscie.src = 'wyjscie.png';
-        const imgWPrawo = new Image(); imgWPrawo.src = 'w_prawo.png';
-        const sfxDrzwi = new Audio('drzwi.mp3');
+        const imgTarczaZielona = new Image(); imgTarczaZielona.src = 'tarcza_zielona.webp';
+        const imgTarczaNiebieska = new Image(); imgTarczaNiebieska.src = 'tarcza_niebieska.webp';
+        const imgPiwoStrzela = new Image(); imgPiwoStrzela.src = 'piwo_strzela.webp';
+        const imgPiwoFaint = new Image(); imgPiwoFaint.src = 'piwo_faint.webp';
+        const imgBoss = new Image(); imgBoss.src = 'boss.webp';
+        const imgDetoks = new Image(); imgDetoks.src = 'detoks.webp';
+        const imgZbierz = new Image(); imgZbierz.src = 'zbierz.webp';
+        const imgStrzelaj = new Image(); imgStrzelaj.src = 'strzelaj.webp';
+        const imgAlkoholNie = new Image(); imgAlkoholNie.src = 'alkohol_nie.webp';
+        const imgAlkoholSzkodzi = new Image(); imgAlkoholSzkodzi.src = 'alkohol_szkodzi.webp'; // To remove logic, keeping loading for safety or remove if unused
+        const imgBossInfo = new Image(); imgBossInfo.src = 'boss_info.webp'; // New Image
+        const imgPancerzZielony = new Image(); imgPancerzZielony.src = 'pancerz_zielony.webp';
+        const imgPancerzNiebieski = new Image(); imgPancerzNiebieski.src = 'pancerz_niebieski.webp';
+        const imgPancerzCzerwony = new Image(); imgPancerzCzerwony.src = 'pancerz_czerwony.webp';
+        const imgTrzezwosc = new Image(); imgTrzezwosc.src = 'trzezwosc.webp';
+        const imgEndTitle = new Image(); imgEndTitle.src = 'end_title.webp';
+        const imgSzarak = new Image(); imgSzarak.src = 'szarak.webp';
+        const imgPlomien = new Image(); imgPlomien.src = 'plomien.webp';
+        const imgPlansza = new Image(); imgPlansza.src = 'plansza.webp';
+        const imgPrzyciskStrzelania = new Image(); imgPrzyciskStrzelania.src = 'przycisk_strzelania.webp';
+        const imgOni = new Image(); imgOni.src = 'oni.webp';
+        const imgOstatniaScena = new Image(); imgOstatniaScena.src = 'ostatnia_scena.webp';
+        const imgPancerzPeka1 = new Image(); imgPancerzPeka1.src = 'pancerz_peka1.webp';
+        const imgPancerzPeka2 = new Image(); imgPancerzPeka2.src = 'pancerz_peka2.webp';
+        const imgPancerzPeka3 = new Image(); imgPancerzPeka3.src = 'pancerz_peka3.webp';
+        const imgPancerzPeka4 = new Image(); imgPancerzPeka4.src = 'pancerz_peka4.webp';
+        const sfxTrzezwosc = new Audio('dzwiek_trzezwosci.opus'); sfxTrzezwosc.volume = 0.6;
+        const imgDialog1 = new Image(); imgDialog1.src = 'dialog1.webp';
+        const imgDialog2 = new Image(); imgDialog2.src = 'dialog2.webp';
+        const imgDialog3 = new Image(); imgDialog3.src = 'dialog3.webp';
+        const imgDialog4 = new Image(); imgDialog4.src = 'dialog4.webp';
+        const imgAniol = new Image(); imgAniol.src = 'aniol.webp';
+        const imgAniol2 = new Image(); imgAniol2.src = 'aniol2.webp';
+        const imgDziekuje = new Image(); imgDziekuje.src = 'dziekuje.webp';
+        const imgGrajPonownie = new Image(); imgGrajPonownie.src = 'grajponownie.webp';
+        const imgWyjscie = new Image(); imgWyjscie.src = 'wyjscie.webp';
+        const imgWPrawo = new Image(); imgWPrawo.src = 'w_prawo.webp';
+        const sfxDrzwi = new Audio('drzwi.opus');
 
         // Game State
         let gameState = 'menu';
@@ -597,10 +597,10 @@
 
             setTimeout(() => {
                 if (gameState === 'playing') {
-                    if (level === 1) showGenericNotification('<img src="zbierz.png" style="max-width: 100%;">', 'transparent');
+                    if (level === 1) showGenericNotification('<img src="zbierz.webp" style="max-width: 100%;">', 'transparent');
                     else if (level === 2) showShootNotification();
-                    else if (level === 3) showGenericNotification('<img src="alkohol_nie.png" style="max-width: 100%;">', 'transparent');
-                    else if (level === 4) showGenericNotification('<img src="alkohol_szkodzi.png" style="max-width: 100%;">', 'transparent');
+                    else if (level === 3) showGenericNotification('<img src="alkohol_nie.webp" style="max-width: 100%;">', 'transparent');
+                    else if (level === 4) showGenericNotification('<img src="alkohol_szkodzi.webp" style="max-width: 100%;">', 'transparent');
                 }
             }, 1000);
         }
@@ -773,7 +773,7 @@
         }
 
         function showShootNotification() {
-            showGenericNotification('<img src="strzelaj.png" style="max-width: 100%;">', 'transparent');
+            showGenericNotification('<img src="strzelaj.webp" style="max-width: 100%;">', 'transparent');
         }
 
         function showGenericNotification(html, color) {
@@ -992,7 +992,10 @@
                 }
                 if (bulletRemoved) continue;
 
-                if (boss && pb.x < boss.x + boss.width && pb.x + 5 > boss.x && pb.y < boss.y + boss.height && pb.y + 5 > boss.y) {
+                // Poprawa hitboxa Bossa - linie 995-1005
+                const bossHitMarginX = 30; // Margines poziomy (pocisk trafi głębiej w sprite)
+                const bossHitMarginY = 20; // Margines pionowy
+                if (boss && pb.x < boss.x + boss.width - bossHitMarginX && pb.x + 5 > boss.x + bossHitMarginX && pb.y < boss.y + boss.height - bossHitMarginY && pb.y + 5 > boss.y + bossHitMarginY) {
                     const damage = pb.isFlame ? 1.33 : 1;
                     boss.hp -= damage;
                     boss.flash = 5;
@@ -1066,8 +1069,8 @@
                         if (it.type === 'sober') {
                             const oldHeight = player.height;
                             player.isSober = true;
-                            player.height = 105;
-                            player.width = 105; // Update width as well for hitbox
+                            player.height = 100;
+                            player.width = 100; // Update width as well for hitbox
                             player.y -= (player.height - oldHeight); // Lift player so feet stay at same Y
                             // Text notification removed as requested
 
@@ -1597,13 +1600,13 @@
                 container.style.alignItems = 'center';
 
                 const btnAgain = document.createElement('img');
-                btnAgain.src = 'grajponownie.png';
+                btnAgain.src = 'grajponownie.webp';
                 btnAgain.style.width = '250px';
                 btnAgain.style.cursor = 'pointer';
                 btnAgain.onclick = () => location.reload();
 
                 const btnExit = document.createElement('img');
-                btnExit.src = 'wyjscie.png';
+                btnExit.src = 'wyjscie.webp';
                 btnExit.style.width = '150px';
                 btnExit.style.cursor = 'pointer';
                 btnExit.onclick = () => {
@@ -1776,7 +1779,7 @@
                     const bob = Math.sin(Date.now() / 350 + c.x) * 3;
                     const cx = c.x, cy = c.y + bob;
                     if (imgKosmita.complete) {
-                        ctx.drawImage(imgKosmita, cx - 17, cy - 22, 35, 45);
+                        ctx.drawImage(imgKosmita, cx - 17, cy - 22, 45, 45);
                     } else {
                         ctx.fillStyle = '#9ca3af'; ctx.beginPath(); ctx.ellipse(cx, cy, 12, 16, 0, 0, Math.PI * 2); ctx.fill();
                         ctx.fillStyle = '#1f2937';

@@ -4,8 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+        content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=no, viewport-fit=cover">
+    <meta property="og:title" content="UFO MOBILE" />
+    <meta property="og:description"
+        content="Antyalkoholowa gra promująca trzeźwy sposób życia. Posłuchaj rad kosmitów." />
+    <meta property="og:image" content="logo.webp" />
+    <meta property="og:url" content="https://humbag738.github.io/ufo.mobile/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="UFO MOBILE" />
+    <meta name="twitter:card" content="logo.webp" />
+    <meta name="twitter:title" content="UFO MOBILE" />
+    <meta name="twitter:description"
+        content="Antyalkoholowa gra promująca trzeźwy sposób życia. Posłuchaj rad kosmitów." />
+    <meta name="twitter:image" content="logo.webp" />
+    <meta name="twitter:url" content="https://humbag738.github.io/ufo.mobile/" />
     <title>UFO MOBILE</title>
+    <link rel="icon" sizes="16x16 32x32 48x48" type="image/png" href="ikona.png" />
     <style>
         :root {
             --accent: #c084fc;
@@ -43,14 +57,6 @@
             border: 2px solid var(--accent);
             border-radius: 8px;
             overflow: hidden;
-        }
-
-        @media (orientation: landscape) and (max-height: 500px) {
-            #game-container {
-                height: 90vh;
-                width: auto;
-                max-width: none;
-            }
         }
 
         canvas {
@@ -158,7 +164,7 @@
         .d-pad {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 10px;
             align-items: center;
         }
 
@@ -244,6 +250,50 @@
             transform: scale(0.95);
         }
 
+        /* Usunięto layout-selector z CSS, teraz jest inline lub w #controls-settings */
+        .controls-settings {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            transition: opacity 0.5s;
+        }
+
+        .controls-settings.hidden {
+            display: none;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .layout-options {
+            display: flex;
+            gap: 20px;
+        }
+
+        .layout-btn-img {
+            background: transparent;
+            border: 3px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            padding: 5px;
+            opacity: 0.6;
+            transition: all 0.2s;
+            max-height: 60px;
+            object-fit: contain;
+        }
+
+        .layout-btn-img:hover {
+            transform: scale(1.05);
+            opacity: 0.8;
+        }
+
+        .layout-btn-img.active {
+            border-color: var(--accent);
+            opacity: 1;
+            box-shadow: 0 0 15px var(--accent);
+        }
+
         .hidden {
             display: none !important;
         }
@@ -278,6 +328,7 @@
         <div id="menu">
             <div class="modal-content">
                 <h1 style="display: none;"></h1>
+
                 <button class="start-btn" onclick="startGame()"
                     style="margin-bottom: 30px; display: none;">ŁADOWANIE...</button>
             </div>
@@ -341,6 +392,14 @@
             <div class="control-btn" id="btn-jump">
                 <img src="up.png" class="control-icon">
             </div>
+        </div>
+    </div>
+
+    <div id="controls-settings" class="controls-settings">
+        <img src="sterowanie.png" alt="STEROWANIE" style="height: 70px; margin-bottom: 5px;">
+        <div class="layout-options">
+            <img src="domyslne.png" class="layout-btn-img active" onclick="setControlLayout('default')" alt="Domyślne">
+            <img src="strzalki.png" class="layout-btn-img" onclick="setControlLayout('keyboard')" alt="Strzałki">
         </div>
     </div>
 
@@ -411,10 +470,16 @@
         bgMusicKarczma.loop = true;
         bgMusicKarczma.volume = 0.4;
 
+        const sfxKlepsydra = new Audio('klepsydra.mp3');
+        sfxKlepsydra.volume = 0.6;
+
         let musicStarted = false;
 
         function startMusic() {
             if (!musicStarted) {
+                // Hide settings if they are still visible (e.g. clicking body to start music)
+                // Actually startMusic is bound to click/touch once.
+                // It's safer to not hide settings here, but only in startGame.
                 if (level === 7) {
                     bgMusicBoss.play().then(() => musicStarted = true).catch(e => console.log(e));
                 } else if (level === 6) {
@@ -593,11 +658,15 @@
         const imgWyjscie = loadImage('wyjscie', 'wyjscie.webp');
         const imgWPrawo = loadImage('w_prawo', 'w_prawo.webp');
         const imgPokonanie = loadImage('pokonanie', 'pokonanie.png');
+        const imgKlepsydra = loadImage('klepsydra', 'klepsydra.png');
+        const imgLaser = loadImage('laser', 'laser.png');
 
         checkAssetsLoaded(); // Initial check
         const sfxTrzezwosc = new Audio('dzwiek_trzezwosci.opus'); sfxTrzezwosc.volume = 0.6;
         const sfxDrzwi = new Audio('drzwi.opus');
         const sfxPrzycisk = new Audio('przycisk.opus');
+        const sfxLaser = new Audio('laser.mp3'); sfxLaser.volume = 0.5;
+        const sfxPowerUp = new Audio('power_up.mp3'); sfxPowerUp.volume = 0.6;
 
         // Performance Optimization: Offscreen Canvas for Background and Stars
         const bgBufferCanvas = document.createElement('canvas');
@@ -655,9 +724,14 @@
         let level6OutroActive = false;
         let level6OutroTimer = 0;
         let level6OutroComplete = false;
+        let level6OutroFade = 0; // New variable for fade effect
         let level6IntroSeen = false;
         let karczmarzHitCount = 0;
         let armorDropped = false;
+        let level6GameplayTimer = 0;
+        let timeFreezeActive = false;
+        let timeFreezeTimer = 0;
+        let lastHourglassSpawnTime = 0; // Track last spawn time
 
         let lastTime = 0;
         let shotPressedPrev = false; // For debouncing skip
@@ -710,6 +784,31 @@
                 if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'Space' || e.key === ' ') keys.jump = false;
             });
         }
+
+        function setControlLayout(type) {
+            const btnJump = document.getElementById('btn-jump');
+            const dPad = document.querySelector('.d-pad');
+            const actionBtns = document.querySelector('.action-btns');
+            const spacer = document.getElementById('btn-jump-mobile');
+            const btnImages = document.querySelectorAll('.layout-btn-img');
+
+            if (!btnJump || !dPad || !actionBtns || !spacer) return;
+
+            // Update Active UI
+            btnImages.forEach(img => img.classList.remove('active'));
+            if (type === 'default') btnImages[0].classList.add('active');
+            if (type === 'keyboard') btnImages[1].classList.add('active');
+
+            if (type === 'keyboard') {
+                // Move Jump to D-Pad and HIDE spacer
+                spacer.style.display = 'none'; // Hide spacer so Jump sits closer to arrows
+                dPad.insertBefore(btnJump, dPad.firstChild); // Insert at very top
+            } else {
+                // Move Jump back and SHOW spacer
+                spacer.style.display = 'block';
+                actionBtns.appendChild(btnJump);
+            }
+        }
         function initLevel() {
             // Clear existing notifications
             document.querySelectorAll('.game-notification').forEach(n => n.remove());
@@ -755,7 +854,12 @@
             // Optymalizacja DOM: Aktualizacja kolorów tylko raz na poziom
             const schemeStyle = COLOR_SCHEMES[(level - 1) % COLOR_SCHEMES.length];
             document.documentElement.style.setProperty('--accent', schemeStyle.accent);
-            document.documentElement.style.setProperty('--bg', schemeStyle.bg);
+            // Poziom 6: Ciemna zieleń zamiast jasnej (rażącej)
+            if (level === 6) {
+                document.documentElement.style.setProperty('--bg', '#1a3a1a'); // Ciemna zieleń
+            } else {
+                document.documentElement.style.setProperty('--bg', schemeStyle.bg);
+            }
 
             setTimeout(() => {
                 if (gameState === 'playing') {
@@ -899,16 +1003,28 @@
                         level6OutroActive = false;
                         level6OutroTimer = 0;
                         level6OutroComplete = false;
+                        level6IntroTimer = 0;
+                        level6OutroActive = false;
                         level6OutroTimer = 0;
                         level6OutroComplete = false;
+                        level6OutroFade = 0; // Reset fade
                         karczmarzHitCount = 0;
                         armorDropped = false;
+                        level6GameplayTimer = 0;
+                        timeFreezeActive = false;
+                        timeFreezeTimer = 0;
+                        lastHourglassSpawnTime = 0; // Reset spawn timer
+
                         player.x = 100;
                         player.y = GAME_HEIGHT - 120 - player.height;
 
                         // Skip intro on retry
                         if (level6IntroSeen) {
                             level6IntroStep = 5;
+                            // Spawn armor immediately when skipping intro
+                            const rx = 50 + Math.random() * (GAME_WIDTH - 100);
+                            const ry = 150 + Math.random() * (300);
+                            items.push({ x: rx, y: ry, type: 'doubleShield', collected: false });
                         } else {
                             level6IntroSeen = true;
                         }
@@ -1137,6 +1253,7 @@
             introTimer = 0; // Reset intro
             document.body.classList.add('playing');
             document.getElementById('menu').classList.add('hidden');
+            document.getElementById('controls-settings').classList.add('hidden');
             document.getElementById('gameover').classList.add('hidden');
             document.getElementById('level-complete').classList.add('hidden');
             document.getElementById('final-screen').classList.add('hidden');
@@ -1187,6 +1304,13 @@
             }, 3000);
         }
 
+        function spawnHourglass() {
+            // Spawn hourglass at random location
+            const rx = 100 + Math.random() * (GAME_WIDTH - 200);
+            const ry = 150 + Math.random() * (300);
+            items.push({ x: rx, y: ry, type: 'hourglass', collected: false });
+        }
+
         function nextLevel() {
             playSFX(sfxButton);
             bgMusic.volume = 0.4;
@@ -1213,14 +1337,14 @@
         }
 
         function updateUI() {
-            const target = level === 6 ? 56 : COINS_TO_WIN;
+            const target = level === 6 ? 84 : COINS_TO_WIN;
             document.getElementById('coins-ui').innerText = `${coinsCollected} / ${target}`;
             document.getElementById('lives-ui').innerText = lives;
             document.getElementById('level-ui').innerText = level;
         }
 
         function loseLife() {
-            if (player.invincibilityTimer > 0) return; // Ignore damage if invincible
+            if (player.invincibilityTimer > 0 || timeFreezeActive) return; // Ignore damage if invincible or time freeze active
 
             if (player.isSober && level === 7) {
                 if (player.soberArmor < 4) {
@@ -1301,7 +1425,7 @@
             if (showCelebration) return;
 
             // Level 6 Outro: Collected all coins
-            if (level === 6 && coinsCollected >= 56 && !level6OutroActive) {
+            if (level === 6 && coinsCollected >= 84 && !level6OutroActive) {
                 level6OutroActive = true;
                 level6OutroTimer = 0;
             }
@@ -1309,18 +1433,28 @@
             if (level6OutroActive) {
                 if (level6OutroTimer === 0) playSFX(sfxButton); // Add sound
 
-                // Pause game updates, handle outro timer
-                level6OutroTimer += 16.6;
-                // Allow skip with shoot
-                if (keys.shoot && !shotPressedPrev) {
-                    level6OutroTimer += 5000; // Force end
-                }
-                shotPressedPrev = keys.shoot;
+                // Only increment timer if not fully faded
+                if (level6OutroFade < 1) {
+                    if (level6OutroFade === 0) {
+                        level6OutroTimer += 16.6;
+                        // Allow skip with shoot - jumps to fade start
+                        if (keys.shoot && !shotPressedPrev) {
+                            level6OutroTimer = 6001;
+                        }
+                        shotPressedPrev = keys.shoot;
+                    }
 
-                if (level6OutroTimer > 4000) { // 4 seconds duration
+                    // After 6 seconds (previously 4), start fading
+                    if (level6OutroTimer > 6000) {
+                        level6OutroFade += 0.01; // Fade speed (approx 1.5s)
+                    }
+                } else {
+                    // Fade complete (>= 1)
                     level6OutroActive = false;
                     level6OutroComplete = true;
-                    player.isAutoWalking = true; // Trigger walk to UFO
+                    level6OutroFade = 0;
+                    nextLevel(); // Go directly to Boss Level (Level 7)
+                    return;
                 }
                 return;
             }
@@ -1346,9 +1480,18 @@
                     level6IntroTimer = 0;
                 }
 
-                // Trigger notification when cutscene ends (step becomes 5)
+                // Trigger notification when cutscene ends (step becomes 5) - Gameplay Starts
                 if (level6IntroStep === 5) {
                     showGenericNotification('<img src="karczma.png" style="max-width: 100%;">', 'transparent');
+
+                    // ZMIANA: Pancerz pojawia się losowo tuż po dialogach
+                    if (!armorDropped) {
+                        armorDropped = true;
+                        // Random location between X: 50-750, Y: 150-450
+                        const rx = 50 + Math.random() * (GAME_WIDTH - 100);
+                        const ry = 150 + Math.random() * (300);
+                        items.push({ x: rx, y: ry, type: 'doubleShield', collected: false });
+                    }
                 }
 
                 shotPressedPrev = keys.shoot; // Track previous state to prevent rapid skipping
@@ -1356,9 +1499,39 @@
             }
             shotPressedPrev = keys.shoot;
 
-            // Moving Platforms Logic (Level 5)
+            // BONUS: Klepsydra Logic
+            if (timeFreezeActive) {
+                timeFreezeTimer--;
+                if (timeFreezeTimer <= 0) {
+                    timeFreezeActive = false;
+                    // Restore background music volume
+                    if (level === 6) {
+                        bgMusicKarczma.volume = 0.4;
+                    }
+                }
+            } else if (level === 6 && level6IntroStep === 5) {
+                // Gameplay active, no freeze
+                level6GameplayTimer += 16.6; // ms
+                const seconds = level6GameplayTimer / 1000;
+
+                // Spawn hourglass: first at 18s, then every 15s
+                if (seconds >= 18 && lastHourglassSpawnTime === 0) {
+                    // First spawn at 18 seconds
+                    lastHourglassSpawnTime = level6GameplayTimer;
+                    spawnHourglass();
+                } else if (lastHourglassSpawnTime > 0 && (seconds - lastHourglassSpawnTime / 1000) >= 15) {
+                    // Subsequent spawns every 15 seconds
+                    lastHourglassSpawnTime = level6GameplayTimer;
+                    spawnHourglass();
+                }
+            }
+
+            // Moving Platforms Logic (Level 5 & 6)
             platforms.forEach(p => {
                 if (p.moving) {
+                    // STOP PLATFORMS IF FREEZE ACTIVE
+                    if (timeFreezeActive) return;
+
                     p.y += p.vy;
                     if (p.y <= p.minY || p.y >= p.maxY) {
                         p.vy *= -1;
@@ -1376,7 +1549,7 @@
 
             // Level 6 Falling Coins Logic
             if (level === 6) {
-                if (level6CoinsSpawned < 56) { // Target 56 total spawns
+                if (level6CoinsSpawned < 84) { // Target 84 total spawns
                     level6CoinSpawnTimer++;
                     // Spawn every ~0.8 seconds (50 frames)
                     if (level6CoinSpawnTimer > 50) {
@@ -1395,6 +1568,10 @@
                 // Physics for falling coins
                 coins.forEach(c => {
                     if (c.falling) {
+                        // Freeze coins too? User said "platforms stop", "karczmarz stops", "bullets disappear".
+                        // Assuming new physics pauses too if we want "everything returns to state".
+                        // Coins keep falling during time freeze (removed check)
+
                         c.y += c.vy;
                         // Stop on platforms
                         platforms.forEach(p => {
@@ -1422,16 +1599,17 @@
             // Karczmarz Logic Update
             enemies.forEach(e => {
                 if (e.type === 'karczmarz') {
+                    // ZMIANA: Karczmarz NIE zatrzymuje się podczas time freeze
+                    // (usunięto warunek: if (timeFreezeActive) return;)
+
                     // Update Stun Timer
                     if (e.stunTimer > 0) {
                         e.stunTimer--;
                         if (e.stunTimer <= 0) {
                             e.isCiosany = false;
                             e.vx = Math.sign(e.vx) * 2; // Restore speed
-                            e.stunCooldown = 300; // 5 seconds cooldown (was 7)
+                            e.stunCooldown = 0; // Removed cooldown - every hit can now stun
                         }
-                    } else if (e.stunCooldown > 0) {
-                        e.stunCooldown--;
                     }
 
                     // Patrol logic (modified for speed)
@@ -1441,7 +1619,8 @@
                     if (e.x >= GAME_WIDTH - e.width - 20) { e.x = GAME_WIDTH - e.width - 20; e.vx = -Math.abs(e.vx); }
                     e.x += e.vx;
 
-                    // Shooting logic
+                    // Shooting logic - Karczmarz strzela nawet podczas time freeze
+
                     e.shootTimer--;
                     if (e.shootTimer <= 0) {
                         if (e.aiPhase === 'aimed') {
@@ -1593,29 +1772,19 @@
                                 setTimeout(() => e.wasHit = false, 200);
                             }
 
-                            // Stun Logic (Only if no cooldown and not already stunned)
-                            if (e.stunTimer <= 0 && e.stunCooldown <= 0) {
+                            // Stun Logic - ALWAYS stun on hit (removed cooldown check)
+                            if (e.stunTimer <= 0) {
                                 e.isCiosany = true;
                                 e.stunTimer = 120; // 2 seconds
                                 e.vx = Math.sign(e.vx) * 0.5; // Slow down significantly
-                            } else {
-                                // Hit during cooldown/stun - visual feedback?
-                                // Maybe flash? Already handled by HP flash?
-                                // User said "tuż po ciosie... strzelanie nie powoduje zmiany grafiki".
-                                // So we do nothing here visually regarding 'ciosany'.
                             }
 
                             // Blue Armor Drop Logic (Once per level)
-                            if (karczmarzHitCount === 4 && !armorDropped) {
-                                // Drop on middle platform (Index 1 is Middle Moving platform? No, let's look up push order)
-                                // Pushes: Ground(0), Left(1), Middle(2), Right(3)
-                                const midPlat = platforms[2];
-                                if (midPlat) {
-                                    items.push({ x: midPlat.x + midPlat.width / 2 - 20, y: midPlat.y - 45, type: 'doubleShield', collected: false });
-                                    armorDropped = true;
+                            // REMOVED: Now drops at start of level
+                            /* if (karczmarzHitCount === 4 && !armorDropped) { 
+                                ...
+                            } */
 
-                                }
-                            }
                             // Don't reduce HP (Invincible)
                         } else {
                             e.hp--;
@@ -1692,9 +1861,9 @@
                         coinsCollected++;
                         score += 100;
                         playSFX(sfxCoin);
-                        document.getElementById('coins-ui').innerText = `${coinsCollected} / ${level === 6 ? 56 : COINS_TO_WIN}`;
+                        document.getElementById('coins-ui').innerText = `${coinsCollected} / ${level === 6 ? 84 : COINS_TO_WIN}`;
 
-                        const winThreshold = level === 6 ? 56 : COINS_TO_WIN;
+                        const winThreshold = level === 6 ? 84 : COINS_TO_WIN;
                         if (coinsCollected >= winThreshold && level < 7) {
                             if (level === 6) {
                                 if (!level6OutroComplete && !level6OutroActive) {
@@ -1718,9 +1887,36 @@
                         it.collected = true;
                         if (it.type === 'shield') {
                             player.shieldLevel = 1;
+                            // Play power-up sound
+                            sfxPowerUp.currentTime = 0;
+                            sfxPowerUp.play().catch(() => { });
                         }
                         if (it.type === 'doubleShield') {
                             player.shieldLevel = 2; // 2 hits for Blue armor
+                            // Play power-up sound
+                            sfxPowerUp.currentTime = 0;
+                            sfxPowerUp.play().catch(() => { });
+                        }
+                        if (it.type === 'hourglass') {
+                            // BONUS: Time Freeze Effect - 6.2 seconds
+                            timeFreezeActive = true;
+                            timeFreezeTimer = 372; // 6.2 seconds at 60 FPS
+
+                            // Play hourglass music
+                            sfxKlepsydra.currentTime = 0;
+                            sfxKlepsydra.play().catch(() => { });
+
+                            // Lower background music volume
+                            if (level === 6) {
+                                bgMusicKarczma.volume = 0.15;
+                            }
+
+                            // Play power-up sound
+                            sfxPowerUp.currentTime = 0;
+                            sfxPowerUp.play().catch(() => { });
+
+                            // Clear all bullets when time freezes
+                            bullets = [];
                         }
                         if (it.type === 'sober') {
                             const oldHeight = player.height;
@@ -1729,6 +1925,10 @@
                             player.width = 100; // Update width as well for hitbox
                             player.y -= (player.height - oldHeight); // Lift player so feet stay at same Y
                             // Text notification removed as requested
+
+                            // Play power-up sound
+                            sfxPowerUp.currentTime = 0;
+                            sfxPowerUp.play().catch(() => { });
 
                             // DYNAMICZNY SPAWN (Level 5) - Na życzenie użytkownika
                             if (level === 7) {
@@ -1755,6 +1955,11 @@
                 const e = enemies[i];
                 if (player.x < e.x + e.width && player.x + player.width > e.x &&
                     player.y < e.y + e.height && player.y + player.height > e.y) {
+                    // ZMIANA: Nieśmiertelność działa też na kolizje z wrogami (w tym karczmarzem)
+                    if (player.invincibilityTimer > 0 || timeFreezeActive) {
+                        // Gracz jest nieśmiertelny - ignoruj kolizję
+                        continue;
+                    }
                     loseLife();
                     return; // Stop processing this frame after death to avoid freeze/glitches
                 }
@@ -1820,7 +2025,6 @@
 
                 // Boss HP Events
                 // 170 HP - Karczmarz Runner (Burst)
-                // 170 HP - Karczmarz Runner (Burst)
                 if (boss.hp <= 170 && !boss.event170) {
                     boss.event170 = true;
                     // Runs from Right to Left on Ground
@@ -1828,47 +2032,90 @@
                         x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 70, width: 60, height: 70, hp: 5,
                         type: 'karczmarz_runner', vx: -3, shootTimer: 20, speechImg: imgBieg1
                     });
+
                 }
-                // 150 HP - 2 Aimed Shooters (Low/High)
+                // 150 HP - LASER BULLET ATTACK
                 if (boss.hp <= 150 && !boss.event150) {
                     boss.event150 = true;
-                    // High (y=150) & Low (Bottom Beam y=450)
-                    enemies.push({ x: 430, y: 150 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 50 });
-                    enemies.push({ x: 80, y: 450 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 50 });
+                    // Spawn laser bullet at middle height
+                    bullets.push({ x: boss.x, y: 300, vx: -4, vy: 0, img: imgLaser, isLaser: true });
+                    // Play laser sound
+                    sfxLaser.currentTime = 0;
+                    sfxLaser.play().catch(() => { });
                 }
-                // 100 HP - Karczmarz Runner (Repeat)
-                if (boss.hp <= 100 && !boss.event100) {
-                    boss.event100 = true;
+
+                // 130 HP - Karczmarz Runner (Burst)
+                if (boss.hp <= 130 && !boss.event130) {
+                    boss.event130 = true;
+                    // Runs from Right to Left on Ground
+                    enemies.push({
+                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 70, width: 60, height: 70, hp: 5,
+                        type: 'karczmarz_runner', vx: -3, shootTimer: 20, speechImg: imgBieg1
+                    });
+
+                }
+
+                // 90 HP - LASER BULLET ATTACK
+                if (boss.hp <= 90 && !boss.event90) {
+                    boss.event90 = true;
+                    // Spawn laser bullet at middle height
+                    bullets.push({ x: boss.x, y: 300, vx: -4, vy: 0, img: imgLaser, isLaser: true });
+                    // Play laser sound
+                    sfxLaser.currentTime = 0;
+                    sfxLaser.play().catch(() => { });
+                }
+                // 80 HP - Karczmarz Runner + LASER BULLET
+                if (boss.hp <= 80 && !boss.event80) {
+                    boss.event80 = true;
                     enemies.push({
                         x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 70, width: 60, height: 70, hp: 5,
                         type: 'karczmarz_runner', vx: -3, shootTimer: 20, speechImg: imgBieg2
                     });
+                    // Laser bullet at upper height
+                    bullets.push({ x: boss.x, y: 200, vx: -4, vy: 0, img: imgLaser, isLaser: true });
+                    // Play laser sound
+                    sfxLaser.currentTime = 0;
+                    sfxLaser.play().catch(() => { });
                 }
-                // 60 HP - 1 Aimed Shooter (Low now)
+                // 70 HP - LASER BULLET ATTACK
+                if (boss.hp <= 70 && !boss.event70) {
+                    boss.event70 = true;
+                    // Spawn laser bullet at middle height
+                    bullets.push({ x: boss.x, y: 300, vx: -4, vy: 0, img: imgLaser, isLaser: true });
+                    // Play laser sound
+                    sfxLaser.currentTime = 0;
+                    sfxLaser.play().catch(() => { });
+                }
+
+
+                // 60 HP - LASER BULLET ATTACK
                 if (boss.hp <= 60 && !boss.event60) {
                     boss.event60 = true;
-                    // Moved to lowest beam (approx y=450) -> FIX: Ground Floor
-                    enemies.push({ x: GAME_WIDTH - 200, y: GAME_HEIGHT - 40 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 50 });
+                    // Spawn laser bullet at middle height
+                    bullets.push({ x: boss.x, y: 300, vx: -4, vy: 0, img: imgLaser, isLaser: true });
+                    // Play laser sound
+                    sfxLaser.currentTime = 0;
+                    sfxLaser.play().catch(() => { });
                 }
-                // 50 HP - Helper + 1 Shooter (Left top removed)
+
+                // 50 HP - LASER BULLET ATTACK
                 if (boss.hp <= 50 && !boss.event50) {
                     boss.event50 = true;
-                    // Helper under Boss
-                    enemies.push({
-                        x: boss.x + boss.width / 2 - 20,
-                        y: GAME_HEIGHT - 40 - 50, // Ground
-                        width: 40, height: 50,
-                        hp: 3,
-                        type: 'boss_helper_50',
-                        shootTimer: 60
-                    });
-                    // Shooter (Right Bottom) - Left top removed -> FIX: Ground Floor
-                    enemies.push({ x: GAME_WIDTH - 100, y: GAME_HEIGHT - 40 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 100 });
+                    // Spawn laser bullet at middle height
+                    bullets.push({ x: boss.x, y: 300, vx: -4, vy: 0, img: imgLaser, isLaser: true });
+                    // Play laser sound
+                    sfxLaser.currentTime = 0;
+                    sfxLaser.play().catch(() => { });
                 }
-                // 40 HP - Nie Pij
+                // 40 HP - Nie Pij + LASER BULLET
                 if (boss.hp <= 40 && !boss.event40) {
                     boss.event40 = true;
                     boss.showNiePij = 300; // 5 seconds
+                    // Laser bullet at lower height
+                    bullets.push({ x: boss.x, y: 450, vx: -4, vy: 0, img: imgLaser, isLaser: true });
+                    // Play laser sound
+                    sfxLaser.currentTime = 0;
+                    sfxLaser.play().catch(() => { });
                 }
                 // 30 HP - Karczmarz Runner 3
                 if (boss.hp <= 30 && !boss.event30) {
@@ -1896,20 +2143,25 @@
                 boss.phaseTimer -= 1;
                 if (boss.phaseTimer <= 0) {
                     if (boss.phaseIndex < 3) {
-                        // Shooting Phase
+                        // Shooting Phase - 2 POCISKI z każdej wysokości
                         const bx = boss.x;
                         let by = 0;
                         if (boss.phaseIndex === 0) by = 210 + 10; // Upper beam
                         else if (boss.phaseIndex === 1) by = 360 + 10; // Middle beam
                         else if (boss.phaseIndex === 2) by = 480 + 10; // Lower beam
 
+                        // Pocisk 1: Poziomy (jak wcześniej)
                         bullets.push({ x: bx, y: by, vx: -5, vy: 0, img: imgDetoks });
+
+                        // Pocisk 2: Ukośny w dół (lekko rozrzucony, mniej stromo)
+                        bullets.push({ x: bx, y: by - 20, vx: -5, vy: 0.8, img: imgDetoks });
+
                         boss.phaseIndex++;
-                        boss.phaseTimer = 240;
+                        boss.phaseTimer = 180; // 3 sekundy (było 240 = 4 sekundy)
                     } else {
-                        // Dialogue (Phase 3) finished, restart series IMMEDIATELY
+                        // Po 3 strzałach (phaseIndex === 3), krótka przerwa i restart
                         boss.phaseIndex = 0;
-                        boss.phaseTimer = 1;
+                        boss.phaseTimer = 60; // Krótka przerwa 1 sekunda zamiast natychmiastowego restartu
                     }
                 }
             }
@@ -1966,6 +2218,7 @@
                     player.y < cy + bSize && player.y + player.height > cy - bSize) {
                     bullets.splice(i, 1);
 
+                    // Nieśmiertelność już jest sprawdzana w loseLife(), więc to działa poprawnie
                     loseLife();
                     return;
                 }
@@ -2415,8 +2668,8 @@
 
                 c.save();
 
-                // Blinking effect when invincible
-                if (player.invincibilityTimer > 0 && Math.floor(Date.now() / 100) % 2 === 0) {
+                // Blinking effect when invincible OR Time Freeze
+                if ((player.invincibilityTimer > 0 || timeFreezeActive) && Math.floor(Date.now() / 100) % 2 === 0) {
                     c.globalAlpha = 0.3;
                 }
 
@@ -2617,6 +2870,9 @@
                 if (b.img && b.img.complete) {
                     if (b.img === imgDetoks) {
                         ctx.drawImage(b.img, b.x, b.y, 80, 60); // Detoks - bigger
+                    } else if (b.isLaser) {
+                        // Laser bullet - pogrubiony, szeroki
+                        ctx.drawImage(b.img, b.x, b.y - 40, 200, 80); // Laser - wide and thick
                     } else {
                         ctx.drawImage(b.img, b.x, b.y, 30, 30); // Others - small
                     }
@@ -2657,13 +2913,6 @@
                 const bx = boss.x;
                 const by = boss.y + Math.sin(Date.now() / 400) * 10;
 
-                if (boss.laserActive > 0) {
-                    ctx.fillStyle = 'rgba(255, 0, 0, 0.4)';
-                    ctx.fillRect(0, boss.laserY - 15, GAME_WIDTH, 30);
-                    ctx.fillStyle = 'white';
-                    ctx.fillRect(0, boss.laserY - 5, GAME_WIDTH, 10);
-                }
-
                 if (imgImieChmielus.complete) {
                     // Name graphic above boss
                     const nw = 200; // Adjust size
@@ -2673,9 +2922,9 @@
 
                 if (boss.showNiePij > 0 && imgNiePij.complete) {
                     // Draw Nie Pij
-                    const nw = 300;
+                    const nw = 350;
                     const nh = nw * (imgNiePij.height / imgNiePij.width);
-                    ctx.drawImage(imgNiePij, GAME_WIDTH / 2 - nw / 2, 100, nw, nh);
+                    ctx.drawImage(imgNiePij, GAME_WIDTH / 2 - nw / 2, 50, nw, nh);
                 }
 
                 if (imgBossInfo.complete) {
@@ -2769,6 +3018,16 @@
                         ctx.fillStyle = '#3b82f6';
                         ctx.fillRect(it.x - 20, it.y - 20, 40, 40);
                     }
+                } else if (!it.collected && it.type === 'hourglass') {
+                    if (imgKlepsydra.complete) {
+                        // Draw hourglass
+                        // Let's make it float/bob
+                        const bob = Math.sin(Date.now() / 300) * 5;
+                        ctx.drawImage(imgKlepsydra, it.x - 25, it.y - 35 + bob, 50, 70);
+                    } else {
+                        ctx.fillStyle = '#fcd34d'; // Gold
+                        ctx.fillRect(it.x - 20, it.y - 30, 40, 60);
+                    }
                 }
             });
 
@@ -2844,36 +3103,35 @@
                     currentDialog = imgKarczmarz1;
                     // Find Karczmarz
                     const k = enemies.find(e => e.type === 'karczmarz');
-                    if (k) { targetX = k.x + k.width / 2; targetY = k.y - 120; }
+                    if (k) { targetX = k.x + k.width / 2; targetY = k.y - 190; }
                 } else if (level6IntroStep === 1) {
                     currentDialog = imgBohater1;
                     targetX = player.x + player.width / 2; targetY = player.y - 120;
                 } else if (level6IntroStep === 2) {
                     currentDialog = imgKarczmarz2;
                     const k = enemies.find(e => e.type === 'karczmarz');
-                    if (k) { targetX = k.x + k.width / 2; targetY = k.y - 120; }
+                    if (k) { targetX = k.x + k.width / 2; targetY = k.y - 155; }
                 } else if (level6IntroStep === 3) {
                     currentDialog = imgBohater2;
                     targetX = player.x + player.width / 2; targetY = player.y - 120;
                 } else if (level6IntroStep === 4) {
                     currentDialog = imgKarczmarz3;
                     const k = enemies.find(e => e.type === 'karczmarz');
-                    if (k) { targetX = k.x + k.width / 2; targetY = k.y - 120; }
+                    if (k) { targetX = k.x + k.width / 2; targetY = k.y - 155; }
                 }
 
                 if (currentDialog && currentDialog.complete) {
                     // Draw centered above target with clamping
-                    const w = 250; // Dialog width
-                    const h = w * (currentDialog.height / currentDialog.width);
+                    // ZMIANA: Rozmiar grafik dialogowych dopasowany do "Bieg" (300px)
+                    const w = 500;
+                    const h = 200;
 
                     // Clamp targetX to be within screen bounds with some padding
                     let drawX = targetX - w / 2;
                     if (drawX < 20) drawX = 20;
                     if (drawX + w > GAME_WIDTH - 20) drawX = GAME_WIDTH - w - 20;
 
-                    // Lower position: targetY is head - 120. Increase to head - 60?
-                    // targetY was set to k.y - 120. Let's make it k.y - 90 (closer)
-                    // We modify draw logic to push it down
+                    // Lower position logic
                     let drawY = targetY + 30; // Lower by 30 pixels
 
                     ctx.drawImage(currentDialog, drawX, drawY, w, h);
@@ -2889,13 +3147,20 @@
                 ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
                 // Draw Karczmarz 4 dialog - larger
-                const w = 400; // Larger
+                // ZMIANA: Powiększenie o 50% ze 400px na 600px
+                const w = 600;
                 const h = w * (imgKarczmarz4.height / imgKarczmarz4.width);
                 const k = enemies.find(e => e.type === 'karczmarz');
                 let tx = GAME_WIDTH / 2; let ty = GAME_HEIGHT / 2;
                 if (k) { tx = k.x + k.width / 2; ty = k.y - 120; }
 
                 ctx.drawImage(imgKarczmarz4, (GAME_WIDTH - w) / 2, GAME_HEIGHT / 2 - h / 2 - 50, w, h);
+
+                // Draw Fade Overlay
+                if (level6OutroFade > 0) {
+                    ctx.fillStyle = `rgba(0, 0, 0, ${level6OutroFade})`;
+                    ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+                }
             }
 
             // Update previous jump state for rising edge detection
@@ -2939,6 +3204,13 @@
             }
 
             ctx.restore();
+        }
+
+        function spawnHourglass() {
+            // Random location: X [50, 750], Y [150, 500]
+            const x = 50 + Math.random() * (GAME_WIDTH - 100);
+            const y = 150 + Math.random() * (GAME_HEIGHT - 250);
+            items.push({ x: x, y: y, type: 'hourglass', collected: false });
         }
 
         setupControls();

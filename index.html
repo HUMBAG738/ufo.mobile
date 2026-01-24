@@ -57,6 +57,7 @@
             width: 100%;
             height: 100%;
             display: block;
+            image-rendering: pixelated;
         }
 
         .ui-overlay {
@@ -126,13 +127,11 @@
         }
 
         .control-btn {
-            width: 85px;
-            /* Powiększone z 70px dla lepszej responsywności */
-            height: 85px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(5px);
-            border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.4);
+            width: 76px;
+            /* Zmniejszone o 10% z 85px */
+            height: 76px;
+            background: transparent;
+            border: none;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -140,17 +139,20 @@
             transition: transform 0.1s;
             touch-action: none;
             /* Blokuje gesty systemowe na przyciskach */
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
         }
 
         .control-btn:active {
             transform: scale(0.9);
-            background: rgba(255, 255, 255, 0.4);
         }
 
-        .control-btn svg {
-            width: 35px;
-            height: 35px;
-            fill: white;
+        .control-icon {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            pointer-events: none;
         }
 
         .d-pad {
@@ -172,10 +174,6 @@
             align-items: center;
         }
 
-        #btn-shoot {
-            background: rgba(59, 130, 246, 0.4);
-            border-color: #3b82f6;
-        }
 
         #menu,
         #gameover,
@@ -319,38 +317,29 @@
         </div>
     </div>
 
+
     <div class="controls">
         <div class="d-pad">
             <div class="control-btn" id="btn-jump-mobile" style="width: 50px; height: 50px; visibility: hidden;"></div>
             <!-- Spacer -->
             <div class="d-pad-row">
                 <div class="control-btn" id="btn-left">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z" />
-                    </svg>
+                    <img src="left.png" class="control-icon">
                 </div>
                 <div class="control-btn" id="btn-down">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M7 10l5 5 5-5H7z" />
-                    </svg>
+                    <img src="down.png" class="control-icon">
                 </div>
                 <div class="control-btn" id="btn-right">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
-                    </svg>
+                    <img src="right.png" class="control-icon">
                 </div>
             </div>
         </div>
         <div class="action-btns">
             <div class="control-btn" id="btn-shoot">
-                <svg viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="8" />
-                </svg>
+                <img src="fire.png" class="control-icon">
             </div>
             <div class="control-btn" id="btn-jump">
-                <svg viewBox="0 0 24 24">
-                    <path d="M7 14l5-5 5 5H7z" />
-                </svg>
+                <img src="up.png" class="control-icon">
             </div>
         </div>
     </div>
@@ -388,6 +377,7 @@
         preloadSFX('shot_enemy', 'shot_enemy.opus', 5);
         preloadSFX('przycisk', 'przycisk.opus', 3);
         preloadSFX('spodek', 'spodek.opus', 1);
+        preloadSFX('cios', 'cios.mp3', 5);
 
         function playSFX(name) {
             if (!sfxPools[name]) return;
@@ -555,7 +545,7 @@
         const imgEndTitle = { complete: true }; // Brak pliku
         const imgSzarak = { complete: true }; // Brak pliku
         const imgPlomien = loadImage('plomien', 'plomien.webp');
-        const imgPlansza = loadImage('plansza', 'plansza.webp');
+        const imgPlansza = loadImage('plansza', 'plansza.png');
         const imgPrzyciskStrzelania = loadImage('przycisk_strzelania', 'przycisk_strzelania.webp');
         const imgOni = loadImage('oni', 'oni.webp');
         const imgOstatniaScena = loadImage('ostatnia_scena', 'ostatnia_scena.webp');
@@ -573,29 +563,42 @@
         const imgGrajPonownie = loadImage('grajponownie', 'grajponownie.webp');
         const imgWyjscie = loadImage('wyjscie', 'wyjscie.webp');
         const imgWPrawo = loadImage('w_prawo', 'w_prawo.webp');
+        const imgPokonanie = loadImage('pokonanie', 'pokonanie.png');
 
         checkAssetsLoaded(); // Initial check
         const sfxTrzezwosc = new Audio('dzwiek_trzezwosci.opus'); sfxTrzezwosc.volume = 0.6;
         const sfxDrzwi = new Audio('drzwi.opus');
 
-        // Performance Optimization: Offscreen Canvas for Stars
-        const starsCanvas = document.createElement('canvas');
-        starsCanvas.width = GAME_WIDTH;
-        starsCanvas.height = GAME_HEIGHT;
-        const starsCtx = starsCanvas.getContext('2d');
+        // Performance Optimization: Offscreen Canvas for Background and Stars
+        const bgBufferCanvas = document.createElement('canvas');
+        bgBufferCanvas.width = GAME_WIDTH;
+        bgBufferCanvas.height = GAME_HEIGHT;
+        const bgBufferCtx = bgBufferCanvas.getContext('2d');
 
-        function generateStars(scheme) {
-            starsCtx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        function preRenderBackground() {
+            const scheme = COLOR_SCHEMES[(level - 1) % COLOR_SCHEMES.length];
+
+            // Draw Background Image or Solid Color
+            if (currentLevelTlo && currentLevelTlo instanceof HTMLImageElement && currentLevelTlo.complete) {
+                bgBufferCtx.drawImage(currentLevelTlo, 0, 0);
+            } else {
+                bgBufferCtx.fillStyle = scheme.bg;
+                bgBufferCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+            }
+
+            // Draw Stars
             const starSeed = level * 999;
             for (let i = 0; i < 50; i++) {
                 const sx = Math.abs(Math.sin(starSeed + i * 73));
                 const sy = Math.abs(Math.sin(starSeed + i * 137));
-                starsCtx.fillStyle = scheme.stars;
-                starsCtx.beginPath();
-                starsCtx.arc(sx * GAME_WIDTH, sy * (GAME_HEIGHT - 100), 1 + (i % 3), 0, Math.PI * 2);
-                starsCtx.fill();
+                bgBufferCtx.fillStyle = scheme.stars;
+                bgBufferCtx.beginPath();
+                bgBufferCtx.arc(sx * GAME_WIDTH, sy * (GAME_HEIGHT - 100), 1 + (i % 3), 0, Math.PI * 2);
+                bgBufferCtx.fill();
             }
         }
+
+        const starsCanvas = document.createElement('canvas'); // Deprecated
 
         // Game State
         let gameState = 'menu';
@@ -632,7 +635,7 @@
                 if (!el) return;
 
                 el.addEventListener('pointerdown', (e) => {
-                    e.target.setPointerCapture(e.pointerId); // "Przykleja" dotyk do przycisku
+                    e.target.setPointerCapture(e.pointerId);
                     keys[key] = true;
                     if (key === 'jump') playSFX(sfxJump);
                 });
@@ -652,6 +655,7 @@
             bind('btn-shoot', 'shoot');
             bind('btn-down', 'down');
 
+
             window.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
                 if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
@@ -659,12 +663,7 @@
                 if (e.key === 'x' || e.key === 'X') keys.shoot = true;
                 if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'Space' || e.key === ' ') {
                     keys.jump = true;
-                    playSFX(sfxJump);
                 }
-                if (e.key === 'l' || e.key === 'L') {
-                    nextLevel();
-                }
-
             });
             window.addEventListener('keyup', (e) => {
                 if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
@@ -681,9 +680,15 @@
             generateLevel(level);
 
             // Cache level assets for performance
-            const scheme = COLOR_SCHEMES[(level - 1) % COLOR_SCHEMES.length];
-            generateStars(scheme);
+            const schemeLvl = COLOR_SCHEMES[(level - 1) % COLOR_SCHEMES.length];
             currentLevelTlo = imgTlo[level - 1] || imgTlo[0];
+
+            // Pre-render background when all assets are ready
+            if (currentLevelTlo.complete) {
+                preRenderBackground();
+            } else {
+                currentLevelTlo.onload = preRenderBackground;
+            }
             if (level === 5) {
                 currentLevelPodloga = imgPodlogaBoss;
                 currentLevelBelka = imgBelkaBoss;
@@ -709,6 +714,11 @@
             abductionPhase = 0;
             soberFreezeTimer = 0; // Timer for the red pause effect
             updateUI();
+
+            // Optymalizacja DOM: Aktualizacja kolorów tylko raz na poziom
+            const schemeStyle = COLOR_SCHEMES[(level - 1) % COLOR_SCHEMES.length];
+            document.documentElement.style.setProperty('--accent', schemeStyle.accent);
+            document.documentElement.style.setProperty('--bg', schemeStyle.bg);
 
             setTimeout(() => {
                 if (gameState === 'playing') {
@@ -957,10 +967,6 @@
             document.getElementById('coins-ui').innerText = `${coinsCollected} / ${COINS_TO_WIN}`;
             document.getElementById('lives-ui').innerText = lives;
             document.getElementById('level-ui').innerText = level;
-
-            const scheme = COLOR_SCHEMES[(level - 1) % COLOR_SCHEMES.length];
-            document.documentElement.style.setProperty('--accent', scheme.accent);
-            document.documentElement.style.setProperty('--bg', scheme.bg);
         }
 
         function loseLife() {
@@ -999,20 +1005,18 @@
         let introTimer = 0;
         const INTRO_DURATION = 10000; // 10s
 
-        function update(dt) {
-            if (gameState !== 'playing') return;
+        function update() {
+            if (gameState !== 'playing' && gameState !== 'celebrating') return;
 
-            // dt (delta time) is normalized to 60fps
-            // dt = 1.0 means the game is running at 60fps
-            // dt = 2.0 means the game is running at 30fps
+            // dt removed, game speed now depends on FPS
 
             if (player.isAutoWalking) {
                 const targetX = GAME_WIDTH / 2 - player.width / 2;
                 const dist = targetX - player.x;
-                if (Math.abs(dist) > 5) {
+                if (Math.abs(dist) > 5 || !player.onGround) {
                     player.vx = Math.sign(dist) * MOVE_SPEED * 0.7;
                     player.facingRight = dist > 0;
-                    player.x += player.vx * dt;
+                    if (Math.abs(dist) > 5) player.x += player.vx;
                 } else {
                     player.x = targetX;
                     player.vx = 0;
@@ -1021,12 +1025,15 @@
                 }
 
                 // Keep physics for auto-walk (gravity/platforms)
-                player.vy += 0.8 * dt;
-                player.y += player.vy * dt;
+                player.vy += 0.8;
+                player.y += player.vy;
                 player.onGround = false;
                 platforms.forEach(p => {
+                    // Ignoruj piętra (beiki) podczas auto-walku, żeby bohater spadł na ziemię
+                    if (!p.isGround) return;
+
                     if (player.x + 10 < p.x + p.width && player.x + player.width - 10 > p.x &&
-                        player.y + player.height > p.y && player.y + player.height < p.y + p.height + (player.vy * dt) + 5 && player.vy >= 0) {
+                        player.y + player.height > p.y && player.y + player.height < p.y + p.height + player.vy + 5 && player.vy >= 0) {
                         player.y = p.y - player.height; player.vy = 0; player.onGround = true;
                     }
                 });
@@ -1037,30 +1044,36 @@
 
             // Boss Intro Logic
             if (level === 5 && introTimer < INTRO_DURATION) {
-                introTimer += 16.6 * dt; // approx 60fps
+                introTimer += 16.6; // approx 60fps step
                 return; // During boss intro, game is paused
             }
 
             // Sober Freeze Timer
             if (soberFreezeTimer > 0) {
-                soberFreezeTimer -= 1 * dt;
+                soberFreezeTimer -= 1;
             }
 
             // Invincibility Timer
             if (player.invincibilityTimer > 0) {
-                player.invincibilityTimer -= 1 * dt;
+                player.invincibilityTimer -= 1;
             }
 
             // Movement
             if (keys.left) { player.vx = -MOVE_SPEED; player.facingRight = false; }
             else if (keys.right) { player.vx = MOVE_SPEED; player.facingRight = true; }
-            else { player.vx *= Math.pow(0.8, dt); }
+            else { player.vx *= 0.8; }
 
-            if (keys.jump && player.onGround) { player.vy = JUMP_FORCE; player.onGround = false; }
+            // Rising Edge Jump Logic: Jump only on fresh press
+            if (keys.jump && !player.prevJumpState && player.onGround) {
+                player.vy = JUMP_FORCE;
+                player.onGround = false;
+                playSFX(sfxJump);
+            }
 
-            player.vy += GRAVITY * dt;
-            player.x += player.vx * dt;
-            player.y += player.vy * dt;
+            player.vy += GRAVITY;
+            if (!keys.jump && player.vy < -5) player.vy *= 0.6;
+            player.x += player.vx;
+            player.y += player.vy;
 
             // Boundaries
             if (player.x < 0) player.x = 0;
@@ -1089,7 +1102,7 @@
 
             for (let i = playerBullets.length - 1; i >= 0; i--) {
                 const pb = playerBullets[i];
-                pb.x += pb.vx * dt;
+                pb.x += pb.vx;
                 if (pb.x < -10 || pb.x > GAME_WIDTH + 10) {
                     playerBullets.splice(i, 1);
                     continue;
@@ -1101,10 +1114,11 @@
                     const e = enemies[j];
                     if (pb.x < e.x + e.width && pb.x + 5 > e.x && pb.y < e.y + e.height && pb.y + 5 > e.y) {
                         e.hp--;
+                        playSFX('cios');
                         playerBullets.splice(i, 1);
                         bulletRemoved = true;
                         if (e.hp <= 0) {
-                            effects.push({ x: e.x + e.width / 2, y: e.y + e.height / 2, type: 'cloud', timer: 40 });
+                            effects.push({ x: e.x + e.width / 2, y: e.y + e.height / 2, type: 'defeat', timer: 90, maxTimer: 90 });
                             enemies.splice(j, 1);
                         }
                         break;
@@ -1139,10 +1153,17 @@
             player.onGround = false;
             platforms.forEach(p => {
                 // Simple Jump down logic: ignore platforms if pressing down
-                if (keys.down && !p.isGround) return;
+                if (keys.down && !p.isGround) {
+                    if (player.x < p.x + p.width && player.x + player.width > p.x &&
+                        Math.abs((player.y + player.height) - p.y) < 20) {
+                        player.y += 12;
+                        player.vy = 3;
+                    }
+                    return;
+                }
 
                 if (player.x < p.x + p.width && player.x + player.width > p.x &&
-                    player.y + player.height > p.y && player.y + player.height < p.y + p.height + (player.vy * dt) + 5 &&
+                    player.y + player.height > p.y && player.y + player.height < p.y + p.height + player.vy + 5 &&
                     player.vy >= 0) {
                     player.y = p.y - player.height;
                     player.vy = 0;
@@ -1152,7 +1173,6 @@
             if (keys.jump && player.onGround) {
                 player.vy = JUMP_FORCE;
                 player.onGround = false;
-                playSFX(sfxJump);
             }
 
             for (let i = coins.length - 1; i >= 0; i--) {
@@ -1225,7 +1245,7 @@
 
                 // Shooting logic (Level 2+)
                 if (level >= 2 && !showCelebration && e.shootType !== 'none' && soberFreezeTimer <= 0) {
-                    e.shootTimer -= 1 * dt;
+                    e.shootTimer -= 1;
                     if (e.shootTimer <= 0) {
                         const dx = (player.x + 15) - (e.x + 20);
                         const dy = (player.y + 25) - (e.y + 25);
@@ -1248,14 +1268,14 @@
             }
 
             for (let i = effects.length - 1; i >= 0; i--) {
-                effects[i].timer -= 1 * dt;
+                effects[i].timer -= 1;
                 if (effects[i].timer <= 0) effects.splice(i, 1);
             }
 
             // Boss Logic - Pattern: 3 horizontal shots @ heights + 4s speech bubble
             if (boss && !showCelebration) {
                 if (boss.isDying) {
-                    boss.deathTimer -= 16.6 * dt;
+                    boss.deathTimer -= 16.6;
                     boss.flash = 5;
                     // Explosion particles
                     for (let k = 0; k < 2; k++) {
@@ -1272,7 +1292,7 @@
                     }
                     return;
                 }
-                if (boss.flash > 0) boss.flash -= 1 * dt;
+                if (boss.flash > 0) boss.flash -= 1;
 
                 // Mid-HP Spawn Logic (50% HP = 30)
                 if (boss.hp <= 60 && !boss.spawnedMidHpEnemy) {
@@ -1294,7 +1314,7 @@
                     return;
                 }
 
-                boss.phaseTimer -= 1 * dt;
+                boss.phaseTimer -= 1;
                 if (boss.phaseTimer <= 0) {
                     if (boss.phaseIndex < 3) {
                         // Shooting Phase
@@ -1319,28 +1339,28 @@
                 const targetX = GAME_WIDTH / 2 - player.width / 2;
                 const targetY = GAME_HEIGHT - player.height - 40;
                 if (Math.abs(player.x - targetX) > 4) {
-                    if (player.x < targetX) { player.x += 2 * dt; player.facingRight = true; }
-                    else { player.x -= 2 * dt; player.facingRight = false; }
+                    if (player.x < targetX) { player.x += 2; player.facingRight = true; }
+                    else { player.x -= 2; player.facingRight = false; }
                 }
                 if (Math.abs(player.y - targetY) > 4) {
-                    if (player.y < targetY) player.y += 2 * dt;
-                    else player.y -= 2 * dt;
+                    if (player.y < targetY) player.y += 2;
+                    else player.y -= 2;
                 }
             }
 
             // Bullet update and collision
             for (let i = bullets.length - 1; i >= 0; i--) {
                 const b = bullets[i];
-                b.x += b.vx * dt;
-                b.y += b.vy * dt;
+                b.x += b.vx;
+                b.y += b.vy;
 
                 if (b.homing && !b.text) {
                     const dx = (player.x + 15) - b.x;
                     const dy = (player.y + 25) - b.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
                     if (dist > 1) {
-                        b.vx = (b.vx * Math.pow(0.98, dt)) + (dx / dist) * 0.05 * dt;
-                        b.vy = (b.vy * Math.pow(0.98, dt)) + (dy / dist) * 0.05 * dt;
+                        b.vx = (b.vx * 0.98) + (dx / dist) * 0.05;
+                        b.vy = (b.vy * 0.98) + (dy / dist) * 0.05;
                     }
                 }
 
@@ -1413,6 +1433,13 @@
             document.body.classList.remove('playing');
             document.querySelector('.ui-overlay').style.opacity = '0';
 
+            // Upewnij się, że przycisk strzelania jest aktywny na poziomie Uplifting
+            const shootBtn = document.getElementById('btn-shoot');
+            if (shootBtn) {
+                shootBtn.style.opacity = '1';
+                shootBtn.style.pointerEvents = 'auto';
+            }
+
             const finalScreen = document.getElementById('final-screen');
             finalScreen.classList.remove('hidden');
             finalScreen.style.display = 'flex';
@@ -1425,6 +1452,7 @@
 
             const uCanvas = document.getElementById('upliftCanvas');
             const uctx = uCanvas.getContext('2d');
+            // uctx.scale(0.5, 0.5); // REMOVED: Native 800x600 resolution
 
             let pWidth = 157 * (70 / 70);
             let pHeight = 157;
@@ -1441,7 +1469,7 @@
             let shakeTimer = 0;
             let currentDialogImg = null;
             let currentBackgroundImg = null;
-            let upliftStartTimer = 180; // 3 seconds to show imgWPrawo
+            let upliftStartTimer = 100; // 3 seconds to show imgWPrawo
             let buttonsAdded = false;
             let shootKeyWasPressed = false;
 
@@ -1454,24 +1482,35 @@
             const bgScale = (imgPlansza.complete && imgPlansza.height > 0) ? (bgHeightActual / imgPlansza.height) : 1;
             const doorXScaled = 4717 * bgScale;
 
-            let lastTimeUplift = performance.now();
+            let lastFrameTimeUplift = 0;
             function updateUplift(timestamp = performance.now()) {
-                if (!lastTimeUplift) lastTimeUplift = timestamp;
-                const dt = Math.min((timestamp - lastTimeUplift) / 16.6, 3);
-                lastTimeUplift = timestamp;
+                const elapsed = timestamp - lastFrameTimeUplift;
 
+                if (elapsed >= FRAME_DURATION) {
+                    lastFrameTimeUplift = timestamp - (elapsed % FRAME_DURATION);
+                    runUpliftStep();
+                }
+
+                if (gameState === 'uplift') {
+                    requestAnimationFrame(updateUplift);
+                }
+            }
+
+            function runUpliftStep() {
                 if (gameState !== 'uplift') return;
+
+                const dt_ref = 1; // logical replacement for dt
 
                 if (!finalSceneActive) {
                     if (upliftStartTimer > 0) {
-                        upliftStartTimer -= 1 * dt;
+                        upliftStartTimer -= 1;
                     } else {
                         if (keys.left) {
-                            px -= 6 * dt;
+                            px -= 6;
                             pFacingRight = false;
                         }
                         if (keys.right) {
-                            px += 6 * dt;
+                            px += 6;
                             pFacingRight = true;
                         }
                         if (keys.jump && pOnGround) {
@@ -1482,8 +1521,8 @@
                     }
 
                     // Gravity and physics
-                    pvy += 0.7 * dt;
-                    py += pvy * dt;
+                    pvy += 0.7;
+                    py += pvy;
                     if (py >= groundY) {
                         py = groundY;
                         pvy = 0;
@@ -1516,7 +1555,7 @@
                     }
 
                     if (isUpliftFading) {
-                        upliftFade += 0.005 * dt;
+                        upliftFade += 0.005;
                         if (upliftFade >= 1) {
                             upliftFade = 1;
                             finalSceneActive = true;
@@ -1536,18 +1575,18 @@
                     }
                     shootKeyWasPressed = keys.shoot;
 
-                    finalTimer += 1 * dt;
+                    finalTimer += 1;
                     // FINAL CUTSCENE STATE MACHINE
                     if (finalCutsceneStep === 1) { // Show ostatnia_scena.png
                         if (finalTimer > 60) { finalCutsceneStep = 2; finalTimer = 0; }
                     } else if (finalCutsceneStep === 2) { // Dialog 1 (top right)
-                        updateDialog(imgDialog1, 900, 0, dt); // 900 frames = 15s
+                        updateDialog(imgDialog1, 900, 0); // 900 frames = 15s
                     } else if (finalCutsceneStep === 3) { // Dialog 2 (top left)
-                        updateDialog(imgDialog2, 900, 0, dt);
+                        updateDialog(imgDialog2, 900, 0);
                     } else if (finalCutsceneStep === 4) { // Dialog 3 (top right)
-                        updateDialog(imgDialog3, 900, 0, dt);
+                        updateDialog(imgDialog3, 900, 0);
                     } else if (finalCutsceneStep === 5) { // Fade to white
-                        finalOpacity += 0.01 * dt;
+                        finalOpacity += 0.01;
                         if (finalOpacity >= 1) {
                             finalOpacity = 1;
                             finalCutsceneStep = 6;
@@ -1555,14 +1594,14 @@
                             currentBackgroundImg = imgAniol;
                         }
                     } else if (finalCutsceneStep === 6) { // Fade from white to aniol.png
-                        finalOpacity -= 0.01 * dt;
+                        finalOpacity -= 0.01;
                         if (finalOpacity <= 0) {
                             finalOpacity = 0;
                             finalCutsceneStep = 7;
                             finalTimer = 0;
                         }
                     } else if (finalCutsceneStep === 7) { // Dialog 4 (11 seconds)
-                        updateDialog(imgDialog4, 1000, 0, dt);
+                        updateDialog(imgDialog4, 1000, 0);
                     } else if (finalCutsceneStep === 8) { // Violent shake
                         shakeTimer = 30;
                         finalCutsceneStep = 9;
@@ -1571,7 +1610,7 @@
                     } else if (finalCutsceneStep === 9) { // Post shake delay
                         if (finalTimer > 300) { finalCutsceneStep = 10; finalTimer = 0; }
                     } else if (finalCutsceneStep === 10) { // Fade to white again
-                        finalOpacity += 0.01 * dt;
+                        finalOpacity += 0.01;
                         if (finalOpacity >= 1) {
                             finalOpacity = 1;
                             finalCutsceneStep = 11;
@@ -1584,14 +1623,13 @@
                         }
                     }
 
-                    if (shakeTimer > 0) shakeTimer -= 1 * dt;
+                    if (shakeTimer > 0) shakeTimer -= 1;
                 }
 
                 drawUplift();
-                requestAnimationFrame(updateUplift);
             }
 
-            function updateDialog(img, duration, gap, dt) {
+            function updateDialog(img, duration, gap) {
                 currentDialogImg = img;
                 if (finalTimer < 60) finalOpacity = finalTimer / 60; // Fade in
                 else if (finalTimer < duration - 60) finalOpacity = 1; // Stay
@@ -1624,17 +1662,38 @@
                         uctx.save();
                         uctx.globalAlpha = finalOpacity;
                         // Positioning
-                        let dScale = 0.28; // Smaller bubbles (20% smaller than previous 0.35)
-                        if (currentDialogImg === imgDialog2) {
-                            uctx.drawImage(currentDialogImg, 40, 40, currentDialogImg.width * dScale, currentDialogImg.height * dScale); // Top Left
+                        // dScale - kontroluje ROZMIAR dialogów (0.28 = 28% oryginalnego rozmiaru)
+                        let dScale = 0.30; // Zwiększ wartość aby powiększyć dialogi, zmniejsz aby pomniejszyć
+
+                        let dw = currentDialogImg.width * dScale;
+                        let dh = currentDialogImg.height * dScale;
+
+                        // OSOBNE USTAWIENIA DLA KAŻDEGO DIALOGU
+                        // Format: uctx.drawImage(obraz, pozycjaX, pozycjaY, szerokość, wysokość)
+
+                        if (currentDialogImg === imgDialog1) {
+                            // DIALOG 1 - Wycentrowany
+                            let posX = (400 - dw / 2) + 60;  // Poprawiony wzór na centrowanie
+                            let posY = 40;
+                            uctx.drawImage(currentDialogImg, posX, posY, dw, dh);
+
+                        } else if (currentDialogImg === imgDialog2) {
+                            // DIALOG 2 - Wycentrowany z przesunięciem użytkownika
+                            let posX = (400 - dw / 2) - 110;
+                            let posY = 40;
+                            uctx.drawImage(currentDialogImg, posX, posY, dw, dh);
+
+                        } else if (currentDialogImg === imgDialog3) {
+                            // DIALOG 3 - Wycentrowany
+                            let posX = (400 - dw / 2) + 60;  // Poprawiony wzór na centrowanie
+                            let posY = 40;
+                            uctx.drawImage(currentDialogImg, posX, posY, dw, dh);
+
                         } else if (currentDialogImg === imgDialog4) {
-                            let dw = currentDialogImg.width * dScale;
-                            let dh = currentDialogImg.height * dScale;
-                            uctx.drawImage(currentDialogImg, 400 - dw / 2, 80, dw, dh); // Centered
-                        } else {
-                            let dw = currentDialogImg.width * dScale;
-                            let dh = currentDialogImg.height * dScale;
-                            uctx.drawImage(currentDialogImg, 800 - dw - 40, 40, dw, dh); // Top Right
+                            // DIALOG 4 - Wycentrowany
+                            let posX = (400 - dw / 2) + 60;  // Poprawiony wzór na centrowanie
+                            let posY = 40;
+                            uctx.drawImage(currentDialogImg, posX, posY, dw, dh);
                         }
                         uctx.restore();
                     }
@@ -1821,14 +1880,27 @@
             }
         }
 
+        let lastFrameTime = 0;
+        const FPS_LIMIT = 60;
+        const FRAME_DURATION = 1000 / FPS_LIMIT;
+
         function draw(timestamp) {
-            if (!lastTime) lastTime = timestamp;
-            const dt = (timestamp - lastTime) / 16.6; // Base 1.0 on 60fps
-            lastTime = timestamp;
+            if (!timestamp) timestamp = performance.now();
 
-            update(Math.min(dt, 3)); // Cap dt to avoid huge jumps on tab switch
+            const elapsed = timestamp - lastFrameTime;
 
-            ctx.save(); // Save context for shake effect
+            if (elapsed >= FRAME_DURATION) {
+                lastFrameTime = timestamp - (elapsed % FRAME_DURATION);
+                update(); // Speed now depends on FPS
+                render();
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        function render() {
+            ctx.save(); // Save context for shake effect i scale
+            // ctx.scale(0.5, 0.5); // REMOVED: Native 800x600 resolution
 
             // Sober Freeze Effect (Red Shake)
             if (soberFreezeTimer > 0) {
@@ -1843,18 +1915,14 @@
 
             const scheme = COLOR_SCHEMES[(level - 1) % COLOR_SCHEMES.length];
 
-            // Background image
-            if (currentLevelTlo && currentLevelTlo instanceof HTMLImageElement && currentLevelTlo.complete) {
-                ctx.drawImage(currentLevelTlo, 0, 0);
-            } else {
-                ctx.fillStyle = scheme.bg;
-                ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-            }
+            // Use the pre-rendered background buffer
+            ctx.drawImage(bgBufferCanvas, 0, 0);
 
-            // Stars (Optimized: draw from offscreen canvas)
-            ctx.globalAlpha = 0.6 + Math.sin(Date.now() / 1000) * 0.2;
-            ctx.drawImage(starsCanvas, 0, 0);
-            ctx.globalAlpha = 1;
+            // Blinking stars effect (optional overlay or part of buffer)
+            ctx.save();
+            ctx.globalAlpha = 0.2 * Math.sin(Date.now() / 1000); // Subtle blink
+            ctx.drawImage(bgBufferCanvas, 0, 0);
+            ctx.restore();
 
             // Platforms
             platforms.forEach(p => {
@@ -1894,25 +1962,32 @@
             });
 
             // Effects
-            effects.forEach((eff, idx) => {
-                eff.timer--;
-                if (eff.type === 'cloud') {
-                    ctx.fillStyle = 'rgba(255, 255, 255, ' + (eff.timer / 40) + ')';
-                    ctx.beginPath();
-                    ctx.arc(eff.x, eff.y, 30, 0, Math.PI * 2);
-                    ctx.arc(eff.x - 15, eff.y - 10, 20, 0, Math.PI * 2);
-                    ctx.arc(eff.x + 15, eff.y - 10, 20, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillStyle = 'rgba(0, 0, 0, ' + (eff.timer / 40) + ')';
-                    ctx.font = 'bold 16px Arial';
-                    ctx.fillText('DOBRZE!', eff.x - 30, eff.y + 5);
+            effects.forEach((eff) => {
+                if (eff.type === 'defeat') {
+                    const progress = Math.max(0, Math.min(1, eff.timer / (eff.maxTimer || 90)));
+                    const alpha = Math.sin(progress * Math.PI);
+                    ctx.save();
+                    ctx.globalAlpha = alpha;
+                    if (imgPokonanie.complete) {
+                        // Drawing centered (powrót do poprzedniej pozycji)
+                        ctx.drawImage(imgPokonanie, eff.x - 30, eff.y - 40, 60, 60);
+                    }
+                    ctx.restore();
                 } else if (eff.type === 'particle') {
-                    ctx.fillStyle = `rgba(255, 165, 0, ${eff.timer / 20})`; // Orange fading particle
+                    const alpha = Math.max(0, eff.timer / 20);
+                    const radius = Math.max(0, 5 + (20 - eff.timer) * 0.5);
+                    ctx.fillStyle = `rgba(255, 165, 0, ${alpha})`;
                     ctx.beginPath();
-                    ctx.arc(eff.x, eff.y, 5 + (20 - eff.timer) * 0.5, 0, Math.PI * 2);
-                    if (eff.timer <= 0) effects.splice(idx, 1);
+                    ctx.arc(eff.x, eff.y, radius, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (eff.type === 'cloud') {
+                    const alpha = Math.max(0, eff.timer / 40);
+                    const radius = Math.max(0, 8 + (40 - eff.timer) * 0.5);
+                    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                    ctx.beginPath();
+                    ctx.arc(eff.x, eff.y, radius, 0, Math.PI * 2);
+                    ctx.fill();
                 }
-                if (eff.timer <= 0 && eff.type !== 'particle') effects.splice(idx, 1); // Cleanup fallback
             });
 
             // Enemies Update
@@ -2018,7 +2093,7 @@
             items.forEach(it => {
                 if (!it.collected && it.type === 'shield') {
                     if (imgTarczaZielona.complete) {
-                        ctx.drawImage(imgTarczaZielona, it.x - 20, it.y - 20, 40, 40);
+                        ctx.drawImage(imgTarczaZielona, it.x - 20, it.y - 20, 60, 60);
                     } else {
                         ctx.fillStyle = '#10b981';
                         const sz = 15;
@@ -2034,7 +2109,7 @@
                     }
                 } else if (!it.collected && it.type === 'doubleShield') {
                     if (imgTarczaNiebieska.complete) {
-                        ctx.drawImage(imgTarczaNiebieska, it.x - 20, it.y - 20, 40, 40);
+                        ctx.drawImage(imgTarczaNiebieska, it.x - 20, it.y - 20, 60, 60);
                     } else {
                         ctx.fillStyle = '#3b82f6';
                         ctx.beginPath();
@@ -2073,13 +2148,7 @@
                 }
             });
 
-            // Effects (particles/clouds)
-            effects.forEach(eff => {
-                ctx.fillStyle = eff.type === 'cloud' ? 'rgba(255,255,255,0.7)' : 'rgba(239, 68, 68, 0.7)';
-                ctx.beginPath();
-                ctx.arc(eff.x, eff.y, 8 + (40 - eff.timer) * 0.5, 0, Math.PI * 2);
-                ctx.fill();
-            });
+
 
             // Player / Abduction
             if (abductionPhase < 4) {
@@ -2093,7 +2162,7 @@
 
             if (abductionPhase >= 4) {
                 const pw = 45 * (player.isSober ? 1.5 : 1);
-                const ufoBottomY = 80 + 35; // UFO center y=80, half height ~35
+                const ufoBottomY = 80; // Wlatuje do środka UFO (ufoY to 80)
                 const liftDuration = 2500;
                 const elapsed = Date.now() - playerAbductStartTime;
                 const progress = Math.min(elapsed / liftDuration, 1);
@@ -2102,11 +2171,12 @@
                 const currentX = playerAbductX + (targetX - playerAbductX) * progress;
                 const liftY = playerAbductY - (playerAbductY - ufoBottomY) * progress;
 
-                if (progress < 0.9) {
+                if (progress < 1.0) {
                     drawPlayer(currentX, liftY, true, true);
                 }
             }
 
+            // Boss Intro Overlay Effects
             // Boss Intro Overlay Effects
             if (level === 5 && introTimer < INTRO_DURATION) {
                 const progress = introTimer / INTRO_DURATION;
@@ -2122,17 +2192,17 @@
                     ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
                     ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
                 }
+                ctx.restore();
 
                 // Dark fade out
                 ctx.fillStyle = `rgba(0, 0, 0, ${1 - progress})`;
                 ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-
-                ctx.restore();
             }
 
+            // Update previous jump state for rising edge detection
+            player.prevJumpState = keys.jump;
 
-            ctx.restore(); // Restore context (undo shake)
-            requestAnimationFrame(draw);
+            ctx.restore(); // Restore scale and shake
         }
 
         function drawPlayer(px, py, right, surprised) {

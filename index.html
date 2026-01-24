@@ -407,12 +407,18 @@
         bgMusicEnding.loop = true;
         bgMusicEnding.volume = 0.4;
 
+        const bgMusicKarczma = new Audio('karczmarz_audio.mp3');
+        bgMusicKarczma.loop = true;
+        bgMusicKarczma.volume = 0.4;
+
         let musicStarted = false;
 
         function startMusic() {
             if (!musicStarted) {
-                if (level === 5) {
+                if (level === 7) {
                     bgMusicBoss.play().then(() => musicStarted = true).catch(e => console.log(e));
+                } else if (level === 6) {
+                    bgMusicKarczma.play().then(() => musicStarted = true).catch(e => console.log(e));
                 } else {
                     bgMusic.play().then(() => musicStarted = true).catch(e => console.log(e));
                 }
@@ -428,7 +434,9 @@
             { bg: '#0a1e14', platforms: '#166534', accent: '#4ade80', ground: '#15803d', stars: '#bbf7d0' }, // Level 2 (Zieleń)
             { bg: '#1e0f0a', platforms: '#c2410c', accent: '#fb923c', ground: '#9a3412', stars: '#fed7aa' }, // Level 3 (Pomarańcz)
             { bg: '#0a141e', platforms: '#1e40af', accent: '#60a5fa', ground: '#1e3a8a', stars: '#bfdbfe' }, // Level 4 (Błękit)
-            { bg: '#1e0a0a', platforms: '#7f1d1d', accent: '#ef4444', ground: '#450a0a', stars: '#fecaca' }, // Level 5 (Czerwień)
+            { bg: '#050314', platforms: '#7e22ce', accent: '#d8b4fe', ground: '#581c87', stars: '#f3e8ff' }, // Level 5 (Near Black)
+            { bg: '#a3e635', platforms: '#1e40af', accent: '#60a5fa', ground: '#1e3a8a', stars: '#dbeafe' }, // Level 6 (Light Green)
+            { bg: '#1e0a0a', platforms: '#7f1d1d', accent: '#ef4444', ground: '#450a0a', stars: '#fecaca' }, // Level 7 (Czerwień - Boss)
         ];
 
         // Assets Loader
@@ -513,10 +521,15 @@
 
         // Preload Images
         const imgTlo = [];
-        for (let i = 1; i <= 5; i++) imgTlo.push(loadImage(`tlo_${i}`, `tlo_${i}.webp`));
+        for (let i = 1; i <= 4; i++) imgTlo.push(loadImage(`tlo_${i}`, `tlo_${i}.webp`));
+        imgTlo.push(loadImage('tlo_5', 'tlo_5.png')); // Level 5
+        imgTlo.push(loadImage('tlo_6', 'tlo_6.png')); // Level 6
+        imgTlo.push(loadImage('tlo_7', 'tlo_7.webp')); // Level 7 (Boss, ex-level 5)
 
         const imgPodlogiLevel = [];
         for (let i = 1; i <= 4; i++) imgPodlogiLevel[i] = loadImage(`podloga_${i}`, `podloga_${i}.webp`);
+        imgPodlogiLevel[5] = loadImage('podloga_5', 'podloga_5.png');
+        imgPodlogiLevel[6] = loadImage('podloga_6', 'podloga_6.png');
 
         const imgBelka = { complete: true }; // Składnik wirtualny, używamy podłóg
         const imgBelkaBoss = loadImage('belka_boss', 'belka_boss.webp');
@@ -538,6 +551,22 @@
         const imgAlkoholNie = loadImage('alkohol_nie', 'alkohol_nie.webp');
         const imgAlkoholSzkodzi = loadImage('alkohol_szkodzi', 'alkohol_szkodzi.webp');
         const imgBossInfo = loadImage('boss_info', 'boss_info.webp');
+        const imgInfo5 = loadImage('info_5', 'info_5.png'); // Level 5 Info
+        const imgKarczma = loadImage('karczma', 'karczma.png'); // Level 6 Info
+        const imgKarczmarz = loadImage('karczmarz', 'karczmarz.png'); // Level 6 Boss
+        const imgKarczmarz1 = loadImage('karczmarz_1', 'karczmarz_1.png');
+        const imgKarczmarz2 = loadImage('karczmarz_2', 'karczmarz_2.png');
+        const imgKarczmarz3 = loadImage('karczmarz_3', 'karczmarz_3.png');
+        const imgKarczmarz4 = loadImage('karczmarz_4', 'karczmarz_4.png');
+        const imgCiosany = loadImage('ciosany', 'ciosany.png');
+        const imgChmielus = loadImage('chmielus', 'chmielus.png'); // Boss Level Intro
+        const imgImieChmielus = loadImage('imie_chmielus', 'imie_chmielus.png');
+        const imgNiePij = loadImage('nie_pij', 'nie_pij.png');
+        const imgBieg1 = loadImage('bieg_1', 'bieg_1.png');
+        const imgBieg2 = loadImage('bieg_2', 'bieg_2.png');
+        const imgBieg3 = loadImage('bieg_3', 'bieg_3.png');
+        const imgBohater1 = loadImage('bohater_1', 'bohater_1.png');
+        const imgBohater2 = loadImage('bohater_2', 'bohater_2.png');
         const imgPancerzZielony = loadImage('pancerz_zielony', 'pancerz_zielony.webp');
         const imgPancerzNiebieski = loadImage('pancerz_niebieski', 'pancerz_niebieski.webp');
         const imgPancerzCzerwony = loadImage('pancerz_czerwony', 'pancerz_czerwony.webp');
@@ -559,7 +588,7 @@
         const imgDialog4 = loadImage('dialog4', 'dialog4.png');
         const imgAniol = loadImage('aniol', 'aniol.webp');
         const imgAniol2 = loadImage('aniol2', 'aniol2.webp');
-        const imgDziekuje = loadImage('dziekuje', 'dziekuje.webp');
+        const imgDziekuje = loadImage('dziekuje', 'dziekuje.png');
         const imgGrajPonownie = loadImage('grajponownie', 'grajponownie.webp');
         const imgWyjscie = loadImage('wyjscie', 'wyjscie.webp');
         const imgWPrawo = loadImage('w_prawo', 'w_prawo.webp');
@@ -568,6 +597,7 @@
         checkAssetsLoaded(); // Initial check
         const sfxTrzezwosc = new Audio('dzwiek_trzezwosci.opus'); sfxTrzezwosc.volume = 0.6;
         const sfxDrzwi = new Audio('drzwi.opus');
+        const sfxPrzycisk = new Audio('przycisk.opus');
 
         // Performance Optimization: Offscreen Canvas for Background and Stars
         const bgBufferCanvas = document.createElement('canvas');
@@ -586,16 +616,7 @@
                 bgBufferCtx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
             }
 
-            // Draw Stars
-            const starSeed = level * 999;
-            for (let i = 0; i < 50; i++) {
-                const sx = Math.abs(Math.sin(starSeed + i * 73));
-                const sy = Math.abs(Math.sin(starSeed + i * 137));
-                bgBufferCtx.fillStyle = scheme.stars;
-                bgBufferCtx.beginPath();
-                bgBufferCtx.arc(sx * GAME_WIDTH, sy * (GAME_HEIGHT - 100), 1 + (i % 3), 0, Math.PI * 2);
-                bgBufferCtx.fill();
-            }
+            // Stars removed as requested
         }
 
         const starsCanvas = document.createElement('canvas'); // Deprecated
@@ -626,7 +647,20 @@
         let keys = { left: false, right: false, jump: false, shoot: false, down: false };
         let ufo = { visible: false, x: 400, y: -100 };
 
+        let level6CoinSpawnTimer = 0;
+        let level6CoinsSpawned = 0;
+        let level6IntroStep = 0; // 0-4: Dialogs, 5: Playing
+
+        let level6IntroTimer = 0;
+        let level6OutroActive = false;
+        let level6OutroTimer = 0;
+        let level6OutroComplete = false;
+        let level6IntroSeen = false;
+        let karczmarzHitCount = 0;
+        let armorDropped = false;
+
         let lastTime = 0;
+        let shotPressedPrev = false; // For debouncing skip
 
         // Input Utilities
         function setupControls() {
@@ -664,6 +698,9 @@
                 if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'Space' || e.key === ' ') {
                     keys.jump = true;
                 }
+                if (e.key === 'l' || e.key === 'L') {
+                    nextLevel();
+                }
             });
             window.addEventListener('keyup', (e) => {
                 if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
@@ -689,7 +726,7 @@
             } else {
                 currentLevelTlo.onload = preRenderBackground;
             }
-            if (level === 5) {
+            if (level === 7) {
                 currentLevelPodloga = imgPodlogaBoss;
                 currentLevelBelka = imgBelkaBoss;
             } else {
@@ -726,6 +763,8 @@
                     else if (level === 2) showShootNotification();
                     else if (level === 3) showGenericNotification('<img src="alkohol_nie.webp" style="max-width: 100%;">', 'transparent');
                     else if (level === 4) showGenericNotification('<img src="alkohol_szkodzi.webp" style="max-width: 100%;">', 'transparent');
+                    else if (level === 5) showGenericNotification('<img src="info_5.png" style="max-width: 100%;">', 'transparent');
+                    else if (level === 7) showGenericNotification('<img src="chmielus.png" style="max-width: 100%;">', 'transparent');
                 }
             }, 1000);
         }
@@ -739,7 +778,7 @@
             items = [];
             boss = null;
 
-            if (lvl <= 4) {
+            if (lvl <= 6) {
                 // Fixed platforms on sides (5 on each side)
                 for (let i = 0; i < 5; i++) {
                     const yPos = 120 + (i * 90);
@@ -799,41 +838,235 @@
                     items.push({ x: 80, y: 390 - 45, type: 'doubleShield', collected: false });
                 }
 
+                if (lvl >= 5) {
+                    if (lvl === 6) {
+                        // Level 6: COMPLEX LAYOUT & FALLING COINS & KARCZMARZ
+                        platforms = [{ x: 0, y: GAME_HEIGHT - 40, width: GAME_WIDTH, height: 40, isGround: true }];
+                        enemies = [];
+                        coins = [];
 
-                // Coins - Explicit distribution
-                coins = [];
-                platforms.forEach((p, idx) => {
-                    if (p.isGround) return;
-                    // Logic: 
-                    // Left side: idx 0(mid), 3(bot), 6(top)
-                    // Right side: idx 1(mid), 4(bot), 7(top)
-                    // Middle: idx 2(mid), 5(bot), 8(top)
-                    // Wait, our platform layout is usually:
-                    // 0,1,2 (Top), 3,4,5 (Mid), 6,7,8 (Bot) - let's check initLevel/generateLevel layout
-                    const col = idx % 3; // 0:Left, 1:Right, 2:Middle
-                    const row = Math.floor(idx / 3); // 0:Top, 1:Mid, 2:Bot
+                        // 3 Columns of Moving Platforms
+                        // Left Column (x=50)
+                        platforms.push({ x: 50, y: 450, width: 100, height: 20, isGround: false, moving: true, minY: 150, maxY: 450, vy: -1.5 });
+                        // Middle Column (x=350)
+                        platforms.push({ x: 350, y: 150, width: 100, height: 20, isGround: false, moving: true, minY: 150, maxY: 450, vy: 1.5 });
+                        // Right Column (x=650)
+                        platforms.push({ x: 650, y: 300, width: 100, height: 20, isGround: false, moving: true, minY: 150, maxY: 450, vy: -1.0 });
 
-                    // HIDE COINS ON BOSS LEVEL
-                    if (lvl === 5) {
-                        // Do not generate coins for level 5
-                    } else {
-                        let count = 2;
-                        if ((col === 0 || col === 1) && row === 0) {
-                            count = 4; // Top side beams
+                        // Static Connectors
+                        // Left-Mid connector
+                        platforms.push({ x: 180, y: 300, width: 140, height: 20, isGround: false });
+                        // Mid-Right connector
+                        platforms.push({ x: 480, y: 300, width: 140, height: 20, isGround: false });
+
+                        // Extra beams BELOW static connectors (User request)
+                        platforms.push({ x: 180, y: 420, width: 140, height: 20, isGround: false });
+                        platforms.push({ x: 480, y: 420, width: 140, height: 20, isGround: false });
+
+                        // Short beams above start (Left) and End (Right)
+                        platforms.push({ x: 20, y: GAME_HEIGHT - 120, width: 80, height: 20, isGround: false });
+                        platforms.push({ x: GAME_WIDTH - 100, y: GAME_HEIGHT - 120, width: 80, height: 20, isGround: false });
+
+                        // KARCZMARZ ENEMY
+                        enemies.push({
+                            x: GAME_WIDTH - 100,
+                            y: GAME_HEIGHT - 100, // Adjusted Y for smaller height
+                            width: 60, // Smaller size (Short)
+                            height: 70,
+                            hp: 15, // Mini-boss HP
+                            type: 'karczmarz',
+                            vx: -2,
+                            shootTimer: 240, // Slower (approx 4s)
+                            aiPhase: 'aimed', // 'aimed' or 'vertical'
+                            type: 'karczmarz',
+                            vx: -2,
+                            shootTimer: 240, // Slower (approx 4s)
+                            aiPhase: 'aimed', // 'aimed' or 'vertical'
+                            aiShotCount: 0,
+                            stunTimer: 0,
+                            stunCooldown: 0
+                        });
+
+                        // Falling Coins Setup
+                        // We do NOT generate initial coins. They will spawn in update()
+                        coinsCollected = 0;
+                        level6CoinSpawnTimer = 0;
+                        level6CoinsSpawned = 0;
+
+                        // Intro Setup
+                        level6IntroStep = 0;
+                        level6IntroTimer = 0;
+                        level6OutroActive = false;
+                        level6OutroTimer = 0;
+                        level6OutroComplete = false;
+                        level6OutroTimer = 0;
+                        level6OutroComplete = false;
+                        karczmarzHitCount = 0;
+                        armorDropped = false;
+                        player.x = 100;
+                        player.y = GAME_HEIGHT - 120 - player.height;
+
+                        // Skip intro on retry
+                        if (level6IntroSeen) {
+                            level6IntroStep = 5;
+                        } else {
+                            level6IntroSeen = true;
+                        }
+                    } else if (lvl === 5) {
+                        // Level 5: Custom Moving Platform
+                        platforms = [{ x: 0, y: GAME_HEIGHT - 40, width: GAME_WIDTH, height: 40, isGround: true }];
+                        enemies = [];
+                        coins = [];
+
+                        // 1. Side Beams (Same as Level 4)
+                        for (let i = 0; i < 5; i++) {
+                            const yPos = 120 + (i * 90);
+
+                            // Left
+                            const pLeft = { x: 20, y: yPos, width: 120, height: 20, isGround: false };
+                            platforms.push(pLeft);
+
+                            // Blue Armor on Top Left Beam (i=0)
+                            if (i === 0) {
+                                items.push({ x: pLeft.x + pLeft.width / 2, y: pLeft.y - 45, type: 'doubleShield', collected: false });
+                            }
+
+                            // Coins on Left
+                            let count = 2;
+                            for (let k = 0; k < count; k++) {
+                                let spacing = pLeft.width / (count + 1);
+                                coins.push({ x: pLeft.x + spacing * (k + 1), y: pLeft.y - 25, collected: false });
+                            }
+
+                            // Right
+                            const pRight = { x: GAME_WIDTH - 140, y: yPos, width: 120, height: 20, isGround: false };
+                            platforms.push(pRight);
+                            // Coins on Right
+                            for (let k = 0; k < count; k++) {
+                                let spacing = pRight.width / (count + 1);
+                                coins.push({ x: pRight.x + spacing * (k + 1), y: pRight.y - 25, collected: false });
+                            }
+                            // Enemy on Right (Aimed Shooter)
+                            enemies.push({
+                                x: pRight.x + pRight.width / 2 - 20,
+                                y: pRight.y - 50,
+                                width: 40,
+                                height: 50,
+                                hp: 2,
+                                shootType: 'aimed',
+                                shootTimer: 100 + Math.random() * 200
+                            });
                         }
 
-                        if (col === 2) {
-                            // All middle beams: 2 coins
-                            count = 2;
+                        // 2. Middle Moving Platform
+                        // Moves between bottom-left beam (i=4, y=480) and 4th-from-bottom (i=1, y=210)
+                        const pMove = {
+                            x: GAME_WIDTH / 2 - 60, // Width 120
+                            y: 480,
+                            width: 120,
+                            height: 20,
+                            isGround: false,
+                            moving: true,
+                            minY: 210,
+                            maxY: 480,
+                            vy: -1.0 // Slow speed up
+                        };
+                        platforms.push(pMove);
+
+                        // Enemy on Moving Platform (Spread Shooter)
+                        enemies.push({
+                            x: pMove.x + pMove.width / 2 - 20,
+                            y: pMove.y - 50,
+                            width: 40,
+                            height: 50,
+                            hp: 3, // Slightly stronger
+                            shootType: 'spread_left',
+                            shootTimer: 120,
+                            attachedTo: pMove,
+                            offsetX: pMove.width / 2 - 20
+                        });
+
+                        // 4 Coins attached to moving platform
+                        for (let k = 0; k < 4; k++) {
+                            let spacing = pMove.width / (5);
+                            coins.push({
+                                x: pMove.x + spacing * (k + 1),
+                                y: pMove.y - 25,
+                                collected: false,
+                                attachedTo: pMove,
+                                offsetX: spacing * (k + 1)
+                            });
                         }
 
-                        for (let i = 0; i < count; i++) {
-                            let spacing = p.width / (count + 1);
-                            coins.push({ x: p.x + spacing * (i + 1), y: p.y - 25, collected: false });
-                        }
+                        // Enemy on Ground Right (Aimed Shooter at Player)
+                        enemies.push({
+                            x: GAME_WIDTH - 100,
+                            y: GAME_HEIGHT - 85,
+                            width: 40,
+                            height: 50,
+                            hp: 2,
+                            shootType: 'aimed',
+                            shootTimer: 150
+                        });
+
+                        // 3. Ground Coins
+                        // User requested "ostatnie dwa coiny umieść na podłodze na samym dole, po prawej stronie ekranu obok siebie"
+
+                        // Ground Right (As requested)
+                        coins.push({ x: GAME_WIDTH - 60, y: GAME_HEIGHT - 80, collected: false });
+                        coins.push({ x: GAME_WIDTH - 100, y: GAME_HEIGHT - 80, collected: false });
+
+                        // Ground Left (Added to reach 28 total coins, to balance gameplay)
+                        coins.push({ x: 60, y: GAME_HEIGHT - 80, collected: false });
+                        coins.push({ x: 100, y: GAME_HEIGHT - 80, collected: false });
+
+                        // Total Calculation:
+                        // Sides: 10 beams * 2 coins = 20.
+                        // Middle: 4 coins.
+                        // Ground: 4 coins.
+                        // Total = 28. Perfect.
                     }
-                });
-            } else if (lvl === 5) {
+                }
+
+
+                // Coins - Explicit distribution (Levels 1-4)
+                if (lvl <= 4) {
+                    coins = [];
+                    platforms.forEach((p, idx) => {
+                        if (p.isGround) return;
+                        // Logic: 
+                        // Left side: idx 0(mid), 3(bot), 6(top)
+                        // Right side: idx 1(mid), 4(bot), 7(top)
+                        // Middle: idx 2(mid), 5(bot), 8(top)
+                        // Wait, our platform layout is usually:
+                        // 0,1,2 (Top), 3,4,5 (Mid), 6,7,8 (Bot) - let's check initLevel/generateLevel layout
+                        const col = idx % 3; // 0:Left, 1:Right, 2:Middle
+                        const row = Math.floor(idx / 3); // 0:Top, 1:Mid, 2:Bot
+
+                        // HIDE COINS ON BOSS LEVEL
+                        if (lvl === 7) {
+                            // Do not generate coins for level 7
+                        } else if (lvl >= 5) {
+                            // Coins already generated for levels 5 & 6 in specific block
+                        } else {
+                            let count = 2;
+                            if ((col === 0 || col === 1) && row === 0) {
+                                count = 4; // Top side beams
+                            }
+
+                            if (col === 2) {
+                                // All middle beams: 2 coins
+                                count = 2;
+                            }
+
+                            for (let i = 0; i < count; i++) {
+                                let spacing = p.width / (count + 1);
+                                coins.push({ x: p.x + spacing * (i + 1), y: p.y - 25, collected: false });
+                            }
+                        }
+                    });
+                }
+            } else if (lvl === 7) {
                 // BOSS LEVEL - Simplified
                 // BOSS LEVEL - Manualne ustawienie belek
                 // format: { x: POZYCJA_X, y: POZYCJA_Y, width: SZEROKOSC, height: 20, isGround: false }
@@ -861,8 +1094,8 @@
                     y: GAME_HEIGHT / 2 - 100,
                     width: 180,
                     height: 220,
-                    hp: 120,
-                    maxHp: 120,
+                    hp: 200,
+                    maxHp: 200,
                     flash: 0,
                     phase: 'upper',
                     phaseTimer: 240, // 4 seconds between shots
@@ -870,7 +1103,15 @@
                     attackCount: 0,
                     laserActive: 0,
                     laserY: 0,
-                    spawnedMidHpEnemy: false
+                    spawnedMidHpEnemy: false,
+                    event170: false,
+                    event150: false,
+                    event100: false,
+                    event60: false,
+                    event50: false,
+                    event40: false,
+                    event30: false,
+                    showNiePij: 0
                 };
             }
         }
@@ -881,11 +1122,14 @@
             bgMusic.volume = 0.4;
             bgMusicBoss.pause();
             bgMusicBoss.currentTime = 0;
+            bgMusicBoss.currentTime = 0;
             bgMusicEnding.pause();
             bgMusicEnding.currentTime = 0;
-            bgMusic.pause();
+            bgMusicKarczma.pause();
+            bgMusicKarczma.currentTime = 0;
             bgMusic.currentTime = 0;
             musicStarted = false;
+            level6IntroSeen = false; // Reset seen flag on full restart
             startMusic();
             level = 1; score = 0; totalScore = 0; lives = MAX_LIVES;
             initLevel();
@@ -948,7 +1192,12 @@
             bgMusic.volume = 0.4;
             level++;
             introTimer = 0;
-            if (level === 5) {
+            if (level === 7) {
+                bgMusicKarczma.pause();
+                bgMusic.pause(); // Safety
+                musicStarted = false;
+                startMusic();
+            } else if (level === 6) {
                 bgMusic.pause();
                 musicStarted = false;
                 startMusic();
@@ -964,7 +1213,8 @@
         }
 
         function updateUI() {
-            document.getElementById('coins-ui').innerText = `${coinsCollected} / ${COINS_TO_WIN}`;
+            const target = level === 6 ? 56 : COINS_TO_WIN;
+            document.getElementById('coins-ui').innerText = `${coinsCollected} / ${target}`;
             document.getElementById('lives-ui').innerText = lives;
             document.getElementById('level-ui').innerText = level;
         }
@@ -972,9 +1222,17 @@
         function loseLife() {
             if (player.invincibilityTimer > 0) return; // Ignore damage if invincible
 
-            if (player.isSober && level === 5) {
+            if (player.isSober && level === 7) {
                 if (player.soberArmor < 4) {
                     player.soberArmor++;
+                    if (player.soberArmor === 4) {
+                        // Reset size to normal
+                        const oldH = player.height;
+                        player.height = 70;
+                        player.width = 70;
+                        player.y += (oldH - 70); // Drop down to align feet
+                        // player.isSober = true; // Keep true to render peka4
+                    }
                     playSFX(sfxShot); // Dźwięk uderzenia w pancerz
                     effects.push({ x: player.x + player.width / 2, y: player.y + player.height / 2, type: 'cloud', timer: 30 });
                     player.invincibilityTimer = 60; // 1 second of i-frames (60 frames)
@@ -983,7 +1241,7 @@
             }
 
             if (player.shieldLevel > 0) {
-                // If Blue (3), 1st hit drops to Green (2). 2nd hit stays Green (1). 3rd hit returns to Normal (0).
+                // If Blue (2), 1st hit drops to Green (1). 2nd hit returns to Normal (0).
                 player.shieldLevel--;
                 effects.push({ x: player.x + player.width / 2, y: player.y + player.height / 2, type: 'cloud', timer: 30 });
                 player.invincibilityTimer = 60; // 1 second of i-frames
@@ -1042,11 +1300,224 @@
 
             if (showCelebration) return;
 
+            // Level 6 Outro: Collected all coins
+            if (level === 6 && coinsCollected >= 56 && !level6OutroActive) {
+                level6OutroActive = true;
+                level6OutroTimer = 0;
+            }
+
+            if (level6OutroActive) {
+                if (level6OutroTimer === 0) playSFX(sfxButton); // Add sound
+
+                // Pause game updates, handle outro timer
+                level6OutroTimer += 16.6;
+                // Allow skip with shoot
+                if (keys.shoot && !shotPressedPrev) {
+                    level6OutroTimer += 5000; // Force end
+                }
+                shotPressedPrev = keys.shoot;
+
+                if (level6OutroTimer > 4000) { // 4 seconds duration
+                    level6OutroActive = false;
+                    level6OutroComplete = true;
+                    player.isAutoWalking = true; // Trigger walk to UFO
+                }
+                return;
+            }
+
             // Boss Intro Logic
-            if (level === 5 && introTimer < INTRO_DURATION) {
+            if (level === 7 && introTimer < INTRO_DURATION) {
                 introTimer += 16.6; // approx 60fps step
                 return; // During boss intro, game is paused
             }
+
+            // Level 6 Intro Cutscene
+            if (level === 6 && level6IntroStep < 5) {
+                if (level6IntroTimer === 0) playSFX(sfxButton); // Sound on step start
+                level6IntroTimer += 16.6;
+                // Allow skip with shoot button
+                if (keys.shoot && !shotPressedPrev) {
+                    level6IntroStep++;
+                    level6IntroTimer = 0;
+                }
+                // Auto advance after 4 seconds
+                if (level6IntroTimer > 4000) {
+                    level6IntroStep++;
+                    level6IntroTimer = 0;
+                }
+
+                // Trigger notification when cutscene ends (step becomes 5)
+                if (level6IntroStep === 5) {
+                    showGenericNotification('<img src="karczma.png" style="max-width: 100%;">', 'transparent');
+                }
+
+                shotPressedPrev = keys.shoot; // Track previous state to prevent rapid skipping
+                return; // Pause game logic during cutscene
+            }
+            shotPressedPrev = keys.shoot;
+
+            // Moving Platforms Logic (Level 5)
+            platforms.forEach(p => {
+                if (p.moving) {
+                    p.y += p.vy;
+                    if (p.y <= p.minY || p.y >= p.maxY) {
+                        p.vy *= -1;
+                    }
+                }
+            });
+
+            // Attached Coins Logic
+            coins.forEach(c => {
+                if (c.attachedTo) {
+                    c.y = c.attachedTo.y - 25;
+                    c.x = c.attachedTo.x + c.offsetX;
+                }
+            });
+
+            // Level 6 Falling Coins Logic
+            if (level === 6) {
+                if (level6CoinsSpawned < 56) { // Target 56 total spawns
+                    level6CoinSpawnTimer++;
+                    // Spawn every ~0.8 seconds (50 frames)
+                    if (level6CoinSpawnTimer > 50) {
+                        level6CoinSpawnTimer = 0;
+                        level6CoinsSpawned++;
+                        coins.push({
+                            x: 20 + Math.random() * (GAME_WIDTH - 40),
+                            y: -50,
+                            collected: false,
+                            falling: true,
+                            vy: 3 // Falling speed
+                        });
+                    }
+                }
+
+                // Physics for falling coins
+                coins.forEach(c => {
+                    if (c.falling) {
+                        c.y += c.vy;
+                        // Stop on platforms
+                        platforms.forEach(p => {
+                            if (c.x > p.x && c.x < p.x + p.width &&
+                                c.y + 10 > p.y && c.y - 10 < p.y) {
+                                c.falling = false;
+                                c.y = p.y - 25;
+
+                                // Attach to moving platform
+                                if (p.moving) {
+                                    c.attachedTo = p;
+                                    c.offsetX = c.x - p.x;
+                                }
+                            }
+                        });
+                        // Stop on ground
+                        if (c.y > GAME_HEIGHT - 80) {
+                            c.falling = false;
+                            c.y = GAME_HEIGHT - 80;
+                        }
+                    }
+                });
+            }
+
+            // Karczmarz Logic Update
+            enemies.forEach(e => {
+                if (e.type === 'karczmarz') {
+                    // Update Stun Timer
+                    if (e.stunTimer > 0) {
+                        e.stunTimer--;
+                        if (e.stunTimer <= 0) {
+                            e.isCiosany = false;
+                            e.vx = Math.sign(e.vx) * 2; // Restore speed
+                            e.stunCooldown = 300; // 5 seconds cooldown (was 7)
+                        }
+                    } else if (e.stunCooldown > 0) {
+                        e.stunCooldown--;
+                    }
+
+                    // Patrol logic (modified for speed)
+                    // If stunned, vx should be already slowed.
+                    // Just ensure boundary checks preserve current direction sign.
+                    if (e.x <= 20) { e.x = 20; e.vx = Math.abs(e.vx); }
+                    if (e.x >= GAME_WIDTH - e.width - 20) { e.x = GAME_WIDTH - e.width - 20; e.vx = -Math.abs(e.vx); }
+                    e.x += e.vx;
+
+                    // Shooting logic
+                    e.shootTimer--;
+                    if (e.shootTimer <= 0) {
+                        if (e.aiPhase === 'aimed') {
+                            // Phase 1: Slow Aimed (5 times)
+                            const dx = (player.x + player.width / 2) - (e.x + e.width / 2);
+                            const dy = (player.y + player.height / 2) - (e.y + 20);
+                            const angle = Math.atan2(dy, dx);
+                            // Bullet 1 (Slightly up)
+                            bullets.push({
+                                x: e.x + e.width / 2, y: e.y + 20,
+                                vx: Math.cos(angle - 0.1) * 2.5, // Even slower (was 3)
+                                vy: Math.sin(angle - 0.1) * 2.5,
+                                radius: 12
+                            });
+                            // Bullet 2 (Slightly down)
+                            bullets.push({
+                                x: e.x + e.width / 2, y: e.y + 20,
+                                vx: Math.cos(angle + 0.1) * 2.5,
+                                vy: Math.sin(angle + 0.1) * 2.5,
+                                radius: 12
+                            });
+                            e.aiShotCount++;
+                            if (e.aiShotCount >= 5) {
+                                e.aiPhase = 'vertical';
+                                e.aiShotCount = 0;
+                            }
+                            playSFX(sfxShotEnemy);
+                            e.shootTimer = 240; // 4 seconds between volleys
+                        } else {
+                            // Phase 2: Fast Vertical (5 times - "w serii")
+                            // 2 bullets straight up
+                            bullets.push({ x: e.x + e.width / 2 - 10, y: e.y, vx: 0, vy: -6, radius: 12 });
+                            bullets.push({ x: e.x + e.width / 2 + 10, y: e.y, vx: 0, vy: -6, radius: 12 });
+
+                            e.aiShotCount++;
+                            if (e.aiShotCount >= 5) {
+                                e.aiPhase = 'aimed';
+                                e.aiShotCount = 0;
+                            }
+                            playSFX(sfxShotEnemy);
+                            e.shootTimer = 40; // Fast fire rate (0.6s)
+                        }
+                    }
+                }
+                else if (e.type === 'karczmarz_runner') {
+                    // Karczmarz Runner Logic
+                    e.x += e.vx; // Move left
+                    e.shootTimer--;
+                    if (e.shootTimer <= 0) {
+                        e.shootTimer = 120; // 2 seconds
+                        // Burst Fire (3 shots rapid vertical)
+                        bullets.push({ x: e.x + e.width / 2 - 15, y: e.y, vx: 0, vy: -6, radius: 12 });
+                        bullets.push({ x: e.x + e.width / 2, y: e.y - 20, vx: 0, vy: -7, radius: 12 });
+                        bullets.push({ x: e.x + e.width / 2 + 15, y: e.y, vx: 0, vy: -6, radius: 12 });
+                        playSFX(sfxShotEnemy);
+                    }
+                    if (e.x < -100) e.hp = 0; // Remove if far off screen
+                } else if (e.type === 'boss_helper_50') {
+                    // Stationary Shooter Logic
+                    e.shootTimer--;
+                    if (e.shootTimer <= 0) {
+                        e.shootTimer = 120; // 2 seconds
+                        bullets.push({ x: e.x + 20, y: e.y + 25, vx: -4, vy: -3, radius: 10 });
+                        bullets.push({ x: e.x + 20, y: e.y + 25, vx: -4, vy: 3, radius: 10 });
+                        playSFX(sfxShotEnemy);
+                    }
+                }
+            });
+
+            // Attached Enemies Logic
+            enemies.forEach(e => {
+                if (e.attachedTo) {
+                    e.y = e.attachedTo.y - 50;
+                    e.x = e.attachedTo.x + e.offsetX;
+                }
+            });
 
             // Sober Freeze Timer
             if (soberFreezeTimer > 0) {
@@ -1113,7 +1584,43 @@
                 for (let j = enemies.length - 1; j >= 0; j--) {
                     const e = enemies[j];
                     if (pb.x < e.x + e.width && pb.x + 5 > e.x && pb.y < e.y + e.height && pb.y + 5 > e.y) {
-                        e.hp--;
+
+                        if (e.type === 'karczmarz') {
+                            // Valid Hit Logic
+                            if (!e.wasHit) {
+                                karczmarzHitCount++;
+                                e.wasHit = true;
+                                setTimeout(() => e.wasHit = false, 200);
+                            }
+
+                            // Stun Logic (Only if no cooldown and not already stunned)
+                            if (e.stunTimer <= 0 && e.stunCooldown <= 0) {
+                                e.isCiosany = true;
+                                e.stunTimer = 120; // 2 seconds
+                                e.vx = Math.sign(e.vx) * 0.5; // Slow down significantly
+                            } else {
+                                // Hit during cooldown/stun - visual feedback?
+                                // Maybe flash? Already handled by HP flash?
+                                // User said "tuż po ciosie... strzelanie nie powoduje zmiany grafiki".
+                                // So we do nothing here visually regarding 'ciosany'.
+                            }
+
+                            // Blue Armor Drop Logic (Once per level)
+                            if (karczmarzHitCount === 4 && !armorDropped) {
+                                // Drop on middle platform (Index 1 is Middle Moving platform? No, let's look up push order)
+                                // Pushes: Ground(0), Left(1), Middle(2), Right(3)
+                                const midPlat = platforms[2];
+                                if (midPlat) {
+                                    items.push({ x: midPlat.x + midPlat.width / 2 - 20, y: midPlat.y - 45, type: 'doubleShield', collected: false });
+                                    armorDropped = true;
+
+                                }
+                            }
+                            // Don't reduce HP (Invincible)
+                        } else {
+                            e.hp--;
+                        }
+
                         playSFX('cios');
                         playerBullets.splice(i, 1);
                         bulletRemoved = true;
@@ -1185,9 +1692,18 @@
                         coinsCollected++;
                         score += 100;
                         playSFX(sfxCoin);
-                        updateUI();
-                        if (coinsCollected >= COINS_TO_WIN && level < 5) {
-                            player.isAutoWalking = true;
+                        document.getElementById('coins-ui').innerText = `${coinsCollected} / ${level === 6 ? 56 : COINS_TO_WIN}`;
+
+                        const winThreshold = level === 6 ? 56 : COINS_TO_WIN;
+                        if (coinsCollected >= winThreshold && level < 7) {
+                            if (level === 6) {
+                                if (!level6OutroComplete && !level6OutroActive) {
+                                    level6OutroActive = true;
+                                    level6OutroTimer = 0;
+                                }
+                            } else {
+                                player.isAutoWalking = true;
+                            }
                         }
                     }
                 }
@@ -1204,7 +1720,7 @@
                             player.shieldLevel = 1;
                         }
                         if (it.type === 'doubleShield') {
-                            player.shieldLevel = 3; // 3 hits for Blue armor
+                            player.shieldLevel = 2; // 2 hits for Blue armor
                         }
                         if (it.type === 'sober') {
                             const oldHeight = player.height;
@@ -1215,7 +1731,7 @@
                             // Text notification removed as requested
 
                             // DYNAMICZNY SPAWN (Level 5) - Na życzenie użytkownika
-                            if (level === 5) {
+                            if (level === 7) {
                                 // Aktywacja pauzy i dźwięku
                                 sfxTrzezwosc.play().catch(() => { });
                                 soberFreezeTimer = 240; // 4 seconds freeze
@@ -1256,6 +1772,14 @@
                         if (e.shootType === 'horizontal') {
                             vx = e.x > player.x ? -2.5 : 2.5;
                             vy = 0;
+                        } else if (e.shootType === 'spread_left') {
+                            // Double shot: Diagonal Top-Left and Diagonal Bottom-Left
+                            bullets.push({ x: e.x + 20, y: e.y + 25, vx: -4, vy: -3, radius: 10 });
+                            bullets.push({ x: e.x + 20, y: e.y + 25, vx: -4, vy: 3, radius: 10 });
+
+                            e.shootTimer = 180; // Fixed interval
+                            playSFX(sfxShotEnemy);
+                            return; // Skip default bullet push
                         }
 
                         // Use consistent bullet image
@@ -1294,13 +1818,68 @@
                 }
                 if (boss.flash > 0) boss.flash -= 1;
 
-                // Mid-HP Spawn Logic (50% HP = 30)
-                if (boss.hp <= 60 && !boss.spawnedMidHpEnemy) {
-                    boss.spawnedMidHpEnemy = true;
-                    // Spawn 1 aimed shooter on top platform (approx x=400, y=100)
-                    enemies.push({ x: 400, y: 150 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 50 });
-                    enemies.push({ x: 80, y: 460 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 50 });
+                // Boss HP Events
+                // 170 HP - Karczmarz Runner (Burst)
+                // 170 HP - Karczmarz Runner (Burst)
+                if (boss.hp <= 170 && !boss.event170) {
+                    boss.event170 = true;
+                    // Runs from Right to Left on Ground
+                    enemies.push({
+                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 70, width: 60, height: 70, hp: 5,
+                        type: 'karczmarz_runner', vx: -3, shootTimer: 20, speechImg: imgBieg1
+                    });
                 }
+                // 150 HP - 2 Aimed Shooters (Low/High)
+                if (boss.hp <= 150 && !boss.event150) {
+                    boss.event150 = true;
+                    // High (y=150) & Low (Bottom Beam y=450)
+                    enemies.push({ x: 430, y: 150 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 50 });
+                    enemies.push({ x: 80, y: 450 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 50 });
+                }
+                // 100 HP - Karczmarz Runner (Repeat)
+                if (boss.hp <= 100 && !boss.event100) {
+                    boss.event100 = true;
+                    enemies.push({
+                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 70, width: 60, height: 70, hp: 5,
+                        type: 'karczmarz_runner', vx: -3, shootTimer: 20, speechImg: imgBieg2
+                    });
+                }
+                // 60 HP - 1 Aimed Shooter (Low now)
+                if (boss.hp <= 60 && !boss.event60) {
+                    boss.event60 = true;
+                    // Moved to lowest beam (approx y=450) -> FIX: Ground Floor
+                    enemies.push({ x: GAME_WIDTH - 200, y: GAME_HEIGHT - 40 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 50 });
+                }
+                // 50 HP - Helper + 1 Shooter (Left top removed)
+                if (boss.hp <= 50 && !boss.event50) {
+                    boss.event50 = true;
+                    // Helper under Boss
+                    enemies.push({
+                        x: boss.x + boss.width / 2 - 20,
+                        y: GAME_HEIGHT - 40 - 50, // Ground
+                        width: 40, height: 50,
+                        hp: 3,
+                        type: 'boss_helper_50',
+                        shootTimer: 60
+                    });
+                    // Shooter (Right Bottom) - Left top removed -> FIX: Ground Floor
+                    enemies.push({ x: GAME_WIDTH - 100, y: GAME_HEIGHT - 40 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 100 });
+                }
+                // 40 HP - Nie Pij
+                if (boss.hp <= 40 && !boss.event40) {
+                    boss.event40 = true;
+                    boss.showNiePij = 300; // 5 seconds
+                }
+                // 30 HP - Karczmarz Runner 3
+                if (boss.hp <= 30 && !boss.event30) {
+                    boss.event30 = true;
+                    enemies.push({
+                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 70, width: 60, height: 70, hp: 5,
+                        type: 'karczmarz_runner', vx: -3, shootTimer: 20, speechImg: imgBieg3
+                    });
+                }
+
+                if (boss.showNiePij > 0) boss.showNiePij--;
 
                 // Collision with player
                 const hitMarginX = 50;
@@ -1415,7 +1994,7 @@
             }, 4000);
             setTimeout(() => {
                 abductionPhase = 5;
-                if (level === 5) {
+                if (level === 7) {
                     startUpliftLevel();
                 } else {
                     document.getElementById('level-complete').classList.remove('hidden');
@@ -1571,9 +2150,15 @@
                         // (Steps 2, 3, 4, 7 are dialogs)
                         if ([1, 2, 3, 4, 7, 9].includes(finalCutsceneStep)) {
                             finalTimer += 1000; // Jump ahead
+                            sfxPrzycisk.currentTime = 0; sfxPrzycisk.play().catch(() => { });
                         }
                     }
                     shootKeyWasPressed = keys.shoot;
+
+                    // Sound trigger for new steps (Dialogues)
+                    if ([2, 3, 4, 7].includes(finalCutsceneStep) && finalTimer === 0) {
+                        playSFX(sfxButton);
+                    }
 
                     finalTimer += 1;
                     // FINAL CUTSCENE STATE MACHINE
@@ -1640,6 +2225,9 @@
                     finalTimer = 0;
                     finalOpacity = 0;
                     currentDialogImg = null;
+                    if (finalCutsceneStep <= 7) { // Play sound on next step start if it's still part of the dialog flow
+                        // Sound moved to main loop for immediate trigger
+                    }
                 }
             }
 
@@ -1800,7 +2388,8 @@
         }
 
         function drawPlayerOnCtx(c, px, py, right, surprised) {
-            let scale = player.isSober ? 1.8 : 1; // 1.8 for Red Armor (SoSober)
+            let scale = player.isSober ? 1.8 : 1; // 1.8 for Red Armor
+            if (player.isSober && player.soberArmor === 4) scale = 1.0; // Reset scale if broken
             if (gameState === 'final') scale = 5.5; // Giant on final screen
             const pw = 70 * scale;
             const ph = 70 * scale;
@@ -1808,7 +2397,7 @@
             if (imgBohater.complete) {
                 let currentImg = imgBohater;
                 if (player.isSober) {
-                    if (level === 5 && player.soberArmor > 0 && player.soberArmor <= 4) {
+                    if (level === 7 && player.soberArmor > 0 && player.soberArmor <= 4) {
                         // Boss Armor Damage States
                         if (player.soberArmor === 1) currentImg = imgPancerzPeka1;
                         else if (player.soberArmor === 2) currentImg = imgPancerzPeka2;
@@ -1817,11 +2406,12 @@
                     } else {
                         currentImg = imgPancerzCzerwony;
                     }
-                } else if (player.shieldLevel === 3) {
-                    currentImg = imgPancerzNiebieski;
-                } else if (player.shieldLevel === 1 || player.shieldLevel === 2) {
-                    currentImg = imgPancerzZielony;
+                } else if (player.shieldLevel > 0) {
+                    if (player.shieldLevel === 2) currentImg = imgPancerzNiebieski; // Level 2 = Blue
+                    else currentImg = imgPancerzZielony; // Level 1 = Green
                 }
+                // No else if (surprised) here, as it would override shield/sober images.
+                // If surprised is needed, it should be applied on top or as a separate layer.
 
                 c.save();
 
@@ -1918,11 +2508,7 @@
             // Use the pre-rendered background buffer
             ctx.drawImage(bgBufferCanvas, 0, 0);
 
-            // Blinking stars effect (optional overlay or part of buffer)
-            ctx.save();
-            ctx.globalAlpha = 0.2 * Math.sin(Date.now() / 1000); // Subtle blink
-            ctx.drawImage(bgBufferCanvas, 0, 0);
-            ctx.restore();
+            // Blinking stars effect removed as requested
 
             // Platforms
             platforms.forEach(p => {
@@ -1992,18 +2578,30 @@
 
             // Enemies Update
             enemies.forEach(e => {
-                const bob = Math.sin(Date.now() / 300 + e.x) * 2;
+                // Bobbing effect ONLY for non-Karczmarz enemies
+                const bob = e.type === 'karczmarz' ? 0 : Math.sin(Date.now() / 300 + e.x) * 2;
+
                 // Shooting logic moved to update() where it belongs!
 
                 if (imgPiwo.complete) {
                     let currentImg = imgPiwo;
-                    if (level >= 2) {
+                    if (e.type === 'karczmarz' || e.type === 'karczmarz_runner') {
+                        if (e.isCiosany && imgCiosany.complete) currentImg = imgCiosany; // Ciosany sprite
+                        else currentImg = imgKarczmarz.complete ? imgKarczmarz : imgBoss; // Standard sprite
+                    } else if (level >= 2) {
                         currentImg = (e.hp === 1 && imgPiwoFaint.complete) ? imgPiwoFaint : imgPiwoStrzela;
                     } else {
                         currentImg = (e.hp === 1 && imgPiwoRed.complete) ? imgPiwoRed : imgPiwo;
                     }
                     if (currentImg.complete) {
                         ctx.drawImage(currentImg, e.x, e.y + bob, e.width, e.height);
+                    }
+
+                    // Render Speech Bubble for Runners
+                    if (e.speechImg && e.speechImg.complete) {
+                        const sw = 300; // Enlarged speech bubble
+                        const sh = sw * (e.speechImg.height / e.speechImg.width);
+                        ctx.drawImage(e.speechImg, e.x + e.width / 2 - sw / 2, e.y - sh - 10, sw, sh);
                     }
                 } else {
                     let color = '#fbbf24';
@@ -2066,9 +2664,24 @@
                     ctx.fillRect(0, boss.laserY - 5, GAME_WIDTH, 10);
                 }
 
+                if (imgImieChmielus.complete) {
+                    // Name graphic above boss
+                    const nw = 200; // Adjust size
+                    const nh = nw * (imgImieChmielus.height / imgImieChmielus.width);
+                    ctx.drawImage(imgImieChmielus, bx + (boss.width - nw) / 2, by - 50, nw, nh);
+                }
+
+                if (boss.showNiePij > 0 && imgNiePij.complete) {
+                    // Draw Nie Pij
+                    const nw = 300;
+                    const nh = nw * (imgNiePij.height / imgNiePij.width);
+                    ctx.drawImage(imgNiePij, GAME_WIDTH / 2 - nw / 2, 100, nw, nh);
+                }
+
                 if (imgBossInfo.complete) {
                     // Boss info graphic on left top side under indicators
-                    ctx.drawImage(imgBossInfo, 20, 80, 200, 100);
+                    // Moved up 15px as requested (80 -> 65)
+                    ctx.drawImage(imgBossInfo, 20, 65, 200, 100);
                 }
 
                 // BOSS Body
@@ -2081,10 +2694,21 @@
                 }
                 ctx.restore();
 
-                // HP Bar
-                ctx.fillStyle = '#333'; ctx.fillRect(GAME_WIDTH - 250, 60, 200, 20);
-                ctx.fillStyle = '#ef4444'; ctx.fillRect(GAME_WIDTH - 250, 60, (boss.hp / boss.maxHp) * 200, 20);
-                ctx.strokeStyle = 'white'; ctx.strokeRect(GAME_WIDTH - 250, 60, 200, 20);
+                // HP Bar - moved below boss
+                const barWidth = 200;
+                const barHeight = 20;
+                const barX = bx + (boss.width - barWidth) / 2; // Centered below boss
+                const barY = by + boss.height + 10;
+
+                ctx.fillStyle = '#333'; ctx.fillRect(barX, barY, barWidth, barHeight);
+                ctx.fillStyle = '#ef4444'; ctx.fillRect(barX, barY, (boss.hp / boss.maxHp) * barWidth, barHeight);
+                ctx.strokeStyle = 'white'; ctx.strokeRect(barX, barY, barWidth, barHeight);
+
+                // Text Indicator
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`HP: ${Math.round(boss.hp)} / ${boss.maxHp}`, barX + barWidth / 2, barY + 15);
             }
 
             // Level Headers - Removed from draw loop to avoid duplicates
@@ -2178,7 +2802,7 @@
 
             // Boss Intro Overlay Effects
             // Boss Intro Overlay Effects
-            if (level === 5 && introTimer < INTRO_DURATION) {
+            if (level === 7 && introTimer < INTRO_DURATION) {
                 const progress = introTimer / INTRO_DURATION;
 
                 // Shake
@@ -2197,6 +2821,81 @@
                 // Dark fade out
                 ctx.fillStyle = `rgba(0, 0, 0, ${1 - progress})`;
                 ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+            }
+
+            // Level 6 Intro Overlay (Dialogs)
+            if (level === 6 && level6IntroStep < 5) {
+                // Dim background
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+                let currentDialog = null;
+                let targetX = 0;
+                let targetY = 0;
+
+                // Steps:
+                // 0: Karczmarz 1
+                // 1: Bohater 1
+                // 2: Karczmarz 2
+                // 3: Bohater 2
+                // 4: Karczmarz 3
+
+                if (level6IntroStep === 0) {
+                    currentDialog = imgKarczmarz1;
+                    // Find Karczmarz
+                    const k = enemies.find(e => e.type === 'karczmarz');
+                    if (k) { targetX = k.x + k.width / 2; targetY = k.y - 120; }
+                } else if (level6IntroStep === 1) {
+                    currentDialog = imgBohater1;
+                    targetX = player.x + player.width / 2; targetY = player.y - 120;
+                } else if (level6IntroStep === 2) {
+                    currentDialog = imgKarczmarz2;
+                    const k = enemies.find(e => e.type === 'karczmarz');
+                    if (k) { targetX = k.x + k.width / 2; targetY = k.y - 120; }
+                } else if (level6IntroStep === 3) {
+                    currentDialog = imgBohater2;
+                    targetX = player.x + player.width / 2; targetY = player.y - 120;
+                } else if (level6IntroStep === 4) {
+                    currentDialog = imgKarczmarz3;
+                    const k = enemies.find(e => e.type === 'karczmarz');
+                    if (k) { targetX = k.x + k.width / 2; targetY = k.y - 120; }
+                }
+
+                if (currentDialog && currentDialog.complete) {
+                    // Draw centered above target with clamping
+                    const w = 250; // Dialog width
+                    const h = w * (currentDialog.height / currentDialog.width);
+
+                    // Clamp targetX to be within screen bounds with some padding
+                    let drawX = targetX - w / 2;
+                    if (drawX < 20) drawX = 20;
+                    if (drawX + w > GAME_WIDTH - 20) drawX = GAME_WIDTH - w - 20;
+
+                    // Lower position: targetY is head - 120. Increase to head - 60?
+                    // targetY was set to k.y - 120. Let's make it k.y - 90 (closer)
+                    // We modify draw logic to push it down
+                    let drawY = targetY + 30; // Lower by 30 pixels
+
+                    ctx.drawImage(currentDialog, drawX, drawY, w, h);
+                }
+            }
+
+            // Level 6 Outro Overlay
+            if (level === 6 && level6OutroActive && imgKarczmarz4.complete) {
+                if (level6OutroTimer === 0) { // First frame of outro just triggered
+                    sfxPrzycisk.currentTime = 0; sfxPrzycisk.play().catch(() => { });
+                }
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+                // Draw Karczmarz 4 dialog - larger
+                const w = 400; // Larger
+                const h = w * (imgKarczmarz4.height / imgKarczmarz4.width);
+                const k = enemies.find(e => e.type === 'karczmarz');
+                let tx = GAME_WIDTH / 2; let ty = GAME_HEIGHT / 2;
+                if (k) { tx = k.x + k.width / 2; ty = k.y - 120; }
+
+                ctx.drawImage(imgKarczmarz4, (GAME_WIDTH - w) / 2, GAME_HEIGHT / 2 - h / 2 - 50, w, h);
             }
 
             // Update previous jump state for rising edge detection
@@ -2235,7 +2934,7 @@
                 ctx.fillStyle = "#60a5fa"; ctx.globalAlpha = 0.6; ctx.beginPath(); ctx.ellipse(0, -15, 22, 20, 0, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
             }
 
-            if (level === 5 && abductionPhase >= 4) {
+            if (level === 7 && abductionPhase >= 4) {
                 // Aliens removed as requested
             }
 

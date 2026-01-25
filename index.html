@@ -12,6 +12,7 @@
     <meta property="og:url" content="https://humbag738.github.io/ufo.mobile/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="UFO MOBILE" />
+    <meta property="fb:app_id" content="966242223397117" />
     <meta name="twitter:card" content="https://humbag738.github.io/ufo.mobile/fb.jpg" />
     <meta name="twitter:title" content="UFO MOBILE" />
     <meta name="twitter:description"
@@ -1226,7 +1227,7 @@
                     phase: 'upper',
                     phaseTimer: 240, // 4 seconds between shots
                     phaseIndex: 0,
-                    spawnTimer: 900, // 👈 Dodaj tę linię
+                    spawnTimer: 1320, // 👈 Dodaj tę linię
                     // ... reszta właściwości ...
                     attackCount: 0,
                     laserActive: 0,
@@ -2048,7 +2049,7 @@
                 boss.spawnTimer--;
                 if (boss.spawnTimer <= 0) {
                     // 1. Wróg na górnej belce (Poziom 4 - aimed)
-                    enemies.push({ x: 430, y: 150 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 100 });
+                    enemies.push({ x: 430, y: 150 - 50, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 100 });
                     // 2. Wróg pod Bossem (Poziom 2 - horizontal)
                     enemies.push({ x: GAME_WIDTH - 200, y: GAME_HEIGHT - 85, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 200 });
 

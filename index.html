@@ -1347,7 +1347,15 @@
         }
 
         function updateUI() {
-            const target = level === 6 ? 84 : COINS_TO_WIN;
+            // Ukryj licznik coinów TYLKO na poziomie bossa (7)
+            const coinsElement = document.getElementById('coins-ui').parentElement;
+            if (level === 7) {
+                coinsElement.style.display = 'none';
+            } else {
+                coinsElement.style.display = '';
+            }
+
+            const target = level === 6 ? 56 : COINS_TO_WIN;
             document.getElementById('coins-ui').innerText = `${coinsCollected} / ${target}`;
             document.getElementById('lives-ui').innerText = lives;
             document.getElementById('level-ui').innerText = level;
@@ -1435,7 +1443,7 @@
             if (showCelebration) return;
 
             // Level 6 Outro: Collected all coins
-            if (level === 6 && coinsCollected >= 84 && !level6OutroActive) {
+            if (level === 6 && coinsCollected >= 56 && !level6OutroActive) {
                 level6OutroActive = true;
                 level6OutroTimer = 0;
             }
@@ -1559,7 +1567,7 @@
 
             // Level 6 Falling Coins Logic
             if (level === 6) {
-                if (level6CoinsSpawned < 84) { // Target 84 total spawns
+                if (level6CoinsSpawned < 56) { // Target 84 total spawns
                     level6CoinSpawnTimer++;
                     // Spawn every ~0.8 seconds (50 frames)
                     if (level6CoinSpawnTimer > 50) {
@@ -1871,9 +1879,9 @@
                         coinsCollected++;
                         score += 100;
                         playSFX(sfxCoin);
-                        document.getElementById('coins-ui').innerText = `${coinsCollected} / ${level === 6 ? 84 : COINS_TO_WIN}`;
+                        document.getElementById('coins-ui').innerText = `${coinsCollected} / ${level === 6 ? 56 : COINS_TO_WIN}`;
 
-                        const winThreshold = level === 6 ? 84 : COINS_TO_WIN;
+                        const winThreshold = level === 6 ? 56 : COINS_TO_WIN;
                         if (coinsCollected >= winThreshold && level < 7) {
                             if (level === 6) {
                                 if (!level6OutroComplete && !level6OutroActive) {

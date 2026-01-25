@@ -432,7 +432,7 @@
             sfxPools[name] = {
                 instances: Array.from({ length: count }, () => {
                     const a = new Audio(url);
-                    a.volume = 0.4; // Lower volume to reduce OS ducking effect
+                    a.volume = 1; // Lower volume to reduce OS ducking effect
                     a.preload = 'auto';
                     return a;
                 }),
@@ -466,22 +466,22 @@
 
         const bgMusic = new Audio('muzyka.opus');
         bgMusic.loop = true;
-        bgMusic.volume = 0.3;
+        bgMusic.volume = 1;
 
         const bgMusicBoss = new Audio('muzyka_boss.opus');
         bgMusicBoss.loop = true;
-        bgMusicBoss.volume = 0.4;
+        bgMusicBoss.volume = 1;
 
         const bgMusicEnding = new Audio('ending.opus');
         bgMusicEnding.loop = true;
-        bgMusicEnding.volume = 0.4;
+        bgMusicEnding.volume = 1;
 
         const bgMusicKarczma = new Audio('karczmarz_audio.mp3');
         bgMusicKarczma.loop = true;
-        bgMusicKarczma.volume = 0.4;
+        bgMusicKarczma.volume = 0.8;
 
         const sfxKlepsydra = new Audio('klepsydra.mp3');
-        sfxKlepsydra.volume = 0.6;
+        sfxKlepsydra.volume = 1;
 
         let musicStarted = false;
 
@@ -672,11 +672,11 @@
         const imgLaser = loadImage('laser', 'laser.png');
 
         checkAssetsLoaded(); // Initial check
-        const sfxTrzezwosc = new Audio('dzwiek_trzezwosci.opus'); sfxTrzezwosc.volume = 0.6;
+        const sfxTrzezwosc = new Audio('dzwiek_trzezwosci.opus'); sfxTrzezwosc.volume = 1;
         const sfxDrzwi = new Audio('drzwi.opus');
         const sfxPrzycisk = new Audio('przycisk.opus');
-        const sfxLaser = new Audio('laser.mp3'); sfxLaser.volume = 0.5;
-        const sfxPowerUp = new Audio('power_up.mp3'); sfxPowerUp.volume = 0.6;
+        const sfxLaser = new Audio('laser.mp3'); sfxLaser.volume = 1;
+        const sfxPowerUp = new Audio('power_up.mp3'); sfxPowerUp.volume = 1;
 
         // Performance Optimization: Offscreen Canvas for Background and Stars
         const bgBufferCanvas = document.createElement('canvas');
@@ -1198,7 +1198,7 @@
                 // format: { x: POZYCJA_X, y: POZYCJA_Y, width: SZEROKOSC, height: 20, isGround: false }
 
                 // Belka 1 (Górna)
-                platforms.push({ x: 400, y: 150, width: 100, height: 30, isGround: false });
+                platforms.push({ x: 400, y: 150, width: 160, height: 30, isGround: false });
 
                 // Belka 2 (Środkowa)
                 platforms.push({ x: 100, y: 300, width: 100, height: 30, isGround: false });
@@ -1212,7 +1212,7 @@
                 items.push({ x: 450, y: 150 - 50, type: 'sober', collected: false });
 
                 // PRZYWRÓCONE: Początkowi przeciwnicy - strzelanie jak na poziomie 4 (shootType: 'aimed')
-                enemies.push({ x: 430, y: 150 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 100 }); // Górna belka
+                enemies.push({ x: 410, y: 150 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 100 }); // Górna belka
                 enemies.push({ x: GAME_WIDTH - 200, y: GAME_HEIGHT - 85, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 200 }); // Pod bossem
 
                 boss = {
@@ -1226,6 +1226,8 @@
                     phase: 'upper',
                     phaseTimer: 240, // 4 seconds between shots
                     phaseIndex: 0,
+                    spawnTimer: 900, // 👈 Dodaj tę linię
+                    // ... reszta właściwości ...
                     attackCount: 0,
                     laserActive: 0,
                     laserY: 0,
@@ -2040,6 +2042,18 @@
                     return;
                 }
                 if (boss.flash > 0) boss.flash -= 1;
+
+                // SPAWNING: Co 15 sekund pojawia się dwóch przeciwników
+                if (!boss.spawnTimer) boss.spawnTimer = 0;
+                boss.spawnTimer--;
+                if (boss.spawnTimer <= 0) {
+                    // 1. Wróg na górnej belce (Poziom 4 - aimed)
+                    enemies.push({ x: 430, y: 150 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 100 });
+                    // 2. Wróg pod Bossem (Poziom 2 - horizontal)
+                    enemies.push({ x: GAME_WIDTH - 200, y: GAME_HEIGHT - 85, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 200 });
+
+                    boss.spawnTimer = 900; // 15 sekund (60 FPS × 15 = 900 framów)
+                }
 
                 // Boss HP Events
                 // 170 HP - Karczmarz Runner (Burst)
@@ -3031,7 +3045,7 @@
                     }
                 } else if (!it.collected && it.type === 'sober') {
                     if (imgTrzezwosc.complete) {
-                        ctx.drawImage(imgTrzezwosc, it.x - -10, it.y - 60, 120, 120);
+                        ctx.drawImage(imgTrzezwosc, it.x - 10, it.y - 60, 120, 120);
                     } else {
                         ctx.fillStyle = '#3b82f6';
                         ctx.fillRect(it.x - 20, it.y - 20, 40, 40);

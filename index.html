@@ -171,6 +171,26 @@
             align-items: center;
         }
 
+        /* Keyboard (Arrows) layout overrides */
+        .controls.layout-keyboard .control-btn {
+            width: 30px;
+            height: 30px;
+        }
+
+        .controls.layout-keyboard .control-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .controls.layout-keyboard .d-pad,
+        .controls.layout-keyboard .d-pad-row {
+            gap: 4px;
+        }
+
+        .controls.layout-keyboard .action-btns {
+            gap: 6px;
+        }
+
 
         #menu,
         #gameover,
@@ -811,10 +831,12 @@
             if (type === 'keyboard') btnImages[1].classList.add('active');
 
             if (type === 'keyboard') {
+                document.querySelector('.controls').classList.add('layout-keyboard');
                 // Move Jump to D-Pad and HIDE spacer
                 spacer.style.display = 'none'; // Hide spacer so Jump sits closer to arrows
                 dPad.insertBefore(btnJump, dPad.firstChild); // Insert at very top
             } else {
+                document.querySelector('.controls').classList.remove('layout-keyboard');
                 // Move Jump back and SHOW spacer
                 spacer.style.display = 'block';
                 actionBtns.appendChild(btnJump);
@@ -2049,10 +2071,11 @@
                 boss.spawnTimer--;
                 if (boss.spawnTimer <= 0) {
                     // 1. Wróg na górnej belce (Poziom 4 - aimed)
-                    enemies.push({ x: 430, y: 150 - 50, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 100 });
-                    enemies.push({ x: 390, y: 150 - 50, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 100 });
+                    enemies.push({ x: 495, y: 150 - 50, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 100 });
+                    enemies.push({ x: 455, y: 150 - 50, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 100 });
+                    enemies.push({ x: 415, y: 150 - 50, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 100 });
                     // 2. Wróg pod Bossem (Poziom 2 - horizontal)
-                    enemies.push({ x: GAME_WIDTH - 225, y: GAME_HEIGHT - 85, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 200 });
+                    enemies.push({ x: GAME_WIDTH - 250, y: GAME_HEIGHT - 85, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 200 });
                     enemies.push({ x: GAME_WIDTH - 200, y: GAME_HEIGHT - 85, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 200 });
                     enemies.push({ x: GAME_WIDTH - 150, y: GAME_HEIGHT - 85, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 200 });
                     boss.spawnTimer = 900; // 15 sekund (60 FPS × 15 = 900 framów)

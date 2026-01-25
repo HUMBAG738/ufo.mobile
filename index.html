@@ -122,16 +122,6 @@
             z-index: 300;
         }
 
-        @media (orientation: landscape) {
-            .controls {
-                top: 0;
-                bottom: 0;
-                height: 100%;
-                align-items: center;
-                padding: 0 40px;
-            }
-        }
-
         .control-btn {
             width: 76px;
             /* Zmniejszone o 10% z 85px */
@@ -296,6 +286,26 @@
 
         .hidden {
             display: none !important;
+        }
+
+        /* Ukryj kontrolki na urządzeniach z precyzyjnym wskaźnikiem (mysz / laptop) */
+        @media (hover: hover) and (pointer: fine) {
+
+            .controls,
+            #controls-settings {
+                display: none !important;
+            }
+        }
+
+        /* Wymuś widoczność na typowych urządzeniach dotykowych */
+        @media (hover: none) and (pointer: coarse) {
+            .controls {
+                display: flex !important;
+            }
+
+            #controls-settings {
+                display: flex !important;
+            }
         }
     </style>
 </head>

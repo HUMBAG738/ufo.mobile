@@ -142,12 +142,12 @@
         }
 
         .control-btn:active {
-            transform: scale(0.9);
+            transform: scale(0.7);
         }
 
         .control-icon {
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 80px;
             object-fit: contain;
             pointer-events: none;
         }
@@ -155,40 +155,35 @@
         .d-pad {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 1px;
             align-items: center;
         }
 
         .d-pad-row {
             display: flex;
-            gap: 10px;
+            gap: 1px;
         }
 
         .action-btns {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            /* Domyślnie pionowo: Ogień nad Skokiem */
+            gap: 1px;
             align-items: center;
-        }
-
-        /* Keyboard (Arrows) layout overrides */
-        .controls.layout-keyboard .control-btn {
-            width: 30px;
-            height: 30px;
-        }
-
-        .controls.layout-keyboard .control-icon {
-            width: 24px;
-            height: 24px;
         }
 
         .controls.layout-keyboard .d-pad,
         .controls.layout-keyboard .d-pad-row {
-            gap: 4px;
+            gap: 1px;
         }
 
         .controls.layout-keyboard .action-btns {
-            gap: 6px;
+            flex-direction: row;
+            /* W trybie strzałek: Ogień po lewej stronie Skoku */
+            gap: 1px;
+            /* Standardowy odstęp */
+            align-items: flex-end;
+            /* Wyrównanie do dołu */
         }
 
 
@@ -307,26 +302,6 @@
 
         .hidden {
             display: none !important;
-        }
-
-        /* Ukryj kontrolki na urządzeniach z precyzyjnym wskaźnikiem (mysz / laptop) */
-        @media (hover: hover) and (pointer: fine) {
-
-            .controls,
-            #controls-settings {
-                display: none !important;
-            }
-        }
-
-        /* Wymuś widoczność na typowych urządzeniach dotykowych */
-        @media (hover: none) and (pointer: coarse) {
-            .controls {
-                display: flex !important;
-            }
-
-            #controls-settings {
-                display: flex !important;
-            }
         }
     </style>
 </head>
@@ -832,14 +807,14 @@
 
             if (type === 'keyboard') {
                 document.querySelector('.controls').classList.add('layout-keyboard');
-                // Move Jump to D-Pad and HIDE spacer
-                spacer.style.display = 'none'; // Hide spacer so Jump sits closer to arrows
-                dPad.insertBefore(btnJump, dPad.firstChild); // Insert at very top
+                // Upewnij się, że sekcja akcji jest po prawej stronie (domyślnie)
+                document.querySelector('.controls').appendChild(actionBtns);
+                spacer.style.display = 'none';
             } else {
                 document.querySelector('.controls').classList.remove('layout-keyboard');
-                // Move Jump back and SHOW spacer
+                // Przyciski akcji zawsze po prawej stronie
+                document.querySelector('.controls').appendChild(actionBtns);
                 spacer.style.display = 'block';
-                actionBtns.appendChild(btnJump);
             }
         }
         function initLevel() {

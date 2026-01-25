@@ -1227,7 +1227,7 @@
                     phase: 'upper',
                     phaseTimer: 240, // 4 seconds between shots
                     phaseIndex: 0,
-                    spawnTimer: 1320, // 👈 Dodaj tę linię
+                    spawnTimer: 1500, // 👈 Dodaj tę linię
                     // ... reszta właściwości ...
                     attackCount: 0,
                     laserActive: 0,
@@ -2050,10 +2050,11 @@
                 if (boss.spawnTimer <= 0) {
                     // 1. Wróg na górnej belce (Poziom 4 - aimed)
                     enemies.push({ x: 430, y: 150 - 50, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 100 });
+                    enemies.push({ x: 390, y: 150 - 50, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 100 });
                     // 2. Wróg pod Bossem (Poziom 2 - horizontal)
                     enemies.push({ x: GAME_WIDTH - 200, y: GAME_HEIGHT - 85, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 200 });
-
-                    boss.spawnTimer = 1320; // 15 sekund (60 FPS × 15 = 900 framów)
+                    enemies.push({ x: GAME_WIDTH - 150, y: GAME_HEIGHT - 85, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 200 });
+                    boss.spawnTimer = 1500; // 15 sekund (60 FPS × 15 = 900 framów)
                 }
 
                 // Boss HP Events

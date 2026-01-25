@@ -175,6 +175,12 @@
         .controls.layout-keyboard .d-pad,
         .controls.layout-keyboard .d-pad-row {
             gap: 1px;
+            padding-right: 10px;
+            /* Odstęp od prawej krawędzi */
+            box-sizing: border-box;
+            /* Gwarantuje, że padding nie powiększy kontenera */
+            max-width: 100%;
+            /* Kontener nie może być szerszy niż ekran */
         }
 
         .controls.layout-keyboard .action-btns {
@@ -184,6 +190,12 @@
             /* Standardowy odstęp */
             align-items: flex-end;
             /* Wyrównanie do dołu */
+            padding-right: 10px;
+            /* Odstęp od prawej krawędzi */
+            box-sizing: border-box;
+            /* Gwarantuje, że padding nie powiększy kontenera */
+            max-width: 100%;
+            /* Kontener nie może być szerszy niż ekran */
         }
 
 

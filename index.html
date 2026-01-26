@@ -2513,7 +2513,7 @@
                 if (boss.hp <= 170 && !boss.event170) {
                     boss.event170 = true;
                     enemies.push({
-                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 5,
+                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 15, maxHp: 15,
                         type: 'karczmarz_runner', vx: -3, shootTimer: 20, speechImg: imgBieg1
                     });
                 }
@@ -2552,7 +2552,7 @@
                 if (boss.hp <= 130 && !boss.event130) {
                     boss.event130 = true;
                     enemies.push({
-                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 5,
+                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 15, maxHp: 15,
                         type: 'karczmarz_runner', vx: -3, shootTimer: 20, speechImg: imgBieg1
                     });
                 }
@@ -2570,7 +2570,7 @@
                 if (boss.hp <= 80 && !boss.event80) {
                     boss.event80 = true;
                     enemies.push({
-                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 5,
+                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 15, maxHp: 15,
                         type: 'karczmarz_runner', vx: -3, shootTimer: 20, speechImg: imgBieg2
                     });
                     // Laser bullet at upper height
@@ -2623,7 +2623,7 @@
                 if (boss.hp <= 30 && !boss.event30) {
                     boss.event30 = true;
                     enemies.push({
-                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 5,
+                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 15, maxHp: 15,
                         type: 'karczmarz_runner', vx: -3, shootTimer: 20, speechImg: imgBieg3
                     });
                 }
@@ -3596,6 +3596,11 @@
                         ctx.fillStyle = '#333'; ctx.fillRect(e.x + (e.width - bw) / 2, e.y - 15, bw, bh);
                         ctx.fillStyle = '#ef4444'; ctx.fillRect(e.x + (e.width - bw) / 2, e.y - 15, (e.hp / e.maxHp) * bw, bh);
                         ctx.strokeStyle = 'white'; ctx.lineWidth = 1; ctx.strokeRect(e.x + (e.width - bw) / 2, e.y - 15, bw, bh);
+                    } else if (e.type === 'karczmarz_runner') {
+                        const bw = 80; const bh = 10;
+                        ctx.fillStyle = '#333'; ctx.fillRect(e.x + (e.width - bw) / 2, e.y - 25, bw, bh);
+                        ctx.fillStyle = '#ef4444'; ctx.fillRect(e.x + (e.width - bw) / 2, e.y - 25, (e.hp / e.maxHp) * bw, bh);
+                        ctx.strokeStyle = 'white'; ctx.lineWidth = 1; ctx.strokeRect(e.x + (e.width - bw) / 2, e.y - 25, bw, bh);
                     }
                 });
 

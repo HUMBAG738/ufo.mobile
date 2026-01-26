@@ -304,12 +304,47 @@
         .hidden {
             display: none !important;
         }
+
+        #btn-pause {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 90px;
+            height: auto;
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.2s;
+        }
+
+        #btn-pause:hover {
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        #pause-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 900;
+            color: white;
+            font-size: 3rem;
+            text-shadow: 0 0 10px var(--accent);
+        }
     </style>
 </head>
 
 <body>
 
+    <img id="btn-pause" src="pauza.png" alt="Pauza" title="Pauza (P)">
     <div id="game-container">
+        <div id="pause-overlay">PAUZA</div>
+
         <canvas id="gameCanvas" width="800" height="600"></canvas>
 
         <div class="ui-overlay">
@@ -379,7 +414,6 @@
     <div class="controls">
         <div class="d-pad">
             <div class="control-btn" id="btn-jump-mobile" style="width: 50px; height: 50px; visibility: hidden;"></div>
-            <!-- Spacer -->
             <div class="d-pad-row">
                 <div class="control-btn" id="btn-left">
                     <img src="left.png" class="control-icon">
@@ -393,6 +427,8 @@
             </div>
         </div>
         <div class="action-btns">
+            <button id="btn-solar" class="control-btn hidden"><img src="przycisk_solarny.png" class="control-icon"
+                    alt="Solar"></button>
             <div class="control-btn" id="btn-shoot">
                 <img src="fire.png" class="control-icon">
             </div>
@@ -444,14 +480,34 @@
         preloadSFX('przycisk', 'przycisk.opus', 3);
         preloadSFX('spodek', 'spodek.opus', 1);
         preloadSFX('cios', 'cios.mp3', 5);
+        preloadSFX('solarny_strzal', 'solarny_strzal.mp3', 5);
+        preloadSFX('game_over', 'game_over.mp3', 1);
 
         function playSFX(name) {
             if (!sfxPools[name]) return;
             const pool = sfxPools[name];
             const instance = pool.instances[pool.index];
             instance.currentTime = 0;
+            // Głośność max 1.0 (wyższe wartości mogą powodować błędy w przeglądarkach)
+            if (name === 'solarny_strzal') instance.volume = 1.0;
             instance.play().catch(() => { });
             pool.index = (pool.index + 1) % pool.instances.length;
+        }
+
+        let currentMusicRate = 1.0;
+        function setMusicPlaybackRate(rate) {
+            if (currentMusicRate === rate) return;
+            currentMusicRate = rate;
+            [bgMusic, bgMusicBoss, bgMusicKarczma, bgMusicEnding].forEach(m => {
+                if (m) {
+                    try {
+                        m.playbackRate = rate;
+                        if ('preservesPitch' in m) m.preservesPitch = false;
+                    } catch (e) {
+                        console.error("Audio error:", e);
+                    }
+                }
+            });
         }
 
         const sfxUfo = 'spodek';
@@ -626,6 +682,7 @@
         const imgInfo5 = loadImage('info_5', 'info_5.png'); // Level 5 Info
         const imgKarczma = loadImage('karczma', 'karczma.png'); // Level 6 Info
         const imgKarczmarz = loadImage('karczmarz', 'karczmarz.png'); // Level 6 Boss
+        const imgBohater1 = loadImage('bohater_1', 'bohater_1.png');
         const imgKarczmarz1 = loadImage('karczmarz_1', 'karczmarz_1.png');
         const imgKarczmarz2 = loadImage('karczmarz_2', 'karczmarz_2.png');
         const imgKarczmarz3 = loadImage('karczmarz_3', 'karczmarz_3.png');
@@ -637,11 +694,16 @@
         const imgBieg1 = loadImage('bieg_1', 'bieg_1.png');
         const imgBieg2 = loadImage('bieg_2', 'bieg_2.png');
         const imgBieg3 = loadImage('bieg_3', 'bieg_3.png');
-        const imgBohater1 = loadImage('bohater_1', 'bohater_1.png');
         const imgBohater2 = loadImage('bohater_2', 'bohater_2.png');
+        const imgPrzyjaciel = loadImage('przyjaciel', 'przyjaciel.png');
+        const imgNieSam = loadImage('nie_sam', 'nie_sam.png');
         const imgPancerzZielony = loadImage('pancerz_zielony', 'pancerz_zielony.webp');
         const imgPancerzNiebieski = loadImage('pancerz_niebieski', 'pancerz_niebieski.webp');
         const imgPancerzCzerwony = loadImage('pancerz_czerwony', 'pancerz_czerwony.webp');
+        const imgMegaMechIcon = loadImage('mega_mech', 'mega_mech.png');
+        const imgMegaPlayer = loadImage('mega', 'mega.png');
+        const imgMechShield = loadImage('mech_tarcza', 'mech_tarcza.png');
+        const imgMechShot = loadImage('mecha_strzal', 'mecha_strzal.png');
         const imgTrzezwosc = loadImage('trzezwosc', 'trzezwosc.webp');
         const imgEndTitle = { complete: true }; // Brak pliku
         const imgSzarak = { complete: true }; // Brak pliku
@@ -658,6 +720,7 @@
         const imgDialog2 = loadImage('dialog2', 'dialog2.png');
         const imgDialog3 = loadImage('dialog3', 'dialog3.png');
         const imgDialog4 = loadImage('dialog4', 'dialog4.png');
+        const imgSerce = loadImage('serce', 'serce.webp');
         const imgAniol = loadImage('aniol', 'aniol.webp');
         const imgAniol2 = loadImage('aniol2', 'aniol2.webp');
         const imgDziekuje = loadImage('dziekuje', 'dziekuje.png');
@@ -667,6 +730,11 @@
         const imgPokonanie = loadImage('pokonanie', 'pokonanie.png');
         const imgKlepsydra = loadImage('klepsydra', 'klepsydra.png');
         const imgLaser = loadImage('laser', 'laser.png');
+        const imgInfoSolarne = loadImage('info_solarne', 'info_solarne.png');
+        const imgDzialoSolarne = loadImage('dzialo_solarne', 'dzialo_solarne.png');
+        const imgPancerzSolarny = loadImage('pancerz_solarny', 'pancerz_solarny.webp');
+        const imgSolarnePocisk = loadImage('solarne_pocisk', 'solarne_pocisk.png');
+        const imgPrzyciskSolarny = loadImage('przycisk_solarny', 'przycisk_solarny.png');
 
         checkAssetsLoaded(); // Initial check
         const sfxTrzezwosc = new Audio('dzwiek_trzezwosci.opus'); sfxTrzezwosc.volume = 1;
@@ -674,6 +742,7 @@
         const sfxPrzycisk = new Audio('przycisk.opus');
         const sfxLaser = new Audio('laser.mp3'); sfxLaser.volume = 1;
         const sfxPowerUp = new Audio('power_up.mp3'); sfxPowerUp.volume = 1;
+        const sfxMech = new Audio('mech.mp3'); sfxMech.volume = 1;
 
         // Performance Optimization: Offscreen Canvas for Background and Stars
         const bgBufferCanvas = document.createElement('canvas');
@@ -710,7 +779,13 @@
         let playerAbductY = 0;
         let playerAbductStartTime = 0;
 
-        let player = { x: 50, y: 500, vx: 0, vy: 0, width: 70, height: 70, onGround: false, facingRight: true, lastShootTime: 0, shieldLevel: 0, isSober: false, invincibilityTimer: 0 };
+        let player = {
+            x: 50, y: 500, vx: 0, vy: 0, width: 70, height: 70,
+            onGround: false, facingRight: true, lastShootTime: 0,
+            shieldLevel: 0, isSober: false, invincibilityTimer: 0,
+            hasSolarBonus: false, solarLastShootTime: 0,
+            isMegaMech: false, mechArmor: 0, soberArmor: 0
+        };
         let currentLevelTlo, currentLevelPodloga, currentLevelBelka;
         let platforms = [];
         let coins = [];
@@ -720,8 +795,18 @@
         let playerBullets = [];
         let effects = [];
         let boss = null;
-        let keys = { left: false, right: false, jump: false, shoot: false, down: false };
+        let keys = { left: false, right: false, jump: false, shoot: false, solarShoot: false, down: false };
         let ufo = { visible: false, x: 400, y: -100 };
+
+        let solarInfoTimer = 0;
+        let solarImmunityTimer = 0;
+        let screenFlashTimer = 0;
+        let slowMoTimer = 0;
+        let solarShakeTimer = 0;
+        let isPaused = false;
+
+        let heartDrop = { active: false, x: 0, y: -100, vx: 0, vy: 5, state: 'none' };
+        let bossHealing = { active: false, flashTimer: 0, scale: 1.0 };
 
         let level6CoinSpawnTimer = 0;
         let level6CoinsSpawned = 0;
@@ -768,6 +853,7 @@
             bind('btn-right', 'right');
             bind('btn-jump', 'jump');
             bind('btn-shoot', 'shoot');
+            bind('btn-solar', 'solarShoot');
             bind('btn-down', 'down');
 
 
@@ -776,8 +862,12 @@
                 if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
                 if (e.key === 'ArrowDown' || e.key === 's') keys.down = true;
                 if (e.key === 'x' || e.key === 'X') keys.shoot = true;
+                if (e.key === 'c' || e.key === 'C' || e.key === 'z' || e.key === 'Z') keys.solarShoot = true; // Klawisz C lub Z dla ataku solarnego
                 if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'Space' || e.key === ' ') {
                     keys.jump = true;
+                }
+                if (e.key === 'p' || e.key === 'P') {
+                    togglePause();
                 }
                 if (e.key === 'l' || e.key === 'L') {
                     nextLevel();
@@ -788,8 +878,15 @@
                 if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
                 if (e.key === 'ArrowDown' || e.key === 's') keys.down = false;
                 if (e.key === 'x' || e.key === 'X') keys.shoot = false;
+                if (e.key === 'c' || e.key === 'C' || e.key === 'z' || e.key === 'Z') keys.solarShoot = false;
                 if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'Space' || e.key === ' ') keys.jump = false;
             });
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            const overlay = document.getElementById('pause-overlay');
+            if (overlay) overlay.style.display = isPaused ? 'flex' : 'none';
         }
 
         function setControlLayout(type) {
@@ -848,12 +945,26 @@
             player.vy = 0;
             player.onGround = false;
             player.shieldLevel = 0;
-            player.shieldLevel = 0;
             player.isSober = false;
             player.soberArmor = 0; // 0=fresh, 1=peka1, 2=peka2, 3=peka3, 4=peka4
             player.isAutoWalking = false;
             player.width = 70;
             player.height = 70;
+            player.hasSolarBonus = false;
+            player.solarLastShootTime = 0;
+
+            // Resetuj przycisk solarny
+            const btnSolar = document.getElementById('btn-solar');
+            if (btnSolar) btnSolar.classList.add('hidden');
+
+            solarInfoTimer = 0;
+            solarImmunityTimer = 0;
+            screenFlashTimer = 0;
+
+            // Resetuj stan serca i leczenia bossa
+            heartDrop = { active: false, x: 0, y: -100, vy: 5, timer: -1 };
+            bossHealing = { active: false, flashTimer: 0, scale: 1.0 };
+
             coinsCollected = 0;
             showCelebration = false;
             abductionPhase = 0;
@@ -991,10 +1102,6 @@
                             vx: -2,
                             shootTimer: 240, // Slower (approx 4s)
                             aiPhase: 'aimed', // 'aimed' or 'vertical'
-                            type: 'karczmarz',
-                            vx: -2,
-                            shootTimer: 240, // Slower (approx 4s)
-                            aiPhase: 'aimed', // 'aimed' or 'vertical'
                             aiShotCount: 0,
                             stunTimer: 0,
                             stunCooldown: 0
@@ -1008,10 +1115,6 @@
 
                         // Intro Setup
                         level6IntroStep = 0;
-                        level6IntroTimer = 0;
-                        level6OutroActive = false;
-                        level6OutroTimer = 0;
-                        level6OutroComplete = false;
                         level6IntroTimer = 0;
                         level6OutroActive = false;
                         level6OutroTimer = 0;
@@ -1208,11 +1311,10 @@
                 // Belka 4 (Dolna - przykład innej pozycji)
                 platforms.push({ x: 50, y: 450, width: 100, height: 30, isGround: false });
 
-                items.push({ x: 450, y: 150 - 50, type: 'sober', collected: false });
+                items.push({ x: 465, y: 150 - 50, type: 'sober', collected: false });
 
                 // PRZYWRÓCONE: Początkowi przeciwnicy - strzelanie jak na poziomie 4 (shootType: 'aimed')
-                enemies.push({ x: 410, y: 150 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 100 }); // Górna belka
-                enemies.push({ x: GAME_WIDTH - 200, y: GAME_HEIGHT - 85, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 200 }); // Pod bossem
+                enemies.push({ x: 410, y: 150 - 58, width: 46, height: 58, hp: 2, shootType: 'aimed', shootTimer: 100 }); // Górna belka
 
                 boss = {
                     x: GAME_WIDTH - 220,
@@ -1292,6 +1394,7 @@
             notify.style.color = 'white';
             notify.style.fontSize = '1.2rem';
             notify.style.fontWeight = 'bold';
+            notify.style.pointerEvents = 'none';
             notify.style.textAlign = 'center';
             notify.style.zIndex = '500';
             notify.style.maxWidth = '80%';
@@ -1327,6 +1430,9 @@
             bgMusic.volume = 0.4;
             level++;
             introTimer = 0;
+            solarInfoTimer = 0;
+            solarImmunityTimer = 0;
+            screenFlashTimer = 0;
             if (level === 7) {
                 bgMusicKarczma.pause();
                 bgMusic.pause(); // Safety
@@ -1363,7 +1469,24 @@
         }
 
         function loseLife() {
-            if (player.invincibilityTimer > 0 || timeFreezeActive) return; // Ignore damage if invincible or time freeze active
+            if (player.invincibilityTimer > 0 || timeFreezeActive) return;
+
+            if (player.isMegaMech && player.mechArmor > 0) {
+                player.mechArmor--;
+                player.invincibilityTimer = 60;
+                sfxMech.currentTime = 0;
+                sfxMech.play().catch(() => { });
+                if (player.mechArmor <= 0) {
+                    player.isMegaMech = false;
+                    player.isSober = true;
+                    player.soberArmor = 4;
+                    const oldH = player.height;
+                    player.width = 70;
+                    player.height = 70;
+                    player.y += (oldH - 70); // Adjust feet to stay on ground
+                }
+                return;
+            }
 
             if (player.isSober && level === 7) {
                 if (player.soberArmor < 4) {
@@ -1753,7 +1876,39 @@
             if (player.isSober && player.soberArmor === 4) {
                 shootCooldown = 350 * 1.4; // 40% slower when armor is broken
             }
-            if (level >= 2 && keys.shoot) {
+
+            if (player.isMegaMech && keys.shoot) {
+                const now = Date.now();
+                if (now - player.lastShootTime > 120) {
+                    playerBullets.push({
+                        x: player.x + (player.facingRight ? player.width : 0),
+                        y: player.y + player.height / 2,
+                        vx: player.facingRight ? 12 : -12,
+                        vy: 0,
+                        owner: 'player',
+                        isMecha: true
+                    });
+                    player.lastShootTime = now;
+                    playSFX(sfxShot);
+                }
+            } else if (player.hasSolarBonus && keys.solarShoot && player.soberArmor !== 4 && !player.isMegaMech) {
+                const now = Date.now();
+                if (now - (player.solarLastShootTime || 0) > 2000) {
+                    playerBullets.push({
+                        x: player.x + (player.facingRight ? player.width : 0),
+                        y: player.y + player.height / 2,
+                        startX: player.x + (player.facingRight ? player.width : 0),
+                        vx: player.facingRight ? 20 : -20,
+                        vy: 0,
+                        owner: 'player',
+                        isSolar: true
+                    });
+                    player.solarLastShootTime = now + 1600;
+                    playSFX('solarny_strzal');
+                    slowMoTimer = 100;
+                    solarShakeTimer = 25;
+                }
+            } else if (level >= 2 && keys.shoot && !player.isMegaMech) {
                 const now = Date.now();
                 if (now - player.lastShootTime > shootCooldown) {
                     playerBullets.push({
@@ -1767,6 +1922,10 @@
                     player.lastShootTime = now;
                     playSFX(sfxShot);
                 }
+            }
+
+            if (player.isMegaMech && keys.shoot) {
+                // Skasowano duplikację
             }
 
             for (let i = playerBullets.length - 1; i >= 0; i--) {
@@ -1825,16 +1984,33 @@
                 const bossHitMarginX = 30; // Margines poziomy (pocisk trafi głębiej w sprite)
                 const bossHitMarginY = 20; // Margines pionowy
                 if (boss && pb.x < boss.x + boss.width - bossHitMarginX && pb.x + 5 > boss.x + bossHitMarginX && pb.y < boss.y + boss.height - bossHitMarginY && pb.y + 5 > boss.y + bossHitMarginY) {
-                    const damage = pb.isFlame ? 1.33 : 1;
+                    const damage = pb.isSolar ? 10 : (pb.isMecha ? 2 : (pb.isFlame ? 1.33 : 1));
                     boss.hp -= damage;
                     boss.flash = 5;
                     playerBullets.splice(i, 1);
                     updateUI();
                     if (boss.hp <= 0 && !boss.isDying) {
-                        boss.isDying = true;
-                        boss.deathTimer = 1500; // Total duration
+                        if (boss.hasHealedOnce) {
+                            boss.isDying = true;
+                            boss.deathTimer = 1500; // Total duration
+                        } else {
+                            boss.hp = 0; // Zatrzymaj na 0, pętla update aktywuje Karczmarza
+                        }
                     }
                 }
+
+                // Karczmarz Turret Damage
+                enemies.forEach((e, idxE) => {
+                    if (e.type === 'karczmarz_turret' && pb.x < e.x + e.width && pb.x + 5 > e.x && pb.y < e.y + e.height && pb.y + 5 > e.y) {
+                        const damage = pb.isMecha ? 2 : (pb.isSolar ? 10 : 1);
+                        e.hp -= damage;
+                        playerBullets.splice(i, 1);
+                        if (e.hp <= 0) {
+                            effects.push({ x: e.x + e.width / 2, y: e.y + e.height / 2, type: 'defeat', timer: 90, maxTimer: 90 });
+                            enemies.splice(idxE, 1);
+                        }
+                    }
+                });
             }
 
             // Shoot button opacity based on level
@@ -1900,9 +2076,23 @@
             for (let i = items.length - 1; i >= 0; i--) {
                 const it = items[i];
                 if (!it.collected) {
-                    const dx = (player.x + player.width / 2) - it.x;
-                    const dy = (player.y + player.height / 2) - it.y;
-                    if (Math.sqrt(dx * dx + dy * dy) < 30) {
+                    // Collision Logic: Use rectangle intersection for large items (Solar), distance for others
+                    let collision = false;
+                    if (it.type === 'solar') {
+                        // Solar Hitbox: 100x100 centered at it.x, it.y (visual is 240x240 centered there-ish)
+                        // Actually visual is drawImage(at x, y). So visual rect is [x, y, 240, 240].
+                        // Let's make hitbox generous: [x+40, y+40, 160, 160]
+                        if (player.x < it.x + 200 && player.x + player.width > it.x + 40 &&
+                            player.y < it.y + 200 && player.y + player.height > it.y + 40) {
+                            collision = true;
+                        }
+                    } else {
+                        const dx = (player.x + player.width / 2) - it.x;
+                        const dy = (player.y + player.height / 2) - it.y;
+                        if (Math.sqrt(dx * dx + dy * dy) < 40) collision = true; // Increased from 30 to 40 for better feel
+                    }
+
+                    if (collision) {
                         it.collected = true;
                         if (it.type === 'shield') {
                             player.shieldLevel = 1;
@@ -1940,8 +2130,8 @@
                         if (it.type === 'sober') {
                             const oldHeight = player.height;
                             player.isSober = true;
-                            player.height = 100;
-                            player.width = 100; // Update width as well for hitbox
+                            player.height = 150; // Visual scale matches logic
+                            player.width = 150;
                             player.y -= (player.height - oldHeight); // Lift player so feet stay at same Y
                             // Text notification removed as requested
 
@@ -1962,9 +2152,33 @@
                                 // ZMIANA: Użytkownik chce brak wrogów na ziemi po zebraniu trzeźwości.
                                 // Więc NIE dodajemy tych pod bossem.
 
-                                // 2. Trzeci przeciwnik na belce - USUNIĘTE na życzenie
-                                // enemies.push({ x: 80, y: 450 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 180 });
                             }
+                        }
+                        if (it.type === 'solar') {
+                            player.hasSolarBonus = true;
+                            player.isSober = true; // Ensure sober state for visual
+                            player.width = 150; // Match visual scale (2.14 * 70)
+                            player.height = 150;
+                            player.y -= 80; // Offset head/feet
+                            player.invincibilityTimer = 180; // 3s
+                            solarImmunityTimer = 180; // 3s
+                            screenFlashTimer = 90; // 1.5s biały ekran (krótko)
+                            player.soberArmor = -1; // Stan pancerza solarnego
+                            solarInfoTimer = 0; // Hide "Zbierz działo" text immediately
+                            const btnSolar = document.getElementById('btn-solar');
+                            if (btnSolar) btnSolar.classList.remove('hidden');
+                            sfxPowerUp.currentTime = 0;
+                            sfxPowerUp.play().catch(() => { });
+                        }
+                        if (it.type === 'mega_mech') {
+                            const oldH = player.height;
+                            player.isMegaMech = true;
+                            player.mechArmor = 20;
+                            player.width = 170; // Larger than Sober (150)
+                            player.height = 190;
+                            player.y -= (player.height - oldH); // Keep feet on ground
+                            sfxMech.currentTime = 0;
+                            sfxMech.play().catch(() => { });
                         }
                     }
                 }
@@ -1993,7 +2207,7 @@
                         let vx = (dx / dist) * 2.5;
                         let vy = (dy / dist) * 2.5;
 
-                        if (e.shootType === 'horizontal') {
+                        if (e.shootType === 'horizontal' || e.isLarge) {
                             vx = e.x > player.x ? -2.5 : 2.5;
                             vy = 0;
                         } else if (e.shootType === 'spread_left') {
@@ -2011,6 +2225,52 @@
 
                         e.shootTimer = 250 + Math.random() * 300;
                         playSFX(sfxShotEnemy);
+                    }
+                }
+
+                if (e.type === 'ally_przyjaciel') {
+                    // ALLY AI
+                    if (e.speechTimer > 0) e.speechTimer--;
+
+                    // Simple movement logic: walk in from left to slightly left of center
+                    const centerX = GAME_WIDTH / 2 - e.width / 2 - 50;
+                    if (e.x < centerX) e.x += 2.5; // Slightly faster entrance
+                    else {
+                        e.x = centerX;
+                        e.vx = 0;
+                        e.jumpTimer--;
+                        if (e.jumpTimer <= 0 && e.onGround) {
+                            e.vy = -18; // High jump to hit boss (was -12)
+                            e.onGround = false;
+                            e.jumpTimer = 180 + Math.random() * 200;
+                        }
+                    }
+
+                    e.vy += 0.5; // Gravity
+                    e.y += e.vy;
+                    e.onGround = false;
+                    platforms.forEach(p => {
+                        if (e.x + e.width > p.x && e.x < p.x + p.width && e.y + e.height > p.y && e.y + e.height < p.y + 20 && e.vy >= 0) {
+                            e.y = p.y - e.height;
+                            e.vy = 0;
+                            e.onGround = true;
+                        }
+                    });
+
+                    // Ally Shooting at Boss or Karczmarz
+                    e.shootTimer--;
+                    if (e.shootTimer <= 0) {
+                        e.shootTimer = 18; // Constant fire rate (30% faster than 40)
+                        const target = enemies.find(en => en.type === 'karczmarz_turret') || boss;
+                        if (target) {
+                            const angle = Math.atan2((target.y + target.height / 2) - (e.y + e.height / 2), (target.x + target.width / 2) - (e.x + e.width / 2));
+                            playerBullets.push({
+                                x: e.x + e.width, y: e.y + e.height / 2, // Spawning in front of player
+                                vx: Math.cos(angle) * 12, vy: Math.sin(angle) * 12,
+                                owner: 'ally', isFlame: true // Visual matches Sober Shot
+                            });
+                            playSFX(sfxShot);
+                        }
                     }
                 }
             }
@@ -2036,37 +2296,129 @@
                     }
                     if (boss.deathTimer <= 0) {
                         boss = null;
+                        // Clean up all boss entities
+                        enemies = enemies.filter(e => e.type !== 'karczmarz_turret' && e.type !== 'ally_przyjaciel');
                         startUfoAbduction();
                     }
                     return;
                 }
                 if (boss.flash > 0) boss.flash -= 1;
 
-                // SPAWNING: Co 15 sekund pojawia się dwóch przeciwników
                 if (!boss.spawnTimer) boss.spawnTimer = 0;
                 boss.spawnTimer--;
-                if (boss.spawnTimer <= 0) {
-                    // 1. Wróg na górnej belce (Poziom 4 - aimed)
-                    enemies.push({ x: 495, y: 150 - 50, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 100 });
-                    enemies.push({ x: 455, y: 150 - 50, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 100 });
-                    enemies.push({ x: 415, y: 150 - 50, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 100 });
-                    // 2. Wróg pod Bossem (Poziom 2 - horizontal)
-                    enemies.push({ x: GAME_WIDTH - 250, y: GAME_HEIGHT - 85, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 200 });
-                    enemies.push({ x: GAME_WIDTH - 200, y: GAME_HEIGHT - 85, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 200 });
-                    enemies.push({ x: GAME_WIDTH - 150, y: GAME_HEIGHT - 85, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 200 });
-                    boss.spawnTimer = 900; // 15 sekund (60 FPS × 15 = 900 framów)
+
+                // STANDARDOWY SPAWN - Teraz 2 duże piwa (normalnej wielkości)
+                if (boss.spawnTimer <= 0 && boss.hp > 50 && !boss.isDying && !bossHealing.active && !boss.hasHealedOnce) {
+                    // 1. Kufel na górze: obniżony na górną belkę (y=150)
+                    enemies.push({
+                        x: 400 + 60, y: 150 - 58, width: 46, height: 58, hp: 4,
+                        shootType: 'horizontal', shootTimer: 60, isLarge: true
+                    });
+                    boss.spawnTimer = 900;
                 }
+
+                // FAZA 2 - KARCZMARZ RATUJE CHMIELUSIA (gdy HP spadnie po raz pierwszy do 0)
+                // FAZA 2 - KARCZMARZ RATUJE CHMIELUSIA (gdy HP spadnie po raz pierwszy do 0)
+                if (boss.hp <= 0 && !boss.hasHealedOnce && !heartDrop.active && !bossHealing.active) {
+                    boss.hp = 0;
+                    const k = {
+                        x: boss.x - 200, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120,
+                        hp: 100, maxHp: 100, type: 'karczmarz_turret', shootTimer: 150,
+                        state: 'throwing', targetX: GAME_WIDTH - 320
+                    };
+                    enemies.push(k);
+
+                    heartDrop.active = true;
+                    heartDrop.x = k.x + 30;
+                    heartDrop.y = k.y;
+                    heartDrop.state = 'flying';
+                    const tx = boss.x + boss.width / 2;
+                    const ty = boss.y + boss.height / 2;
+                    const dist = Math.sqrt((tx - heartDrop.x) ** 2 + (ty - heartDrop.y) ** 2);
+                    // Leci wolniej (dist / 1.2 zamiast dist / 3)
+                    heartDrop.vx = (tx - heartDrop.x) / (dist / 1.2);
+                    heartDrop.vy = (ty - heartDrop.y) / (dist / 1.2);
+                }
+
+                if (heartDrop.active && heartDrop.state === 'flying') {
+                    heartDrop.x += heartDrop.vx;
+                    heartDrop.y += heartDrop.vy;
+                    if (Math.abs(heartDrop.x - (boss.x + boss.width / 2)) < 20 && Math.abs(heartDrop.y - (boss.y + boss.height / 2)) < 20) {
+                        heartDrop.active = false;
+                        bossHealing.active = true;
+                        boss.hasHealedOnce = true;
+                        playSFX('power_up');
+
+                        // Po rzucie Karczmarz zaczyna iść w prawo
+                        enemies.forEach(e => {
+                            if (e.type === 'karczmarz_turret') e.state = 'walking';
+                        });
+                    }
+                }
+
+                if (bossHealing.active) {
+                    bossHealing.flashTimer = (bossHealing.flashTimer + 1) % 6;
+                    if (bossHealing.scale < 1.25) bossHealing.scale += 0.002;
+                    if (boss.hp < 400) {
+                        boss.hp += 1.0;
+                        boss.maxHp = 400; // Increase maxHp during healing phase
+                        if (boss.hp >= 100 && !boss.megaMechSpawned) {
+                            boss.megaMechSpawned = true;
+                            // Ikona na górnej belce: x=400, y=150
+                            items.push({ x: 400 + 80, y: 150 - 50, width: 100, height: 100, type: 'mega_mech', collected: false });
+                        }
+                    }
+                    else {
+                        boss.hp = 400;
+                        bossHealing.active = false;
+                    }
+                }
+
+                // Karczmarz Turret AI: Poruszanie i strzelanie
+                enemies.forEach(e => {
+                    if (e.type === 'karczmarz_turret' && !showCelebration) {
+                        if (e.state === 'walking') {
+                            if (e.x < e.targetX) {
+                                e.x += 1.5; // Chód w prawo
+                            } else {
+                                e.state = 'shooting';
+                            }
+                        } else if (e.state === 'shooting') {
+                            e.shootTimer--;
+                            if (e.shootTimer <= 0) {
+                                e.shootTimer = 150;
+                                for (let n = 0; n < 2; n++) {
+                                    const angle = Math.atan2((player.y + player.height / 2) - (e.y + 25), (player.x + player.width / 2) - (e.x + 30));
+                                    bullets.push({
+                                        x: e.x + 30, y: e.y + 25,
+                                        vx: Math.cos(angle) * (4 + n), vy: Math.sin(angle) * (4 + n),
+                                        radius: 10
+                                    });
+                                }
+                                playSFX(sfxShotEnemy);
+                            }
+                        }
+                    }
+                });
 
                 // Boss HP Events
                 // 170 HP - Karczmarz Runner (Burst)
                 if (boss.hp <= 170 && !boss.event170) {
                     boss.event170 = true;
-                    // Runs from Right to Left on Ground
                     enemies.push({
-                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 70, width: 60, height: 70, hp: 5,
+                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 5,
                         type: 'karczmarz_runner', vx: -3, shootTimer: 20, speechImg: imgBieg1
                     });
+                }
 
+                // 200 HP after heal - ALLY SPAWN
+                if (boss.hasHealedOnce && boss.hp <= 200 && !boss.allySpawned) {
+                    boss.allySpawned = true;
+                    enemies.push({
+                        x: -100, y: GAME_HEIGHT - 40 - 119, width: 85, height: 119,
+                        type: 'ally_przyjaciel', vx: 2, vy: 0, onGround: false,
+                        shootTimer: 36, jumpTimer: 120, speechTimer: 600
+                    });
                 }
                 // 150 HP - LASER BULLET ATTACK
                 if (boss.hp <= 150 && !boss.event150) {
@@ -2077,16 +2429,25 @@
                     sfxLaser.currentTime = 0;
                     sfxLaser.play().catch(() => { });
                 }
+                // 120 HP - SOLAR BONUS SPAWN
+                if (boss.hp <= 120 && !boss.solarBonusSpawned) {
+                    boss.solarBonusSpawned = true;
+                    // Spawn bonus wyżej (podniesienie o 180px względem ziemi), uwzględniając rozmiar 240px
+                    // User wanted visual at Y - 100 from previous Y.
+                    // Previous Y was GAME_HEIGHT - 140.
+                    // Visual was at GAME_HEIGHT - 140 - 100 = GAME_HEIGHT - 240.
+                    // So let's spawn logical Y at GAME_HEIGHT - 240 so logic matches visual.
+                    items.push({ x: GAME_WIDTH / 2 - 120, y: GAME_HEIGHT - 240, type: 'solar', collected: false });
+                    solarInfoTimer = 240; // 4s info_solarne.png
+                }
 
                 // 130 HP - Karczmarz Runner (Burst)
                 if (boss.hp <= 130 && !boss.event130) {
                     boss.event130 = true;
-                    // Runs from Right to Left on Ground
                     enemies.push({
-                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 70, width: 60, height: 70, hp: 5,
+                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 5,
                         type: 'karczmarz_runner', vx: -3, shootTimer: 20, speechImg: imgBieg1
                     });
-
                 }
 
                 // 90 HP - LASER BULLET ATTACK
@@ -2102,7 +2463,7 @@
                 if (boss.hp <= 80 && !boss.event80) {
                     boss.event80 = true;
                     enemies.push({
-                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 70, width: 60, height: 70, hp: 5,
+                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 5,
                         type: 'karczmarz_runner', vx: -3, shootTimer: 20, speechImg: imgBieg2
                     });
                     // Laser bullet at upper height
@@ -2155,7 +2516,7 @@
                 if (boss.hp <= 30 && !boss.event30) {
                     boss.event30 = true;
                     enemies.push({
-                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 70, width: 60, height: 70, hp: 5,
+                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 5,
                         type: 'karczmarz_runner', vx: -3, shootTimer: 20, speechImg: imgBieg3
                     });
                 }
@@ -2299,12 +2660,14 @@
             document.body.classList.remove('playing');
             document.querySelector('.ui-overlay').style.opacity = '0';
 
-            // Upewnij się, że przycisk strzelania jest aktywny na poziomie Uplifting
+            // Upewnij się, że przycisk strzelania jest aktywny na poziomie Uplifting, a solarny ukryty
             const shootBtn = document.getElementById('btn-shoot');
+            const btnSolar = document.getElementById('btn-solar');
             if (shootBtn) {
                 shootBtn.style.opacity = '1';
                 shootBtn.style.pointerEvents = 'auto';
             }
+            if (btnSolar) btnSolar.classList.add('hidden');
 
             const finalScreen = document.getElementById('final-screen');
             finalScreen.classList.remove('hidden');
@@ -2675,22 +3038,63 @@
         }
 
         function drawPlayerOnCtx(c, px, py, right, surprised) {
-            let scale = player.isSober ? 1.8 : 1; // 1.8 for Red Armor
+            if (player.isMegaMech && imgMegaPlayer.complete) {
+                c.save();
+                // Blinking effect when invincible OR Time Freeze
+                if ((player.invincibilityTimer > 0 || timeFreezeActive || solarImmunityTimer > 0) && Math.floor(Date.now() / 100) % 2 === 0) {
+                    c.globalAlpha = 0.3;
+                }
+                if (!right) {
+                    c.translate(px + player.width, py);
+                    c.scale(-1, 1);
+                    c.drawImage(imgMegaPlayer, 0, 0, player.width, player.height);
+                } else {
+                    c.drawImage(imgMegaPlayer, px, py, player.width, player.height);
+                }
+                c.restore();
+
+                // Draw shield icons above player's head in Mech mode (2 rows of 10)
+                if (player.mechArmor > 0 && imgTarczaNiebieska.complete) {
+                    const iconSize = 15;
+                    const gap = 3;
+                    const rowLength = 10;
+                    const totalWidth = rowLength * iconSize + (rowLength - 1) * gap;
+                    const startX = px + player.width / 2 - totalWidth / 2;
+                    const startY = py - 20;
+
+                    for (let i = 0; i < Math.min(player.mechArmor, 20); i++) {
+                        const row = Math.floor(i / rowLength);
+                        const col = i % rowLength;
+                        const ax = startX + col * (iconSize + gap);
+                        const ay = startY - row * (iconSize + gap);
+                        c.drawImage(imgTarczaNiebieska, ax, ay, iconSize, iconSize);
+                    }
+                }
+                return;
+            }
+
+            let scale = 1; // Base scale for player model
+            if (player.isSober || player.hasSolarBonus) {
+                scale = 2.14; // ~150px for Red Armor / Solar Armor (was 2.5)
+            }
             if (player.isSober && player.soberArmor === 4) scale = 1.0; // Reset scale if broken
             if (gameState === 'final') scale = 5.5; // Giant on final screen
+
             const pw = 70 * scale;
             const ph = 70 * scale;
 
             if (imgBohater.complete) {
                 let currentImg = imgBohater;
-                if (player.isSober) {
-                    if (level === 7 && player.soberArmor > 0 && player.soberArmor <= 4) {
+                if (player.isSober || player.hasSolarBonus) {
+                    if (level === 7 && player.soberArmor >= -1 && player.soberArmor <= 4) {
                         // Boss Armor Damage States
-                        if (player.soberArmor === 1) currentImg = imgPancerzPeka1;
-                        else if (player.soberArmor === 2) currentImg = imgPancerzPeka2;
-                        else if (player.soberArmor === 3) currentImg = imgPancerzPeka3;
-                        else if (player.soberArmor === 4) currentImg = imgPancerzPeka4;
-                    } else {
+                        if (player.soberArmor === -1 && imgPancerzSolarny.complete && imgPancerzSolarny.naturalWidth > 0) currentImg = imgPancerzSolarny;
+                        else if (player.soberArmor === 0 && imgPancerzCzerwony.complete && imgPancerzCzerwony.naturalWidth > 0) currentImg = imgPancerzCzerwony;
+                        else if (player.soberArmor === 1 && imgPancerzPeka1.complete && imgPancerzPeka1.naturalWidth > 0) currentImg = imgPancerzPeka1;
+                        else if (player.soberArmor === 2 && imgPancerzPeka2.complete && imgPancerzPeka2.naturalWidth > 0) currentImg = imgPancerzPeka2;
+                        else if (player.soberArmor === 3 && imgPancerzPeka3.complete && imgPancerzPeka3.naturalWidth > 0) currentImg = imgPancerzPeka3;
+                        else if (player.soberArmor === 4 && imgPancerzPeka4.complete && imgPancerzPeka4.naturalWidth > 0) currentImg = imgPancerzPeka4;
+                    } else if (player.isSober && imgPancerzCzerwony.complete && imgPancerzCzerwony.naturalWidth > 0) {
                         currentImg = imgPancerzCzerwony;
                     }
                 } else if (player.shieldLevel > 0) {
@@ -2703,7 +3107,7 @@
                 c.save();
 
                 // Blinking effect when invincible OR Time Freeze
-                if ((player.invincibilityTimer > 0 || timeFreezeActive) && Math.floor(Date.now() / 100) % 2 === 0) {
+                if ((player.invincibilityTimer > 0 || timeFreezeActive || solarImmunityTimer > 0) && Math.floor(Date.now() / 100) % 2 === 0) {
                     c.globalAlpha = 0.3;
                 }
 
@@ -2758,18 +3162,38 @@
         }
 
         let lastFrameTime = 0;
+        let frameCount = 0;
         const FPS_LIMIT = 60;
         const FRAME_DURATION = 1000 / FPS_LIMIT;
 
         function draw(timestamp) {
+            if (isPaused) {
+                requestAnimationFrame(draw);
+                return;
+            }
             if (!timestamp) timestamp = performance.now();
-
             const elapsed = timestamp - lastFrameTime;
 
             if (elapsed >= FRAME_DURATION) {
                 lastFrameTime = timestamp - (elapsed % FRAME_DURATION);
-                update(); // Speed now depends on FPS
+                frameCount++;
+
+                let shouldUpdate = true;
+                if (slowMoTimer > 0) {
+                    slowMoTimer--;
+                    setMusicPlaybackRate(0.6); // Spowolnienie muzyki i obniżenie tonu
+                    // Aktualizuj co 3 klatkę
+                    if (frameCount % 3 !== 0) {
+                        shouldUpdate = false;
+                    }
+                } else {
+                    setMusicPlaybackRate(1.0); // Powrót do normalnej prędkości muzyki
+                }
+
+                if (shouldUpdate) update();
                 render();
+
+                if (solarShakeTimer > 0) solarShakeTimer--;
             }
 
             requestAnimationFrame(draw);
@@ -2779,15 +3203,18 @@
             ctx.save(); // Save context for shake effect i scale
             // ctx.scale(0.5, 0.5); // REMOVED: Native 800x600 resolution
 
-            // Sober Freeze Effect (Red Shake)
-            if (soberFreezeTimer > 0) {
-                const shakeX = (Math.random() - 0.5) * 10;
-                const shakeY = (Math.random() - 0.5) * 10;
+            // Sober Freeze Effect (Red Shake) lub Solar Shake
+            if (soberFreezeTimer > 0 || solarShakeTimer > 0) {
+                const intensity = soberFreezeTimer > 0 ? 10 : 25; // Znacznie mocniejsze drżenie dla działa (25)
+                const shakeX = (Math.random() - 0.5) * intensity;
+                const shakeY = (Math.random() - 0.5) * intensity;
                 ctx.translate(shakeX, shakeY);
 
-                // Red tint background override
-                ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
-                ctx.fillRect(-20, -20, GAME_WIDTH + 40, GAME_HEIGHT + 40);
+                if (soberFreezeTimer > 0) {
+                    // Red tint background override
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
+                    ctx.fillRect(-20, -20, GAME_WIDTH + 40, GAME_HEIGHT + 40);
+                }
             }
 
             const scheme = COLOR_SCHEMES[(level - 1) % COLOR_SCHEMES.length];
@@ -2811,28 +3238,54 @@
                         ctx.drawImage(currentLevelBelka, p.x, p.y, p.width, p.height);
                     } else {
                         ctx.fillStyle = scheme.platforms;
-                        ctx.fillRect(p.x, p.y, p.width, p.height);
+                        ctx.fillRect(p.x, p.y, p.width, 4);
                         ctx.fillStyle = scheme.accent;
                         ctx.fillRect(p.x, p.y, p.width, 4);
                     }
                 }
             });
 
-            // Coins (Kosmici)
+            // Items (Coins/Power-ups)
             coins.forEach(c => {
                 if (!c.collected) {
                     const bob = Math.sin(Date.now() / 350 + c.x) * 3;
                     const cx = c.x, cy = c.y + bob;
                     if (imgKosmita.complete) {
                         ctx.drawImage(imgKosmita, cx - 17, cy - 22, 45, 45);
-                    } else {
-                        ctx.fillStyle = '#9ca3af'; ctx.beginPath(); ctx.ellipse(cx, cy, 12, 16, 0, 0, Math.PI * 2); ctx.fill();
-                        ctx.fillStyle = '#1f2937';
-                        ctx.beginPath(); ctx.ellipse(cx - 5, cy - 2, 4, 6, -0.3, 0, Math.PI * 2); ctx.fill();
-                        ctx.beginPath(); ctx.ellipse(cx + 5, cy - 2, 4, 6, 0.3, 0, Math.PI * 2); ctx.fill();
                     }
                 }
             });
+
+            items.forEach(it => {
+                if (!it.collected) {
+                    const bob = Math.sin(Date.now() / 400 + it.x) * 5;
+                    let img = null;
+                    let iw = it.width || 40;
+                    let ih = it.height || 40;
+
+                    if (it.type === 'shield') img = imgTarczaZielona;
+                    else if (it.type === 'doubleShield') img = imgTarczaNiebieska;
+                    else if (it.type === 'hourglass') img = imgKlepsydra;
+                    else if (it.type === 'sober') { img = imgTrzezwosc; iw = 150; ih = 150; }
+                    else if (it.type === 'solar') { img = imgDzialoSolarne; iw = 240; ih = 240; }
+                    else if (it.type === 'mega_mech') { img = imgMegaMechIcon; iw = 100; ih = 100; }
+
+                    if (img && img.complete) {
+                        ctx.drawImage(img, it.x - iw / 2, it.y - ih / 2 + bob, iw, ih);
+
+                        if (it.type === 'mega_mech') {
+                            ctx.fillStyle = 'white';
+                            ctx.font = 'bold 20px "Courier New", Courier, monospace';
+                            ctx.textAlign = 'center';
+                            ctx.shadowColor = 'black';
+                            ctx.shadowBlur = 4;
+                            ctx.fillText('MEGA MECH', it.x, it.y - ih / 2 - 10 + bob);
+                            ctx.shadowBlur = 0;
+                        }
+                    }
+                }
+            });
+
 
             // Effects
             effects.forEach((eff) => {
@@ -2847,7 +3300,7 @@
                     }
                     ctx.restore();
                 } else if (eff.type === 'particle') {
-                    const alpha = Math.max(0, eff.timer / 20);
+                    const alpha = Math.max(0, 0.5 * eff.timer / 20); // Reduced alpha for particles
                     const radius = Math.max(0, 5 + (20 - eff.timer) * 0.5);
                     ctx.fillStyle = `rgba(255, 165, 0, ${alpha})`;
                     ctx.beginPath();
@@ -2872,16 +3325,36 @@
 
                 if (imgPiwo.complete) {
                     let currentImg = imgPiwo;
-                    if (e.type === 'karczmarz' || e.type === 'karczmarz_runner') {
+                    if (e.type === 'karczmarz' || e.type === 'karczmarz_runner' || e.type === 'karczmarz_turret') {
                         if (e.isCiosany && imgCiosany.complete) currentImg = imgCiosany; // Ciosany sprite
                         else currentImg = imgKarczmarz.complete ? imgKarczmarz : imgBoss; // Standard sprite
+                    } else if (e.type === 'ally_przyjaciel') {
+                        currentImg = imgPrzyjaciel;
                     } else if (level >= 2) {
                         currentImg = (e.hp === 1 && imgPiwoFaint.complete) ? imgPiwoFaint : imgPiwoStrzela;
                     } else {
                         currentImg = (e.hp === 1 && imgPiwoRed.complete) ? imgPiwoRed : imgPiwo;
                     }
                     if (currentImg.complete) {
-                        ctx.drawImage(currentImg, e.x, e.y + bob, e.width, e.height);
+                        const ew = e.width || 40;
+                        const eh = e.height || 50;
+
+                        if (e.type === 'karczmarz_turret' || (e.type === 'karczmarz_runner' && e.vx < 0)) {
+                            ctx.save();
+                            ctx.translate(e.x + ew, e.y + bob);
+                            ctx.scale(-1, 1);
+                            ctx.drawImage(currentImg, 0, 0, ew, eh);
+                            ctx.restore();
+                        } else {
+                            ctx.drawImage(currentImg, e.x, e.y + bob, ew, eh);
+                        }
+                    }
+
+                    // Render Speech Bubble for NPC
+                    if (e.type === 'ally_przyjaciel' && e.speechTimer > 0 && imgNieSam.complete) {
+                        const sw = 300;
+                        const sh = sw * (imgNieSam.height / imgNieSam.width);
+                        ctx.drawImage(imgNieSam, e.x + e.width / 2 - sw / 2, e.y - sh - 10, sw, sh);
                     }
 
                     // Render Speech Bubble for Runners
@@ -2934,6 +3407,21 @@
                         ctx.drawImage(imgPlomien, pb.x - 40, pb.y - 15, 40, 30);
                     }
                     ctx.restore();
+                } else if (pb.isSolar && imgSolarnePocisk.complete) {
+                    // Pocisk solarny - długa wiązka/promień
+                    ctx.save();
+                    const beamHeight = 120; // Jeszcze grubszy promień (z 80 na 120)
+                    const beamWidth = Math.abs(pb.x - pb.startX) + 20;
+                    if (pb.vx < 0) {
+                        ctx.translate(pb.startX, pb.y - beamHeight / 2);
+                        ctx.scale(-1, 1);
+                        ctx.drawImage(imgSolarnePocisk, 0, 0, beamWidth, beamHeight);
+                    } else {
+                        ctx.drawImage(imgSolarnePocisk, pb.startX, pb.y - beamHeight / 2, beamWidth, beamHeight);
+                    }
+                    ctx.restore();
+                } else if (pb.isMecha && imgMechShot.complete) {
+                    ctx.drawImage(imgMechShot, pb.x, pb.y - 25, 60, 50);
                 } else {
                     ctx.fillStyle = '#3b82f6';
                     ctx.beginPath(); ctx.arc(pb.x, pb.y, 10, 0, Math.PI * 2); ctx.fill();
@@ -2969,13 +3457,39 @@
 
                 // BOSS Body
                 ctx.save();
-                if (boss.flash > 0) ctx.filter = 'brightness(2) sepia(1) saturate(100) hue-rotate(-50deg)';
+                if (bossHealing.active && bossHealing.flashTimer < 5) {
+                    ctx.filter = 'brightness(3)';
+                } else if (boss.flash > 0) {
+                    ctx.filter = 'brightness(2) sepia(1) saturate(100) hue-rotate(-50deg)';
+                }
+
+                const drawScale = bossHealing.scale;
+                const dw = boss.width * drawScale;
+                const dh = boss.height * drawScale;
+                const dx = bx - (dw - boss.width) / 2;
+                const dy = by - (dh - boss.height) / 2;
+
                 if (imgBoss.complete) {
-                    ctx.drawImage(imgBoss, bx, by, boss.width, boss.height);
+                    ctx.drawImage(imgBoss, dx, dy, dw, dh);
                 } else {
-                    ctx.fillStyle = '#fbbf24'; ctx.fillRect(bx + 20, by + 40, 140, 160);
+                    ctx.fillStyle = '#fbbf24'; ctx.fillRect(dx + 20, dy + 40, dw - 40, dh - 40);
                 }
                 ctx.restore();
+
+                if (heartDrop.active && imgSerce.complete) {
+                    // Serce jest teraz bardzo DUŻE
+                    ctx.drawImage(imgSerce, heartDrop.x - 125, heartDrop.y - 125, 250, 250);
+                }
+
+                // Karczmarz Turret HP Bar & Extra enemies drawing logic adjustment
+                enemies.forEach(e => {
+                    if (e.type === 'karczmarz_turret') {
+                        const bw = 60; const bh = 6;
+                        ctx.fillStyle = '#333'; ctx.fillRect(e.x + (e.width - bw) / 2, e.y - 15, bw, bh);
+                        ctx.fillStyle = '#ef4444'; ctx.fillRect(e.x + (e.width - bw) / 2, e.y - 15, (e.hp / e.maxHp) * bw, bh);
+                        ctx.strokeStyle = 'white'; ctx.lineWidth = 1; ctx.strokeRect(e.x + (e.width - bw) / 2, e.y - 15, bw, bh);
+                    }
+                });
 
                 // HP Bar - moved below boss
                 const barWidth = 200;
@@ -2984,94 +3498,100 @@
                 const barY = by + boss.height + 10;
 
                 ctx.fillStyle = '#333'; ctx.fillRect(barX, barY, barWidth, barHeight);
-                ctx.fillStyle = '#ef4444'; ctx.fillRect(barX, barY, (boss.hp / boss.maxHp) * barWidth, barHeight);
+
+                // Warstwa 1: Czerwony pasek (0-200)
+                const hpRed = Math.min(boss.hp, 200);
+                ctx.fillStyle = '#ef4444';
+                ctx.fillRect(barX, barY, (hpRed / 200) * barWidth, barHeight);
+
+                // Warstwa 2: Żółty pasek (200-400)
+                if (boss.hp > 200) {
+                    const hpYellow = boss.hp - 200;
+                    ctx.fillStyle = '#facc15';
+                    ctx.fillRect(barX, barY, (hpYellow / 200) * barWidth, barHeight);
+                }
+
                 ctx.strokeStyle = 'white'; ctx.strokeRect(barX, barY, barWidth, barHeight);
 
                 // Text Indicator
                 ctx.fillStyle = 'white';
                 ctx.font = 'bold 14px Arial';
                 ctx.textAlign = 'center';
-                ctx.fillText(`HP: ${Math.round(boss.hp)} / ${boss.maxHp}`, barX + barWidth / 2, barY + 15);
+                ctx.fillText(`HP: ${Math.round(boss.hp)} / 400`, barX + barWidth / 2, barY + 15);
             }
+
+            // Info Solarne (na samej górze ekranu)
+            if (solarInfoTimer > 0) {
+                if (imgInfoSolarne.complete) {
+                    const iw = 400;
+                    const ih = iw * (imgInfoSolarne.height / imgInfoSolarne.width);
+                    ctx.drawImage(imgInfoSolarne, GAME_WIDTH / 2 - iw / 2, 10, iw, ih);
+                }
+                solarInfoTimer--;
+            }
+
+            // Pasek ładowania działa solarnego
+            if (player.hasSolarBonus) {
+                const now = Date.now();
+                const solarDelay = 2000;
+                const timePassed = now - (player.solarLastShootTime || 0);
+                const progress = Math.max(0, Math.min(timePassed / solarDelay, 1));
+
+                if (progress < 1) {
+                    const barW = 200;
+                    const barH = 10;
+                    const barX = GAME_WIDTH / 2 - barW / 2;
+                    const barY = 50; // Pod info_solarne
+
+                    // Tło paska
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                    ctx.fillRect(barX, barY, barW, barH);
+
+                    // Postęp (kolor jaskrawy niebieski)
+                    ctx.fillStyle = '#00bbff';
+                    ctx.fillRect(barX, barY, barW * progress, barH);
+
+                    // Obramowanie
+                    ctx.strokeStyle = 'white';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(barX, barY, barW, barH);
+
+                    // Napis
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText("ŁADOWANIE DZIAŁA...", GAME_WIDTH / 2, barY - 5);
+                }
+            }
+
+            // Błysk ekranu (miganie i przezroczystość)
+            if (screenFlashTimer > 0) {
+                const blink = Math.sin(Date.now() / 50) > 0 ? 0.6 : 0.3; // Miganie
+                ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(blink, screenFlashTimer / 60)})`;
+                ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+                screenFlashTimer--;
+            }
+
+            // Dekrementacja solarImmunityTimer
+            if (solarImmunityTimer > 0) solarImmunityTimer--;
 
             // Level Headers - Removed from draw loop to avoid duplicates
             // Headers are now managed by showGenericNotification fading element in DOM
 
-            items.forEach(it => {
-                if (!it.collected && it.type === 'shield') {
-                    if (imgTarczaZielona.complete) {
-                        ctx.drawImage(imgTarczaZielona, it.x - 20, it.y - 20, 60, 60);
-                    } else {
-                        ctx.fillStyle = '#10b981';
-                        const sz = 15;
-                        ctx.beginPath();
-                        ctx.moveTo(it.x, it.y - sz);
-                        ctx.lineTo(it.x + sz, it.y - sz / 2);
-                        ctx.lineTo(it.x + sz, it.y + sz / 2);
-                        ctx.quadraticCurveTo(it.x, it.y + sz * 1.5, it.x - sz, it.y + sz / 2);
-                        ctx.lineTo(it.x - sz, it.y - sz / 2);
-                        ctx.closePath();
-                        ctx.fill();
-                        ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
-                    }
-                } else if (!it.collected && it.type === 'doubleShield') {
-                    if (imgTarczaNiebieska.complete) {
-                        ctx.drawImage(imgTarczaNiebieska, it.x - 20, it.y - 20, 60, 60);
-                    } else {
-                        ctx.fillStyle = '#3b82f6';
-                        ctx.beginPath();
-                        ctx.moveTo(it.x, it.y - sz);
-                        ctx.lineTo(it.x + sz, it.y - sz / 2);
-                        ctx.lineTo(it.x + sz, it.y + sz / 2);
-                        ctx.quadraticCurveTo(it.x, it.y + sz * 1.5, it.x - sz, it.y + sz / 2);
-                        ctx.lineTo(it.x - sz, it.y - sz / 2);
-                        ctx.closePath();
-                        ctx.fill();
-                        ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
-                    }
-                } else if (!it.collected && it.type === 'doubleShield') {
-                    if (imgTarczaNiebieska.complete) {
-                        ctx.drawImage(imgTarczaNiebieska, it.x - 20, it.y - 20, 40, 40);
-                    } else {
-                        ctx.fillStyle = '#3b82f6';
-                        const sz = 15;
-                        ctx.beginPath();
-                        ctx.moveTo(it.x, it.y - sz);
-                        ctx.lineTo(it.x + sz, it.y - sz / 2);
-                        ctx.lineTo(it.x + sz, it.y + sz / 2);
-                        ctx.quadraticCurveTo(it.x, it.y + sz * 1.5, it.x - sz, it.y + sz / 2);
-                        ctx.lineTo(it.x - sz, it.y - sz / 2);
-                        ctx.closePath();
-                        ctx.fill();
-                        ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
-                    }
-                } else if (!it.collected && it.type === 'sober') {
-                    if (imgTrzezwosc.complete) {
-                        ctx.drawImage(imgTrzezwosc, it.x - 10, it.y - 60, 120, 120);
-                    } else {
-                        ctx.fillStyle = '#3b82f6';
-                        ctx.fillRect(it.x - 20, it.y - 20, 40, 40);
-                    }
-                } else if (!it.collected && it.type === 'hourglass') {
-                    if (imgKlepsydra.complete) {
-                        // Draw hourglass
-                        // Let's make it float/bob
-                        const bob = Math.sin(Date.now() / 300) * 5;
-                        ctx.drawImage(imgKlepsydra, it.x - 25, it.y - 35 + bob, 50, 70);
-                    } else {
-                        ctx.fillStyle = '#fcd34d'; // Gold
-                        ctx.fillRect(it.x - 20, it.y - 30, 40, 60);
-                    }
-                }
-            });
+            // Duplicate loop removed
 
 
 
             // Player / Abduction
             if (abductionPhase < 4) {
-                // Small downward offset when player is enlarged to keep feet on platform
-                const yOffset = (player.isSober && player.height > 70) ? (player.height - 70) * -0.2 : 0;
-                drawPlayer(player.x, player.y + yOffset, player.facingRight, false);
+                // Flash effect when invincible
+                if (player.invincibilityTimer > 0 && Math.floor(Date.now() / 100) % 2 === 0) {
+                    // Skin rendering
+                } else {
+                    drawPlayer(player.x, player.y, player.facingRight, false);
+                }
+
+                // MECH ARMOR UI (2 rows of 10) - REMOVED AS DUPLICATE
             }
 
             const ufoX = GAME_WIDTH / 2;
@@ -3225,29 +3745,18 @@
             }
 
             if (imgUfo.complete) {
-                // Centering ufo.png (assuming it should be around the same size as the old drawn UFO)
                 ctx.drawImage(imgUfo, -75, -25, 150, 75);
             } else {
                 ctx.fillStyle = "#4b5563"; ctx.beginPath(); ctx.ellipse(0, 10, 70, 22, 0, 0, Math.PI * 2); ctx.fill();
                 ctx.fillStyle = "#6b7280"; ctx.beginPath(); ctx.ellipse(0, 0, 50, 30, 0, 0, Math.PI * 2); ctx.fill();
                 ctx.fillStyle = "#60a5fa"; ctx.globalAlpha = 0.6; ctx.beginPath(); ctx.ellipse(0, -15, 22, 20, 0, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
             }
-
-            if (level === 7 && abductionPhase >= 4) {
-                // Aliens removed as requested
-            }
-
             ctx.restore();
         }
 
-        function spawnHourglass() {
-            // Random location: X [50, 750], Y [150, 500]
-            const x = 50 + Math.random() * (GAME_WIDTH - 100);
-            const y = 150 + Math.random() * (GAME_HEIGHT - 250);
-            items.push({ x: x, y: y, type: 'hourglass', collected: false });
-        }
-
         setupControls();
+        const btnPause = document.getElementById('btn-pause');
+        if (btnPause) btnPause.onclick = togglePause;
         generateLevel(1);
 
         // Initial draw or loading state

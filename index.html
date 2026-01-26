@@ -2012,6 +2012,7 @@
                 for (let j = enemies.length - 1; j >= 0; j--) {
                     const e = enemies[j];
                     if (pb.x < e.x + e.width && pb.x + 5 > e.x && pb.y < e.y + e.height && pb.y + 5 > e.y) {
+                        if (e.type === 'ally_przyjaciel') continue;
 
                         if (e.type === 'karczmarz') {
                             // Valid Hit Logic

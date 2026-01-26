@@ -735,6 +735,7 @@
         const imgPancerzSolarny = loadImage('pancerz_solarny', 'pancerz_solarny.webp');
         const imgSolarnePocisk = loadImage('solarne_pocisk', 'solarne_pocisk.png');
         const imgPrzyciskSolarny = loadImage('przycisk_solarny', 'przycisk_solarny.png');
+        const imgLatanie = loadImage('latanie', 'latanie.png');
 
         checkAssetsLoaded(); // Initial check
         const sfxTrzezwosc = new Audio('dzwiek_trzezwosci.opus'); sfxTrzezwosc.volume = 1;
@@ -2008,6 +2009,7 @@
                         if (e.hp <= 0) {
                             effects.push({ x: e.x + e.width / 2, y: e.y + e.height / 2, type: 'defeat', timer: 90, maxTimer: 90 });
                             enemies.splice(idxE, 1);
+                            if (boss) boss.karczmarzDefeated = true; // Trigger Ally transformation
                         }
                     }
                 });
@@ -2188,6 +2190,9 @@
                 const e = enemies[i];
                 if (player.x < e.x + e.width && player.x + player.width > e.x &&
                     player.y < e.y + e.height && player.y + player.height > e.y) {
+                    // Ignore Ally collision (Friednly Fire OFF)
+                    if (e.type === 'ally_przyjaciel') continue;
+
                     // ZMIANA: Nieśmiertelność działa też na kolizje z wrogami (w tym karczmarzem)
                     if (player.invincibilityTimer > 0 || timeFreezeActive) {
                         // Gracz jest nieśmiertelny - ignoruj kolizję
@@ -2232,30 +2237,32 @@
                     // ALLY AI
                     if (e.speechTimer > 0) e.speechTimer--;
 
-                    // Simple movement logic: walk in from left to slightly left of center
-                    const centerX = GAME_WIDTH / 2 - e.width / 2 - 50;
-                    if (e.x < centerX) e.x += 2.5; // Slightly faster entrance
-                    else {
-                        e.x = centerX;
-                        e.vx = 0;
-                        e.jumpTimer--;
-                        if (e.jumpTimer <= 0 && e.onGround) {
-                            e.vy = -18; // High jump to hit boss (was -12)
-                            e.onGround = false;
-                            e.jumpTimer = 180 + Math.random() * 200;
+                    if (!e.isFlying) {
+                        // Simple movement logic: walk in from left to slightly left of center
+                        const centerX = GAME_WIDTH / 2 - e.width / 2 - 50;
+                        if (e.x < centerX) e.x += 2.5; // Slightly faster entrance
+                        else {
+                            e.x = centerX;
+                            e.vx = 0;
+                            e.jumpTimer--;
+                            if (e.jumpTimer <= 0 && e.onGround) {
+                                e.vy = -14.4; // High jump to hit boss (was -18, reduced by 20%)
+                                e.onGround = false;
+                                e.jumpTimer = 180 + Math.random() * 200;
+                            }
                         }
-                    }
 
-                    e.vy += 0.5; // Gravity
-                    e.y += e.vy;
-                    e.onGround = false;
-                    platforms.forEach(p => {
-                        if (e.x + e.width > p.x && e.x < p.x + p.width && e.y + e.height > p.y && e.y + e.height < p.y + 20 && e.vy >= 0) {
-                            e.y = p.y - e.height;
-                            e.vy = 0;
-                            e.onGround = true;
-                        }
-                    });
+                        e.vy += 0.5; // Gravity
+                        e.y += e.vy;
+                        e.onGround = false;
+                        platforms.forEach(p => {
+                            if (e.x + e.width > p.x && e.x < p.x + p.width && e.y + e.height > p.y && e.y + e.height < p.y + 20 && e.vy >= 0) {
+                                e.y = p.y - e.height;
+                                e.vy = 0;
+                                e.onGround = true;
+                            }
+                        });
+                    }
 
                     // Ally Shooting at Boss or Karczmarz
                     e.shootTimer--;
@@ -2272,6 +2279,31 @@
                             playSFX(sfxShot);
                         }
                     }
+                }
+
+                // Check for Boss Death Transformation OR Boss HP <= 386 (AND not healing)
+                if (boss && boss.hp <= 386 && !bossHealing.active && e.type === 'ally_przyjaciel') {
+                    if (!e.isFlying) {
+                        e.isFlying = true;
+                        // Transform to flying mode (Fix Aspect Ratio for 819x1528) + 40% larger total
+                        e.width = 92;
+                        e.height = 172;
+                    }
+                    // Positioning: Hover to hit the bottom of the Boss
+                    // Boss bottom is boss.y + boss.height.
+                    // User requested: Higher by 50px (so -50 from +110 = +60).
+                    // Update: Shift left by another 20px (total -270)
+                    const targetY = boss.y + 60;
+                    const targetX = boss.x - 270; // Hover more to the left (was -250)
+
+                    // Fly smoothly to target
+                    const dx = targetX - e.x;
+                    const dy = targetY - e.y;
+
+                    e.x += dx * 0.05;
+                    e.y += dy * 0.05;
+                    e.vx = 0;
+                    e.vy = 0; // Disable gravity
                 }
             }
 
@@ -3329,7 +3361,7 @@
                         if (e.isCiosany && imgCiosany.complete) currentImg = imgCiosany; // Ciosany sprite
                         else currentImg = imgKarczmarz.complete ? imgKarczmarz : imgBoss; // Standard sprite
                     } else if (e.type === 'ally_przyjaciel') {
-                        currentImg = imgPrzyjaciel;
+                        currentImg = (e.isFlying && imgLatanie.complete) ? imgLatanie : imgPrzyjaciel;
                     } else if (level >= 2) {
                         currentImg = (e.hp === 1 && imgPiwoFaint.complete) ? imgPiwoFaint : imgPiwoStrzela;
                     } else {

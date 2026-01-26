@@ -240,17 +240,16 @@
             color: transparent;
             /* Ukrycie tekstu tekstowego */
             border: none;
-            padding: 25px 60px;
+            padding: 0;
             font-size: 0;
             /* Rozmiar czcionki 0, aby tekst nie zajmował miejsca */
             cursor: pointer;
             margin-top: 150px;
             /* Obniżenie przycisku */
             transition: transform 0.2s;
-            min-width: 250px;
-            /* Dopasowanie szerokości do grafiki ramka.webp */
-            min-height: 80px;
-            /* Dopasowanie wysokości */
+            width: 300px;
+            aspect-ratio: 847 / 400;
+            /* Dopasowanie proporcji do grafiki ramka.webp */
         }
 
         button.start-btn:active {
@@ -307,9 +306,9 @@
 
         #btn-pause {
             position: fixed;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
+            left: 50%;
+            /* Top is set by JS */
+            transform: translate(-50%, -50%);
             width: 90px;
             height: auto;
             cursor: pointer;
@@ -318,7 +317,7 @@
         }
 
         #btn-pause:hover {
-            transform: translateY(-50%) scale(1.1);
+            transform: translate(-50%, -50%) scale(1.1);
         }
 
         #pause-overlay {
@@ -332,9 +331,12 @@
             justify-content: center;
             align-items: center;
             z-index: 900;
-            color: white;
-            font-size: 3rem;
-            text-shadow: 0 0 10px var(--accent);
+        }
+
+        #pause-overlay img {
+            max-width: 60%;
+            max-height: 80%;
+            filter: drop-shadow(0 0 10px var(--accent));
         }
     </style>
 </head>
@@ -343,7 +345,7 @@
 
     <img id="btn-pause" src="pauza.png" alt="Pauza" title="Pauza (P)">
     <div id="game-container">
-        <div id="pause-overlay">PAUZA</div>
+        <div id="pause-overlay"><img src="pauza.png" alt="PAUZA"></div>
 
         <canvas id="gameCanvas" width="800" height="600"></canvas>
 
@@ -1371,7 +1373,28 @@
             document.getElementById('gameover').classList.add('hidden');
             document.getElementById('level-complete').classList.add('hidden');
             document.getElementById('final-screen').classList.add('hidden');
+            repositionPauseButton(); // Ensure correct position on start
         }
+
+        function repositionPauseButton() {
+            const btn = document.getElementById('btn-pause');
+            const container = document.getElementById('game-container');
+            if (!btn || !container) return;
+
+            const rect = container.getBoundingClientRect();
+            // Calculate center of the space below the canvas
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const centerY = rect.bottom + (spaceBelow / 2);
+
+            // If space is too small, maybe clamp it? But user asked for center.
+            // Let's just set it.
+            btn.style.top = `${centerY}px`;
+        }
+
+        window.addEventListener('resize', repositionPauseButton);
+        window.addEventListener('load', repositionPauseButton);
+        // Call periodically in case of layout shifts
+        setInterval(repositionPauseButton, 500);
 
         function showShootNotification() {
             showGenericNotification('<img src="strzelaj.webp" style="max-width: 100%;">', 'transparent');
@@ -1485,6 +1508,12 @@
                     player.width = 70;
                     player.height = 70;
                     player.y += (oldH - 70); // Adjust feet to stay on ground
+
+                    // Przywróć przycisk solarny jeśli gracz ma bonus
+                    if (player.hasSolarBonus) {
+                        const btnSolar = document.getElementById('btn-solar');
+                        if (btnSolar) btnSolar.classList.remove('hidden');
+                    }
                 }
                 return;
             }
@@ -2181,6 +2210,10 @@
                             player.y -= (player.height - oldH); // Keep feet on ground
                             sfxMech.currentTime = 0;
                             sfxMech.play().catch(() => { });
+
+                            // Ukryj przycisk solarny w mechu
+                            const btnSolar = document.getElementById('btn-solar');
+                            if (btnSolar) btnSolar.classList.add('hidden');
                         }
                     }
                 }

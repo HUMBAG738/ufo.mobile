@@ -833,39 +833,80 @@
 
         // Input Utilities
         function setupControls() {
-            const bind = (id, key) => {
-                const el = document.getElementById(id);
-                if (!el) return;
-
-                el.addEventListener('pointerdown', (e) => {
-                    e.target.setPointerCapture(e.pointerId);
-                    keys[key] = true;
-                    if (key === 'jump') playSFX(sfxJump);
-                });
-
-                const release = (e) => {
-                    keys[key] = false;
-                };
-
-                el.addEventListener('pointerup', release);
-                el.addEventListener('pointercancel', release);
-                // pointerleave usunięty, aby ruch nie przerywał się przy lekkim zsunięciu palca
+            // Mapping IDs to keys
+            const btnMap = {
+                'btn-left': 'left',
+                'btn-right': 'right',
+                'btn-up': 'jump', // Backup
+                'btn-down': 'down',
+                'btn-jump': 'jump',
+                'btn-shoot': 'shoot',
+                'btn-solar': 'solarShoot',
+                'btn-jump-mobile': 'jump'
             };
 
-            bind('btn-left', 'left');
-            bind('btn-right', 'right');
-            bind('btn-jump', 'jump');
-            bind('btn-shoot', 'shoot');
-            bind('btn-solar', 'solarShoot');
-            bind('btn-down', 'down');
+            const controlsContainer = document.querySelector('.controls');
 
+            // Funkcja aktualizująca stan klawiszy na podstawie aktywnych dotyków
+            const updateTouchKeys = (e) => {
+                const activeKeys = new Set();
+
+                // Iterate over ALL active touches
+                for (let i = 0; i < e.touches.length; i++) {
+                    const touch = e.touches[i];
+                    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+
+                    if (element) {
+                        // Check the element or its parents for the button class
+                        const btn = element.closest('.control-btn');
+                        if (btn && btn.id && btnMap[btn.id]) {
+                            activeKeys.add(btnMap[btn.id]);
+                        }
+                    }
+                }
+
+                // Apply to global keys object (Touch logic overwrites)
+                Object.values(btnMap).forEach(k => {
+                    // Simple OR logic with existing keyboard state would be better if we tracked them separately,
+                    // but here we just blindly update based on touch.
+                    // Assuming touch usage implies touch focus.
+                    keys[k] = activeKeys.has(k);
+                });
+            };
+
+            // Touch Events
+            if (controlsContainer) {
+                controlsContainer.addEventListener('touchstart', (e) => {
+                    e.preventDefault(); // Prevent scroll/zoom
+                    updateTouchKeys(e);
+                    // Fix for 'jump' sound on first press
+                    if (keys.jump) {
+                        // Sound handling logic is usually in update or specific trigger
+                    }
+                }, { passive: false });
+
+                controlsContainer.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    updateTouchKeys(e);
+                }, { passive: false });
+
+                controlsContainer.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    updateTouchKeys(e);
+                }, { passive: false });
+
+                controlsContainer.addEventListener('touchcancel', (e) => {
+                    e.preventDefault();
+                    updateTouchKeys(e);
+                }, { passive: false });
+            }
 
             window.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
                 if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
                 if (e.key === 'ArrowDown' || e.key === 's') keys.down = true;
                 if (e.key === 'x' || e.key === 'X') keys.shoot = true;
-                if (e.key === 'c' || e.key === 'C' || e.key === 'z' || e.key === 'Z') keys.solarShoot = true; // Klawisz C lub Z dla ataku solarnego
+                if (e.key === 'c' || e.key === 'C' || e.key === 'z' || e.key === 'Z') keys.solarShoot = true;
                 if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'Space' || e.key === ' ') {
                     keys.jump = true;
                 }
@@ -2687,6 +2728,7 @@
                     bullets.splice(i, 1);
                 }
             }
+            player.prevJumpState = keys.jump;
         }
 
         function startUfoAbduction() {

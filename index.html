@@ -538,6 +538,14 @@
         const sfxKlepsydra = new Audio('klepsydra.mp3');
         sfxKlepsydra.volume = 1;
 
+        const bgMusicKoncowka = new Audio('koncowka.mp3');
+        bgMusicKoncowka.loop = false; // Usually ending music is played once or looped? Assuming loop for now or long enough
+        bgMusicKoncowka.volume = 1;
+
+        const bgMusicZakonczenie = new Audio('zakonczenie.mp3');
+        bgMusicZakonczenie.loop = true;
+        bgMusicZakonczenie.volume = 1;
+
         let musicStarted = false;
 
         function startMusic() {
@@ -650,6 +658,7 @@
         }
 
         // Preload Images
+
         const imgTlo = [];
         for (let i = 1; i <= 4; i++) imgTlo.push(loadImage(`tlo_${i}`, `tlo_${i}.webp`));
         imgTlo.push(loadImage('tlo_5', 'tlo_5.png')); // Level 5
@@ -738,6 +747,7 @@
         const imgSolarnePocisk = loadImage('solarne_pocisk', 'solarne_pocisk.png');
         const imgPrzyciskSolarny = loadImage('przycisk_solarny', 'przycisk_solarny.png');
         const imgLatanie = loadImage('latanie', 'latanie.png');
+        const imgLezy = loadImage('lezy', 'lezy.png');
 
         checkAssetsLoaded(); // Initial check
         const sfxTrzezwosc = new Audio('dzwiek_trzezwosci.opus'); sfxTrzezwosc.volume = 1;
@@ -1141,7 +1151,7 @@
                             y: GAME_HEIGHT - 100, // Adjusted Y for smaller height
                             width: 60, // Smaller size (Short)
                             height: 70,
-                            hp: 15, // Mini-boss HP
+                            hp: 10, // Mini-boss HP (Reduced from 15)
                             type: 'karczmarz',
                             vx: -2,
                             shootTimer: 240, // Slower (approx 4s)
@@ -1599,6 +1609,68 @@
 
         let introTimer = 0;
         const INTRO_DURATION = 10000; // 10s
+
+        function startUfoAbduction() {
+            gameState = 'celebrating';
+            showCelebration = true;
+            document.body.classList.remove('playing');
+
+            // Cleanup entities to remove frozen bullets/enemies
+            bullets = [];
+            enemies = [];
+            items = [];
+
+            // Player Lying Down Logic
+            player.isMegaMech = false;
+            player.isSober = false;
+            player.hasSolarBonus = false;
+            player.isLyingDown = true;
+            player.vx = 0;
+            player.vy = 0;
+
+            // Simple Ending Flags
+            bossEndingSimple = true;
+            lezyAnimX = GAME_WIDTH / 2 - 75; // Center 150px width
+            lezyAnimY = GAME_HEIGHT - 80; // Ground level
+
+
+            if (level === 7) {
+                // Stop all music
+                [bgMusic, bgMusicBoss, bgMusicKarczma, bgMusicEnding].forEach(m => {
+                    if (m) {
+                        m.pause();
+                        m.currentTime = 0;
+                    }
+                });
+                // Play Koncowka
+                bgMusicKoncowka.currentTime = 0;
+                bgMusicKoncowka.volume = 1.0;
+                bgMusicKoncowka.play().catch(e => console.log(e));
+            } else {
+                playSFX(sfxUfo);
+                bgMusic.volume = 0.2;
+            }
+
+            // Extended Sequence Timings (Delay added +4s to wait)
+            setTimeout(() => abductionPhase = 1, 500); // Start
+            setTimeout(() => abductionPhase = 2, 6000); // Wait... (was 2000)
+            setTimeout(() => abductionPhase = 3, 8000); // Beam appears (was 4000)
+            setTimeout(() => {
+                abductionPhase = 4; // Lift starts
+                playerAbductX = player.x;
+                playerAbductY = player.y;
+                playerAbductStartTime = Date.now();
+                player.isLyingDown = false; // Stand up for lifting
+            }, 10000); // Lift at 10s (was 6s)
+            setTimeout(() => {
+                abductionPhase = 5;
+                if (level === 7) {
+                    startUpliftLevel();
+                } else {
+                    document.getElementById('level-complete').classList.remove('hidden');
+                }
+            }, 13000); // End at 13s (was 9s)
+        }
 
         function update() {
             if (gameState !== 'playing' && gameState !== 'celebrating') return;
@@ -2732,31 +2804,6 @@
             player.prevJumpState = keys.jump;
         }
 
-        function startUfoAbduction() {
-            gameState = 'celebrating';
-            showCelebration = true;
-            document.body.classList.remove('playing');
-            playSFX(sfxUfo);
-            bgMusic.volume = 0.2;
-
-            setTimeout(() => abductionPhase = 1, 500);
-            setTimeout(() => abductionPhase = 2, 2000);
-            setTimeout(() => abductionPhase = 3, 3000);
-            setTimeout(() => {
-                abductionPhase = 4;
-                playerAbductX = player.x;
-                playerAbductY = player.y;
-                playerAbductStartTime = Date.now();
-            }, 4000);
-            setTimeout(() => {
-                abductionPhase = 5;
-                if (level === 7) {
-                    startUpliftLevel();
-                } else {
-                    document.getElementById('level-complete').classList.remove('hidden');
-                }
-            }, 6500);
-        }
 
         let upliftCameraX = 0;
         let upliftFade = 0;
@@ -2958,6 +3005,11 @@
                             finalOpacity = 1;
                             finalCutsceneStep = 11;
                             finalTimer = 0;
+                            // Switch to Zakonczenie Music
+                            bgMusicEnding.pause();
+                            bgMusicEnding.currentTime = 0;
+                            bgMusicZakonczenie.currentTime = 0;
+                            bgMusicZakonczenie.play().catch(e => console.log(e));
                         }
                     } else if (finalCutsceneStep === 11) { // Show "dziekuje.jpg" and end
                         if (!buttonsAdded) {
@@ -3127,7 +3179,11 @@
                 btnAgain.src = 'grajponownie.webp';
                 btnAgain.style.width = '100px';
                 btnAgain.style.cursor = 'pointer';
-                btnAgain.onclick = () => location.reload();
+                btnAgain.onclick = () => {
+                    bgMusicZakonczenie.pause();
+                    bgMusicZakonczenie.currentTime = 0;
+                    location.reload();
+                };
 
                 const btnExit = document.createElement('img');
                 btnExit.src = 'wyjscie.webp';
@@ -3181,6 +3237,8 @@
                 return;
             }
 
+
+
             let scale = 1; // Base scale for player model
             if (player.isSober || player.hasSolarBonus) {
                 scale = 2.14; // ~150px for Red Armor / Solar Armor (was 2.5)
@@ -3227,6 +3285,21 @@
                     c.drawImage(currentImg, px, py, pw, ph);
                 }
                 c.restore();
+                return;
+            }
+
+            // Lying Down Sprite (Boss Ending)
+            if (player.isLyingDown && imgLezy.complete) {
+                // 877x457 -> ~1.9 ratio. Width approx 130px?
+                const lRatio = imgLezy.height / imgLezy.width;
+                const lWidth = 130;
+                const lHeight = lWidth * lRatio;
+                // Adjust Y to align with ground (player.y is top-left, we want bottom to match)
+                // Assuming py is top-left of standard 70x70 box. 
+                // We want bottom of ly (py + 70) to match.
+                // so drawY = (py + 70) - lHeight.
+                const drawY = (py + 70) - lHeight;
+                c.drawImage(imgLezy, px - 30, drawY, lWidth, lHeight); // Offset X slightly to center on previous position
                 return;
             }
 
@@ -3307,7 +3380,42 @@
             requestAnimationFrame(draw);
         }
 
+        let bossEndingSimple = false;
+        let lezyAnimX = 0;
+        let lezyAnimY = 0;
+
+        function drawBossEnding() {
+            // Black Background
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+            if (!imgLezy.complete) return;
+
+            // Lezy Dimensions
+            const lWidth = 150;
+            const lRatio = imgLezy.height / imgLezy.width;
+            const lHeight = lWidth * lRatio;
+
+            // Lift Animation (Phase 4)
+            if (abductionPhase >= 4) {
+                lezyAnimY -= 2;
+            }
+
+            // Draw Lezy First
+            if (lezyAnimY > -100) {
+                ctx.drawImage(imgLezy, lezyAnimX, lezyAnimY, lWidth, lHeight);
+            }
+
+            // Draw UFO (and Beam) on Top - Centered
+            drawUFO(GAME_WIDTH / 2);
+        }
+
         function render() {
+            if (bossEndingSimple) {
+                drawBossEnding();
+                return;
+            }
+
             ctx.save(); // Save context for shake effect i scale
             // ctx.scale(0.5, 0.5); // REMOVED: Native 800x600 resolution
 
@@ -3713,7 +3821,7 @@
             if (abductionPhase >= 4) {
                 const pw = 45 * (player.isSober ? 1.5 : 1);
                 const ufoBottomY = 80; // Wlatuje do środka UFO (ufoY to 80)
-                const liftDuration = 2500;
+                const liftDuration = level === 7 ? 8000 : 2500; // Level 7: Very slow (8s)
                 const elapsed = Date.now() - playerAbductStartTime;
                 const progress = Math.min(elapsed / liftDuration, 1);
 
@@ -3722,7 +3830,17 @@
                 const liftY = playerAbductY - (playerAbductY - ufoBottomY) * progress;
 
                 if (progress < 1.0) {
-                    drawPlayer(currentX, liftY, true, true);
+                    if (level === 7) {
+                        // Level 7: Stop before UFO
+                        // "kawałek przed nią znika"
+                        // UFO is at ufoY=80. ufoBottomY=80.
+                        // We want to disappear maybe at Y=150?
+                        if (liftY > 150) {
+                            drawPlayer(currentX, liftY, true, true);
+                        }
+                    } else {
+                        drawPlayer(currentX, liftY, true, true);
+                    }
                 }
             }
 
@@ -3847,14 +3965,47 @@
             ctx.translate(ufoX, ufoY);
 
             if (abductionPhase >= 3) {
-                ctx.fillStyle = scheme.accent; ctx.globalAlpha = 0.2 + Math.sin(Date.now() / 200) * 0.1;
-                ctx.beginPath();
-                ctx.moveTo(-40, 40);
-                ctx.lineTo(40, 40);
-                ctx.lineTo(120, 500);
-                ctx.lineTo(-120, 500);
-                ctx.fill();
-                ctx.globalAlpha = 1;
+                if (level === 7) {
+                    // Custom Wide Beam for Boss Level
+                    ctx.fillStyle = scheme.accent; // Or maybe white/cyan?
+                    // "promień rozszerza się od statku w dół na szerokość X canvas"
+                    // Animation: Expand width over time
+                    // Start of phase 3: width small -> expands to full GAME_WIDTH
+                    // We don't have exact timer variable here easily, but phase 3 starts at 4000ms and phase 4 at 8000ms.
+                    // We can use (Date.now() - abductionPhase3Start) if we tracked it, OR just use generic sin/time
+                    // Let's assume full width immediately or pulsing? 
+                    // "animacja promienia jest nieco wydłużona niż normalnie" -> probably refers to timing.
+                    // "promień rozszerza się od statku" -> Beam starts at UFO (width ~100) and expands at bottom to fill screen?
+                    // Let's make it a trapezoid filling the whole screen bottom
+
+                    ctx.globalAlpha = 0.3 + Math.sin(Date.now() / 300) * 0.1;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 40); // Center of UFO (since translated to ufoX which is center)
+                    // Top width: small (e.g. 20px left/right)
+                    ctx.lineTo(40, 40);
+                    // Bottom width: Full screen. 
+                    // ufoX is at GAME_WIDTH/2 (400). Left screen edge is -400 relative. Right is +400.
+                    ctx.lineTo(450, 520); // Wide bottom right
+                    ctx.lineTo(-450, 520); // Wide bottom left
+                    ctx.moveTo(-40, 40); // Close shape properly? 
+                    // Easier: moveTo(-40, 40) -> lineTo(40,40) -> lineTo(450,520) -> lineTo(-450,520) -> close
+                    ctx.moveTo(-40, 40);
+                    ctx.lineTo(40, 40);
+                    ctx.lineTo(450, 550);
+                    ctx.lineTo(-450, 550);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+
+                } else {
+                    ctx.fillStyle = scheme.accent; ctx.globalAlpha = 0.2 + Math.sin(Date.now() / 200) * 0.1;
+                    ctx.beginPath();
+                    ctx.moveTo(-40, 40);
+                    ctx.lineTo(40, 40);
+                    ctx.lineTo(120, 500);
+                    ctx.lineTo(-120, 500);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
             }
 
             if (imgUfo.complete) {
@@ -3865,6 +4016,45 @@
                 ctx.fillStyle = "#60a5fa"; ctx.globalAlpha = 0.6; ctx.beginPath(); ctx.ellipse(0, -15, 22, 20, 0, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
             }
             ctx.restore();
+
+            // Screen Darkening for Level 7 Ending
+            if (level === 7 && showCelebration) {
+                // Determine darkening progress based on abductionPhase or time
+                // We know phases: 1 (start), 2(2s), 3(4s), 4(8s), 5(16s)
+                let darkness = 0;
+                // Currently we don't track exact "time since startUfoAbduction" easily in drawUFO.
+                // But we can approximate or add a global timer. 
+                // Or use `playerAbductStartTime` for phase 4.
+
+                // Let's rely on manual calculation if possible or just use a new timer property if needed.
+                // Assuming we can't easily add a new timer var without risking state issues, let's look at `player.isLyingDown`
+
+                // Hack: We can assume darkness increases continuously.
+                // Let's add a global var `endingDarkness` in update loop if possible?
+                // Or just use a static increase in the draw loop if it is called consistently.
+
+                // Better: Use `abductionPhase` to step it up.
+                if (abductionPhase >= 1) darkness = 0.3; // Was 0.1
+                if (abductionPhase >= 2) darkness = 0.5; // Was 0.2
+                if (abductionPhase >= 3) darkness = 0.7; // Was 0.35
+                if (abductionPhase >= 4) {
+                    // Phase 4 lasts 3 seconds (from 6s to 9s).
+                    const elapsed = Date.now() - playerAbductStartTime;
+                    const progress = Math.min(elapsed / 3000, 1);
+                    darkness = 0.7 + (0.3 * progress); // Fade to full black (1.0)
+
+                    // Music Fading during this phase
+                    if (progress > 0.5) {
+                        const fadeVol = 1.0 - ((progress - 0.5) * 2);
+                        bgMusicKoncowka.volume = Math.max(0, fadeVol);
+                    }
+                }
+
+                if (darkness > 0) {
+                    ctx.fillStyle = `rgba(0,0,0,${darkness})`;
+                    ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+                }
+            }
         }
 
         setupControls();

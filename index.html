@@ -6,6 +6,8 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=no, viewport-fit=cover">
     <meta property="og:title" content="UFO MOBILE" />
+    <meta name="author" content="Piko102">
+    <meta name="description" content="Antyalkoholowa gra promująca trzeźwy sposób życia. Posłuchaj rad kosmitów.">
     <meta property="og:description"
         content="Antyalkoholowa gra promująca trzeźwy sposób życia. Posłuchaj rad kosmitów." />
     <meta property="og:image" content="https://humbag738.github.io/ufo.mobile/fb.jpg" />
@@ -343,9 +345,9 @@
 
 <body>
 
-    <img id="btn-pause" src="pauza.png" alt="Pauza" title="Pauza (P)">
+    <img id="btn-pause" src="pauza.webp" alt="Pauza" title="Pauza (P)">
     <div id="game-container">
-        <div id="pause-overlay"><img src="pauza.png" alt="PAUZA"></div>
+        <div id="pause-overlay"><img src="pauza.webp" alt="PAUZA"></div>
 
         <canvas id="gameCanvas" width="800" height="600"></canvas>
 
@@ -362,7 +364,7 @@
             </div>
             <div class="stats-group">
                 <div class="stat-item">
-                    <img src="strzalka.png" class="stat-icon" alt="🚀">
+                    <img src="strzalka.webp" class="stat-icon" alt="🚀">
                     <span id="level-ui">1</span>
                 </div>
             </div>
@@ -418,33 +420,33 @@
             <div class="control-btn" id="btn-jump-mobile" style="width: 50px; height: 50px; visibility: hidden;"></div>
             <div class="d-pad-row">
                 <div class="control-btn" id="btn-left">
-                    <img src="left.png" class="control-icon">
+                    <img src="left.webp" class="control-icon">
                 </div>
                 <div class="control-btn" id="btn-down">
-                    <img src="down.png" class="control-icon">
+                    <img src="down.webp" class="control-icon">
                 </div>
                 <div class="control-btn" id="btn-right">
-                    <img src="right.png" class="control-icon">
+                    <img src="right.webp" class="control-icon">
                 </div>
             </div>
         </div>
         <div class="action-btns">
-            <button id="btn-solar" class="control-btn hidden"><img src="przycisk_solarny.png" class="control-icon"
+            <button id="btn-solar" class="control-btn hidden"><img src="przycisk_solarny.webp" class="control-icon"
                     alt="Solar"></button>
             <div class="control-btn" id="btn-shoot">
-                <img src="fire.png" class="control-icon">
+                <img src="fire.webp" class="control-icon">
             </div>
             <div class="control-btn" id="btn-jump">
-                <img src="up.png" class="control-icon">
+                <img src="up.webp" class="control-icon">
             </div>
         </div>
     </div>
 
     <div id="controls-settings" class="controls-settings">
-        <img src="sterowanie.png" alt="STEROWANIE" style="height: 70px; margin-bottom: 5px;">
+        <img src="sterowanie.webp" alt="STEROWANIE" style="height: 70px; margin-bottom: 5px;">
         <div class="layout-options">
-            <img src="domyslne.png" class="layout-btn-img active" onclick="setControlLayout('default')" alt="Domyślne">
-            <img src="strzalki.png" class="layout-btn-img" onclick="setControlLayout('keyboard')" alt="Strzałki">
+            <img src="domyslne.webp" class="layout-btn-img active" onclick="setControlLayout('default')" alt="Domyślne">
+            <img src="strzalki.webp" class="layout-btn-img" onclick="setControlLayout('keyboard')" alt="Strzałki">
         </div>
     </div>
 
@@ -481,9 +483,9 @@
         preloadSFX('shot_enemy', 'shot_enemy.opus', 5);
         preloadSFX('przycisk', 'przycisk.opus', 3);
         preloadSFX('spodek', 'spodek.opus', 1);
-        preloadSFX('cios', 'cios.mp3', 5);
-        preloadSFX('solarny_strzal', 'solarny_strzal.mp3', 5);
-        preloadSFX('game_over', 'game_over.mp3', 1);
+        preloadSFX('cios', 'cios.opus', 5);
+        preloadSFX('solarny_strzal', 'solarny_strzal.opus', 5);
+        preloadSFX('game_over', 'game_over.opus', 1);
 
         function playSFX(name) {
             if (!sfxPools[name]) return;
@@ -531,18 +533,18 @@
         bgMusicEnding.loop = true;
         bgMusicEnding.volume = 1;
 
-        const bgMusicKarczma = new Audio('karczmarz_audio.mp3');
+        const bgMusicKarczma = new Audio('karczmarz_audio.opus');
         bgMusicKarczma.loop = true;
         bgMusicKarczma.volume = 0.8;
 
-        const sfxKlepsydra = new Audio('klepsydra.mp3');
+        const sfxKlepsydra = new Audio('klepsydra.opus');
         sfxKlepsydra.volume = 1;
 
-        const bgMusicKoncowka = new Audio('koncowka.mp3');
+        const bgMusicKoncowka = new Audio('koncowka.opus');
         bgMusicKoncowka.loop = false; // Usually ending music is played once or looped? Assuming loop for now or long enough
         bgMusicKoncowka.volume = 1;
 
-        const bgMusicZakonczenie = new Audio('zakonczenie.mp3');
+        const bgMusicZakonczenie = new Audio('zakonczenie.opus');
         bgMusicZakonczenie.loop = true;
         bgMusicZakonczenie.volume = 1;
 
@@ -661,14 +663,14 @@
 
         const imgTlo = [];
         for (let i = 1; i <= 4; i++) imgTlo.push(loadImage(`tlo_${i}`, `tlo_${i}.webp`));
-        imgTlo.push(loadImage('tlo_5', 'tlo_5.png')); // Level 5
-        imgTlo.push(loadImage('tlo_6', 'tlo_6.png')); // Level 6
+        imgTlo.push(loadImage('tlo_5', 'tlo_5.webp')); // Level 5
+        imgTlo.push(loadImage('tlo_6', 'tlo_6.webp')); // Level 6
         imgTlo.push(loadImage('tlo_7', 'tlo_7.webp')); // Level 7 (Boss, ex-level 5)
 
         const imgPodlogiLevel = [];
         for (let i = 1; i <= 4; i++) imgPodlogiLevel[i] = loadImage(`podloga_${i}`, `podloga_${i}.webp`);
-        imgPodlogiLevel[5] = loadImage('podloga_5', 'podloga_5.png');
-        imgPodlogiLevel[6] = loadImage('podloga_6', 'podloga_6.png');
+        imgPodlogiLevel[5] = loadImage('podloga_5', 'podloga_5.webp');
+        imgPodlogiLevel[6] = loadImage('podloga_6', 'podloga_6.webp');
 
         const imgBelka = { complete: true }; // Składnik wirtualny, używamy podłóg
         const imgBelkaBoss = loadImage('belka_boss', 'belka_boss.webp');
@@ -679,47 +681,47 @@
         const imgUfo = loadImage('ufo', 'ufo.webp');
         const imgBohater = loadImage('bohater', 'bohater.webp');
         const imgKosmita = loadImage('kosmita', 'kosmita.webp');
-        const imgTarczaZielona = loadImage('tarcza_zielona', 'tarcza_zielona.png');
-        const imgTarczaNiebieska = loadImage('tarcza_niebieska', 'tarcza_niebieska.png');
+        const imgTarczaZielona = loadImage('tarcza_zielona', 'tarcza_zielona.webp');
+        const imgTarczaNiebieska = loadImage('tarcza_niebieska', 'tarcza_niebieska.webp');
         const imgPiwoStrzela = loadImage('piwo_strzela', 'piwo_strzela.webp');
         const imgPiwoFaint = loadImage('piwo_faint', 'piwo_faint.webp');
         const imgBoss = loadImage('boss', 'boss.webp');
-        const imgDetoks = loadImage('detoks', 'detoks.png');
+        const imgDetoks = loadImage('detoks', 'detoks.webp');
         const imgZbierz = loadImage('zbierz', 'zbierz.webp');
         const imgStrzelaj = loadImage('strzelaj', 'strzelaj.webp');
         const imgAlkoholNie = loadImage('alkohol_nie', 'alkohol_nie.webp');
         const imgAlkoholSzkodzi = loadImage('alkohol_szkodzi', 'alkohol_szkodzi.webp');
         const imgBossInfo = loadImage('boss_info', 'boss_info.webp');
-        const imgInfo5 = loadImage('info_5', 'info_5.png'); // Level 5 Info
-        const imgKarczma = loadImage('karczma', 'karczma.png'); // Level 6 Info
-        const imgKarczmarz = loadImage('karczmarz', 'karczmarz.png'); // Level 6 Boss
-        const imgBohater1 = loadImage('bohater_1', 'bohater_1.png');
-        const imgKarczmarz1 = loadImage('karczmarz_1', 'karczmarz_1.png');
-        const imgKarczmarz2 = loadImage('karczmarz_2', 'karczmarz_2.png');
-        const imgKarczmarz3 = loadImage('karczmarz_3', 'karczmarz_3.png');
-        const imgKarczmarz4 = loadImage('karczmarz_4', 'karczmarz_4.png');
-        const imgCiosany = loadImage('ciosany', 'ciosany.png');
-        const imgChmielus = loadImage('chmielus', 'chmielus.png'); // Boss Level Intro
-        const imgImieChmielus = loadImage('imie_chmielus', 'imie_chmielus.png');
-        const imgNiePij = loadImage('nie_pij', 'nie_pij.png');
-        const imgBieg1 = loadImage('bieg_1', 'bieg_1.png');
-        const imgBieg2 = loadImage('bieg_2', 'bieg_2.png');
-        const imgBieg3 = loadImage('bieg_3', 'bieg_3.png');
-        const imgBohater2 = loadImage('bohater_2', 'bohater_2.png');
-        const imgPrzyjaciel = loadImage('przyjaciel', 'przyjaciel.png');
-        const imgNieSam = loadImage('nie_sam', 'nie_sam.png');
+        const imgInfo5 = loadImage('info_5', 'info_5.webp'); // Level 5 Info
+        const imgKarczma = loadImage('karczma', 'karczma.webp'); // Level 6 Info
+        const imgKarczmarz = loadImage('karczmarz', 'karczmarz.webp'); // Level 6 Boss
+        const imgBohater1 = loadImage('bohater_1', 'bohater_1.webp');
+        const imgKarczmarz1 = loadImage('karczmarz_1', 'karczmarz_1.webp');
+        const imgKarczmarz2 = loadImage('karczmarz_2', 'karczmarz_2.webp');
+        const imgKarczmarz3 = loadImage('karczmarz_3', 'karczmarz_3.webp');
+        const imgKarczmarz4 = loadImage('karczmarz_4', 'karczmarz_4.webp');
+        const imgCiosany = loadImage('ciosany', 'ciosany.webp');
+        const imgChmielus = loadImage('chmielus', 'chmielus.webp'); // Boss Level Intro
+        const imgImieChmielus = loadImage('imie_chmielus', 'imie_chmielus.webp');
+        const imgNiePij = loadImage('nie_pij', 'nie_pij.webp');
+        const imgBieg1 = loadImage('bieg_1', 'bieg_1.webp');
+        const imgBieg2 = loadImage('bieg_2', 'bieg_2.webp');
+        const imgBieg3 = loadImage('bieg_3', 'bieg_3.webp');
+        const imgBohater2 = loadImage('bohater_2', 'bohater_2.webp');
+        const imgPrzyjaciel = loadImage('przyjaciel', 'przyjaciel.webp');
+        const imgNieSam = loadImage('nie_sam', 'nie_sam.webp');
         const imgPancerzZielony = loadImage('pancerz_zielony', 'pancerz_zielony.webp');
         const imgPancerzNiebieski = loadImage('pancerz_niebieski', 'pancerz_niebieski.webp');
         const imgPancerzCzerwony = loadImage('pancerz_czerwony', 'pancerz_czerwony.webp');
-        const imgMegaMechIcon = loadImage('mega_mech', 'mega_mech.png');
-        const imgMegaPlayer = loadImage('mega', 'mega.png');
-        const imgMechShield = loadImage('mech_tarcza', 'mech_tarcza.png');
-        const imgMechShot = loadImage('mecha_strzal', 'mecha_strzal.png');
+        const imgMegaMechIcon = loadImage('mega_mech', 'mega_mech.webp');
+        const imgMegaPlayer = loadImage('mega', 'mega.webp');
+        const imgMechShield = loadImage('mech_tarcza', 'mech_tarcza.webp');
+        const imgMechShot = loadImage('mecha_strzal', 'mecha_strzal.webp');
         const imgTrzezwosc = loadImage('trzezwosc', 'trzezwosc.webp');
         const imgEndTitle = { complete: true }; // Brak pliku
         const imgSzarak = { complete: true }; // Brak pliku
         const imgPlomien = loadImage('plomien', 'plomien.webp');
-        const imgPlansza = loadImage('plansza', 'plansza.png');
+        const imgPlansza = loadImage('plansza', 'plansza.webp');
         const imgPrzyciskStrzelania = loadImage('przycisk_strzelania', 'przycisk_strzelania.webp');
         const imgOni = loadImage('oni', 'oni.webp');
         const imgOstatniaScena = loadImage('ostatnia_scena', 'ostatnia_scena.webp');
@@ -727,35 +729,35 @@
         const imgPancerzPeka2 = loadImage('pancerz_peka2', 'pancerz_peka2.webp');
         const imgPancerzPeka3 = loadImage('pancerz_peka3', 'pancerz_peka3.webp');
         const imgPancerzPeka4 = loadImage('pancerz_peka4', 'pancerz_peka4.webp');
-        const imgDialog1 = loadImage('dialog1', 'dialog1.png');
-        const imgDialog2 = loadImage('dialog2', 'dialog2.png');
-        const imgDialog3 = loadImage('dialog3', 'dialog3.png');
-        const imgDialog4 = loadImage('dialog4', 'dialog4.png');
+        const imgDialog1 = loadImage('dialog1', 'dialog1.webp');
+        const imgDialog2 = loadImage('dialog2', 'dialog2.webp');
+        const imgDialog3 = loadImage('dialog3', 'dialog3.webp');
+        const imgDialog4 = loadImage('dialog4', 'dialog4.webp');
         const imgSerce = loadImage('serce', 'serce.webp');
         const imgAniol = loadImage('aniol', 'aniol.webp');
         const imgAniol2 = loadImage('aniol2', 'aniol2.webp');
-        const imgDziekuje = loadImage('dziekuje', 'dziekuje.png');
+        const imgDziekuje = loadImage('dziekuje', 'dziekuje.webp');
         const imgGrajPonownie = loadImage('grajponownie', 'grajponownie.webp');
         const imgWyjscie = loadImage('wyjscie', 'wyjscie.webp');
         const imgWPrawo = loadImage('w_prawo', 'w_prawo.webp');
-        const imgPokonanie = loadImage('pokonanie', 'pokonanie.png');
-        const imgKlepsydra = loadImage('klepsydra', 'klepsydra.png');
-        const imgLaser = loadImage('laser', 'laser.png');
-        const imgInfoSolarne = loadImage('info_solarne', 'info_solarne.png');
-        const imgDzialoSolarne = loadImage('dzialo_solarne', 'dzialo_solarne.png');
+        const imgPokonanie = loadImage('pokonanie', 'pokonanie.webp');
+        const imgKlepsydra = loadImage('klepsydra', 'klepsydra.webp');
+        const imgLaser = loadImage('laser', 'laser.webp');
+        const imgInfoSolarne = loadImage('info_solarne', 'info_solarne.webp');
+        const imgDzialoSolarne = loadImage('dzialo_solarne', 'dzialo_solarne.webp');
         const imgPancerzSolarny = loadImage('pancerz_solarny', 'pancerz_solarny.webp');
-        const imgSolarnePocisk = loadImage('solarne_pocisk', 'solarne_pocisk.png');
-        const imgPrzyciskSolarny = loadImage('przycisk_solarny', 'przycisk_solarny.png');
-        const imgLatanie = loadImage('latanie', 'latanie.png');
-        const imgLezy = loadImage('lezy', 'lezy.png');
+        const imgSolarnePocisk = loadImage('solarne_pocisk', 'solarne_pocisk.webp');
+        const imgPrzyciskSolarny = loadImage('przycisk_solarny', 'przycisk_solarny.webp');
+        const imgLatanie = loadImage('latanie', 'latanie.webp');
+        const imgLezy = loadImage('lezy', 'lezy.webp');
 
         checkAssetsLoaded(); // Initial check
         const sfxTrzezwosc = new Audio('dzwiek_trzezwosci.opus'); sfxTrzezwosc.volume = 1;
         const sfxDrzwi = new Audio('drzwi.opus');
         const sfxPrzycisk = new Audio('przycisk.opus');
-        const sfxLaser = new Audio('laser.mp3'); sfxLaser.volume = 1;
-        const sfxPowerUp = new Audio('power_up.mp3'); sfxPowerUp.volume = 1;
-        const sfxMech = new Audio('mech.mp3'); sfxMech.volume = 1;
+        const sfxLaser = new Audio('laser.opus'); sfxLaser.volume = 1;
+        const sfxPowerUp = new Audio('power_up.opus'); sfxPowerUp.volume = 1;
+        const sfxMech = new Audio('mech.opus'); sfxMech.volume = 1;
 
         // Performance Optimization: Offscreen Canvas for Background and Stars
         const bgBufferCanvas = document.createElement('canvas');
@@ -1041,8 +1043,8 @@
                     else if (level === 2) showShootNotification();
                     else if (level === 3) showGenericNotification('<img src="alkohol_nie.webp" style="max-width: 100%;">', 'transparent');
                     else if (level === 4) showGenericNotification('<img src="alkohol_szkodzi.webp" style="max-width: 100%;">', 'transparent');
-                    else if (level === 5) showGenericNotification('<img src="info_5.png" style="max-width: 100%;">', 'transparent');
-                    else if (level === 7) showGenericNotification('<img src="chmielus.png" style="max-width: 100%;">', 'transparent');
+                    else if (level === 5) showGenericNotification('<img src="info_5.webp" style="max-width: 100%;">', 'transparent');
+                    else if (level === 7) showGenericNotification('<img src="chmielus.webp" style="max-width: 100%;">', 'transparent');
                 }
             }, 1000);
         }
@@ -1628,13 +1630,14 @@
             player.vx = 0;
             player.vy = 0;
 
-            // Simple Ending Flags
-            bossEndingSimple = true;
-            lezyAnimX = GAME_WIDTH / 2 - 75; // Center 150px width
-            lezyAnimY = GAME_HEIGHT - 80; // Ground level
-
+            // Simple Ending Flags - Default False
+            bossEndingSimple = false;
 
             if (level === 7) {
+                bossEndingSimple = true;
+                lezyAnimX = GAME_WIDTH / 2 - 75; // Center 150px width
+                lezyAnimY = GAME_HEIGHT - 80; // Ground level
+
                 // Stop all music
                 [bgMusic, bgMusicBoss, bgMusicKarczma, bgMusicEnding].forEach(m => {
                     if (m) {
@@ -1651,25 +1654,42 @@
                 bgMusic.volume = 0.2;
             }
 
-            // Extended Sequence Timings (Delay added +4s to wait)
-            setTimeout(() => abductionPhase = 1, 500); // Start
-            setTimeout(() => abductionPhase = 2, 6000); // Wait... (was 2000)
-            setTimeout(() => abductionPhase = 3, 8000); // Beam appears (was 4000)
-            setTimeout(() => {
-                abductionPhase = 4; // Lift starts
-                playerAbductX = player.x;
-                playerAbductY = player.y;
-                playerAbductStartTime = Date.now();
-                player.isLyingDown = false; // Stand up for lifting
-            }, 10000); // Lift at 10s (was 6s)
-            setTimeout(() => {
-                abductionPhase = 5;
-                if (level === 7) {
+            // Extended Sequence Timings
+            if (level === 7) {
+                // Boss Level - Slow & Dramatic (Delay added +4s)
+                setTimeout(() => abductionPhase = 1, 500);
+                setTimeout(() => abductionPhase = 2, 6000);
+                setTimeout(() => abductionPhase = 3, 8000);
+                setTimeout(() => {
+                    abductionPhase = 4;
+                    playerAbductX = player.x;
+                    playerAbductY = player.y;
+                    playerAbductStartTime = Date.now();
+                    player.isLyingDown = false;
+                }, 10000);
+                setTimeout(() => {
+                    abductionPhase = 5;
                     startUpliftLevel();
-                } else {
+                }, 13000);
+            } else {
+                // Normal Levels - Fast Abduction
+                setTimeout(() => abductionPhase = 1, 500);
+                setTimeout(() => abductionPhase = 2, 1500); // Quick wait
+                setTimeout(() => abductionPhase = 3, 3000); // Beam quick
+                setTimeout(() => {
+                    abductionPhase = 4;
+                    playerAbductX = player.x;
+                    playerAbductY = player.y;
+                    playerAbductStartTime = Date.now();
+                    // For normal levels, player stands (isLyingDown was set true globally, maybe we should set false?)
+                    // Actually let's force false here just in case visual implies standing
+                    player.isLyingDown = false;
+                }, 4500); // Lift
+                setTimeout(() => {
+                    abductionPhase = 5;
                     document.getElementById('level-complete').classList.remove('hidden');
-                }
-            }, 13000); // End at 13s (was 9s)
+                }, 7000); // End
+            }
         }
 
         function update() {
@@ -1767,7 +1787,7 @@
 
                 // Trigger notification when cutscene ends (step becomes 5) - Gameplay Starts
                 if (level6IntroStep === 5) {
-                    showGenericNotification('<img src="karczma.png" style="max-width: 100%;">', 'transparent');
+                    showGenericNotification('<img src="karczma.webp" style="max-width: 100%;">', 'transparent');
 
                     // ZMIANA: Pancerz pojawia się losowo tuż po dialogach
                     if (!armorDropped) {
@@ -2617,7 +2637,7 @@
                     // Visual was at GAME_HEIGHT - 140 - 100 = GAME_HEIGHT - 240.
                     // So let's spawn logical Y at GAME_HEIGHT - 240 so logic matches visual.
                     items.push({ x: GAME_WIDTH / 2 - 120, y: GAME_HEIGHT - 240, type: 'solar', collected: false });
-                    solarInfoTimer = 240; // 4s info_solarne.png
+                    solarInfoTimer = 240; // 4s info_solarne.webp
                 }
 
                 // 130 HP - Karczmarz Runner (Burst)
@@ -2967,7 +2987,7 @@
 
                     finalTimer += 1;
                     // FINAL CUTSCENE STATE MACHINE
-                    if (finalCutsceneStep === 1) { // Show ostatnia_scena.png
+                    if (finalCutsceneStep === 1) { // Show ostatnia_scena.webp
                         if (finalTimer > 60) { finalCutsceneStep = 2; finalTimer = 0; }
                     } else if (finalCutsceneStep === 2) { // Dialog 1 (top right)
                         updateDialog(imgDialog1, 900, 0); // 900 frames = 15s
@@ -2983,7 +3003,7 @@
                             finalTimer = 0;
                             currentBackgroundImg = imgAniol;
                         }
-                    } else if (finalCutsceneStep === 6) { // Fade from white to aniol.png
+                    } else if (finalCutsceneStep === 6) { // Fade from white to aniol.webp
                         finalOpacity -= 0.01;
                         if (finalOpacity <= 0) {
                             finalOpacity = 0;
@@ -3011,7 +3031,7 @@
                             bgMusicZakonczenie.currentTime = 0;
                             bgMusicZakonczenie.play().catch(e => console.log(e));
                         }
-                    } else if (finalCutsceneStep === 11) { // Show "dziekuje.jpg" and end
+                    } else if (finalCutsceneStep === 11) { // Show "dziekuje.webp" and end
                         if (!buttonsAdded) {
                             buttonsAdded = true;
                             addFinalScreenButtons();
@@ -3116,7 +3136,7 @@
                     return;
                 }
 
-                // Draw background (plansza.png) stretched to height 600
+                // Draw background (plansza.webp) stretched to height 600
                 if (imgPlansza.complete) {
                     const bgHeight = 600;
                     const bgScale = bgHeight / imgPlansza.height;
@@ -3139,7 +3159,7 @@
                     uctx.restore();
                 }
 
-                // Button "przycisk_strzelania.png"
+                // Button "przycisk_strzelania.webp"
                 if (Math.abs(px - doorXScaled) < 150 && !isUpliftFading) {
                     if (imgPrzyciskStrzelania.complete) {
                         uctx.drawImage(imgPrzyciskStrzelania, 400 - 200, 40, 400, 160);
@@ -3511,8 +3531,10 @@
                     ctx.save();
                     ctx.globalAlpha = alpha;
                     if (imgPokonanie.complete) {
-                        // Drawing centered (powrót do poprzedniej pozycji)
-                        ctx.drawImage(imgPokonanie, eff.x - 30, eff.y - 40, 60, 60);
+                        // Drawing centered with correct aspect ratio (200x133 -> 1.5 ratio)
+                        const w = 100;
+                        const h = 100 * (133 / 200); // 66.5
+                        ctx.drawImage(imgPokonanie, eff.x - w / 2, eff.y - h / 2, w, h);
                     }
                     ctx.restore();
                 } else if (eff.type === 'particle') {

@@ -1,6 +1,8 @@
+Created by: Piko102
+
 # 🛸 UFO MOBILE - Gra Antyalkoholowa
 
-![UFO MOBILE](logo.png)
+![UFO MOBILE](logo.webp)
 
 ## 📖 O Grze
 

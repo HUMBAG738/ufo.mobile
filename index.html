@@ -185,16 +185,19 @@
             align-items: center;
         }
 
-        /* ZMIANA: Powiększone przyciski dla trybu strzałek */
-        .controls.layout-keyboard .control-btn {
+        /* ZMIANA: Powiększone TYLKO strzałki (dół, lewo, prawo) dla trybu strzałek */
+        .controls.layout-keyboard .d-pad .control-btn {
+            width: 95px;
+            /* Powiększone */
+            height: 95px;
+        }
+
+        .controls.layout-keyboard .d-pad .control-icon {
             width: 100px;
             height: 100px;
         }
 
-        .controls.layout-keyboard .control-icon {
-            width: 105px;
-            height: 105px;
-        }
+        /* Przyciski akcji (Skok, Strzał, Solar) zostają standardowe (76px) */
 
 
         #menu,
@@ -256,7 +259,8 @@
             margin-top: 150px;
             /* Obniżenie przycisku */
             transition: transform 0.2s;
-            width: 300px;
+            width: 225px;
+            /* Zmniejszono z 300px o 25% */
             aspect-ratio: 847 / 400;
             /* Dopasowanie proporcji do grafiki ramka.webp */
         }

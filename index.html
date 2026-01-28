@@ -180,13 +180,20 @@
         }
 
         .controls.layout-keyboard .action-btns {
-            flex-direction: flex;
-            /* W trybie strzałek: Ogień po lewej stronie Skoku */
-            gap: 45px;
-            /* Standardowy odstęp */
+            /* flex-direction: flex; Ignored, stays column */
+            gap: 0;
             align-items: center;
-            /* Wyrównanie do dołu */
+        }
 
+        /* ZMIANA: Powiększone przyciski dla trybu strzałek */
+        .controls.layout-keyboard .control-btn {
+            width: 100px;
+            height: 100px;
+        }
+
+        .controls.layout-keyboard .control-icon {
+            width: 105px;
+            height: 105px;
         }
 
 
@@ -712,7 +719,8 @@
         const imgNieSam = loadImage('nie_sam', 'nie_sam.webp');
         const imgPancerzZielony = loadImage('pancerz_zielony', 'pancerz_zielony.webp');
         const imgPancerzNiebieski = loadImage('pancerz_niebieski', 'pancerz_niebieski.webp');
-        const imgPancerzCzerwony = loadImage('pancerz_czerwony', 'pancerz_czerwony.webp');
+        const imgWybuch = new Image(); imgWybuch.src = 'wybuch.webp';
+        const imgPancerzCzerwony = new Image(); imgPancerzCzerwony.src = 'pancerz_czerwony.webp';
         const imgMegaMechIcon = loadImage('mega_mech', 'mega_mech.webp');
         const imgMegaPlayer = loadImage('mega', 'mega.webp');
         const imgMechShield = loadImage('mech_tarcza', 'mech_tarcza.webp');
@@ -1044,7 +1052,7 @@
                     else if (level === 3) showGenericNotification('<img src="alkohol_nie.webp" style="max-width: 100%;">', 'transparent');
                     else if (level === 4) showGenericNotification('<img src="alkohol_szkodzi.webp" style="max-width: 100%;">', 'transparent');
                     else if (level === 5) showGenericNotification('<img src="info_5.webp" style="max-width: 100%;">', 'transparent');
-                    else if (level === 7) showGenericNotification('<img src="chmielus.webp" style="max-width: 100%;">', 'transparent');
+                    else if (level === 7) showGenericNotification('<img src="chmielus.webp" style="max-width: 100%; opacity: 0.5;">', 'transparent', 6000);
                 }
             }, 1000);
         }
@@ -1453,7 +1461,7 @@
             showGenericNotification('<img src="strzelaj.webp" style="max-width: 100%;">', 'transparent');
         }
 
-        function showGenericNotification(html, color) {
+        function showGenericNotification(html, color, duration = 3000) {
             const notify = document.createElement('div');
             notify.className = 'game-notification';
             notify.style.position = 'absolute';
@@ -1492,7 +1500,7 @@
             setTimeout(() => {
                 notify.style.opacity = '0';
                 setTimeout(() => notify.remove(), 1000);
-            }, 3000);
+            }, duration);
         }
 
         function spawnHourglass() {
@@ -2042,7 +2050,7 @@
 
             if (player.isMegaMech && keys.shoot) {
                 const now = Date.now();
-                if (now - player.lastShootTime > 120) {
+                if (now - player.lastShootTime > 96) { // 25% Faster (was 120)
                     playerBullets.push({
                         x: player.x + (player.facingRight ? player.width : 0),
                         y: player.y + player.height / 2,
@@ -2434,12 +2442,12 @@
                     // Ally Shooting at Boss or Karczmarz
                     e.shootTimer--;
                     if (e.shootTimer <= 0) {
-                        e.shootTimer = 18; // Constant fire rate (30% faster than 40)
+                        e.shootTimer = 14; // increased by 25% speed (was 18)
                         const target = enemies.find(en => en.type === 'karczmarz_turret') || boss;
                         if (target) {
                             const angle = Math.atan2((target.y + target.height / 2) - (e.y + e.height / 2), (target.x + target.width / 2) - (e.x + e.width / 2));
                             playerBullets.push({
-                                x: e.x + e.width, y: e.y + e.height / 2, // Spawning in front of player
+                                x: e.x + e.width, y: e.y + e.height / 2 - 30, // Spawning higher (was center)
                                 vx: Math.cos(angle) * 12, vy: Math.sin(angle) * 12,
                                 owner: 'ally', isFlame: true // Visual matches Sober Shot
                             });
@@ -2475,8 +2483,17 @@
             }
 
             for (let i = effects.length - 1; i >= 0; i--) {
-                effects[i].timer -= 1;
-                if (effects[i].timer <= 0) effects.splice(i, 1);
+                if (effects[i].type === 'explosion') {
+                    // Explosion handles its own timing increment in render, or we can do it here.
+                    // Let's rely on the render loop incrementing 'timer' upwards for frame calculation, 
+                    // BUT 'effects' loop usually decrements timer.
+                    // Let's CHANGE 'explosion' to Increment Timer logic.
+                    effects[i].timer += 1;
+                    if (effects[i].timer >= 64) effects.splice(i, 1);
+                } else {
+                    effects[i].timer -= 1;
+                    if (effects[i].timer <= 0) effects.splice(i, 1);
+                }
             }
 
             // Boss Logic - Pattern: 3 horizontal shots @ heights + 4s speech bubble
@@ -2485,13 +2502,20 @@
                     boss.deathTimer -= 16.6;
                     boss.flash = 5;
                     // Explosion particles
-                    for (let k = 0; k < 2; k++) {
-                        effects.push({
-                            x: boss.x + Math.random() * boss.width,
-                            y: boss.y + Math.random() * boss.height,
-                            type: 'particle',
-                            timer: 20
-                        });
+
+                    if (boss.deathTimer > 1400) { // Trigger explosion ONCE at start of death
+                        if (!boss.explosionTriggered) {
+                            boss.explosionTriggered = true;
+                            effects.push({
+                                x: boss.x + boss.width / 2,
+                                y: boss.y + boss.height / 2,
+                                type: 'explosion',
+                                timer: 0,
+                                maxTimer: 64, // 16 frames * 4 ticks per frame
+                                frame: 0
+                            });
+                            playSFX('wybuch'); // Optional: Play explosion sound if available or use existing
+                        }
                     }
                     if (boss.deathTimer <= 0) {
                         boss = null;
@@ -2526,6 +2550,9 @@
                         state: 'throwing', targetX: GAME_WIDTH - 320
                     };
                     enemies.push(k);
+
+                    // Remove all Running Karczmarz instances to clean up the screen
+                    enemies = enemies.filter(e => e.type !== 'karczmarz_runner');
 
                     heartDrop.active = true;
                     heartDrop.x = k.x + 30;
@@ -3149,12 +3176,21 @@
 
                 if (imgBohater.complete) {
                     uctx.save();
+                    // Breathing effect for Uplift Hero
+                    const breath = 1.0 + Math.sin(Date.now() / 300) * 0.03;
+
                     if (!pFacingRight) {
                         uctx.translate(px - upliftCameraX + pWidth, py - pHeight);
                         uctx.scale(-1, 1);
+                        // Apply breath center relative
+                        uctx.translate(pWidth / 2, pHeight / 2);
+                        uctx.scale(breath, breath);
+                        uctx.translate(-pWidth / 2, -pHeight / 2);
                         uctx.drawImage(imgBohater, 0, 0, pWidth, pHeight);
                     } else {
-                        uctx.drawImage(imgBohater, px - upliftCameraX, py - pHeight, pWidth, pHeight);
+                        uctx.translate(px - upliftCameraX + pWidth / 2, py - pHeight + pHeight / 2);
+                        uctx.scale(breath, breath);
+                        uctx.drawImage(imgBohater, -pWidth / 2, -pHeight / 2, pWidth, pHeight);
                     }
                     uctx.restore();
                 }
@@ -3231,9 +3267,21 @@
                 if (!right) {
                     c.translate(px + player.width, py);
                     c.scale(-1, 1);
+                    // Breathing Effect for MegaMech
+                    const breath = 1.0 + Math.sin(Date.now() / 300) * 0.03;
+                    c.translate(player.width / 2, player.height / 2);
+                    c.scale(breath, breath);
+                    c.translate(-player.width / 2, -player.height / 2);
+
                     c.drawImage(imgMegaPlayer, 0, 0, player.width, player.height);
                 } else {
-                    c.drawImage(imgMegaPlayer, px, py, player.width, player.height);
+                    // Breathing Effect for MegaMech
+                    c.save();
+                    c.translate(px + player.width / 2, py + player.height / 2);
+                    const breath = 1.0 + Math.sin(Date.now() / 300) * 0.03;
+                    c.scale(breath, breath);
+                    c.drawImage(imgMegaPlayer, -player.width / 2, -player.height / 2, player.width, player.height);
+                    c.restore();
                 }
                 c.restore();
 
@@ -3297,12 +3345,23 @@
                     c.globalAlpha = 0.3;
                 }
 
+                // Breathing effect
+                const breath = 1.0 + Math.sin(Date.now() / 300) * 0.03;
+
                 if (!right) {
                     c.translate(px + pw, py);
                     c.scale(-1, 1);
+
+                    // Apply breath center relative
+                    c.translate(pw / 2, ph / 2);
+                    c.scale(breath, breath);
+                    c.translate(-pw / 2, -ph / 2);
+
                     c.drawImage(currentImg, 0, 0, pw, ph);
                 } else {
-                    c.drawImage(currentImg, px, py, pw, ph);
+                    c.translate(px + pw / 2, py + ph / 2);
+                    c.scale(breath, breath);
+                    c.drawImage(currentImg, -pw / 2, -ph / 2, pw, ph);
                 }
                 c.restore();
                 return;
@@ -3319,7 +3378,13 @@
                 // We want bottom of ly (py + 70) to match.
                 // so drawY = (py + 70) - lHeight.
                 const drawY = (py + 70) - lHeight;
-                c.drawImage(imgLezy, px - 30, drawY, lWidth, lHeight); // Offset X slightly to center on previous position
+                // Breathing effect for Lezy
+                const breath = 1.0 + Math.sin(Date.now() / 300) * 0.03;
+                c.save();
+                c.translate(px - 30 + lWidth / 2, drawY + lHeight / 2);
+                c.scale(breath, breath);
+                c.drawImage(imgLezy, -lWidth / 2, -lHeight / 2, lWidth, lHeight);
+                c.restore();
                 return;
             }
 
@@ -3499,8 +3564,8 @@
                     let iw = it.width || 40;
                     let ih = it.height || 40;
 
-                    if (it.type === 'shield') img = imgTarczaZielona;
-                    else if (it.type === 'doubleShield') img = imgTarczaNiebieska;
+                    if (it.type === 'shield') { img = imgTarczaZielona; iw = 80; ih = 80; } // 2x size
+                    else if (it.type === 'doubleShield') { img = imgTarczaNiebieska; iw = 80; ih = 80; } // 2x size
                     else if (it.type === 'hourglass') img = imgKlepsydra;
                     else if (it.type === 'sober') { img = imgTrzezwosc; iw = 150; ih = 150; }
                     else if (it.type === 'solar') { img = imgDzialoSolarne; iw = 240; ih = 240; }
@@ -3531,9 +3596,9 @@
                     ctx.save();
                     ctx.globalAlpha = alpha;
                     if (imgPokonanie.complete) {
-                        // Drawing centered with correct aspect ratio (200x133 -> 1.5 ratio)
+                        // Drawing centered with correct aspect ratio (200x133 -> 1.5 ratio) but scaled down by half
                         const w = 100;
-                        const h = 100 * (133 / 200); // 66.5
+                        const h = 66.5;
                         ctx.drawImage(imgPokonanie, eff.x - w / 2, eff.y - h / 2, w, h);
                     }
                     ctx.restore();
@@ -3551,6 +3616,35 @@
                     ctx.beginPath();
                     ctx.arc(eff.x, eff.y, radius, 0, Math.PI * 2);
                     ctx.fill();
+                } else if (eff.type === 'explosion') {
+                    if (imgWybuch.complete) {
+                        const totalFrames = 16;
+                        const cols = 4;
+                        const rows = 4;
+
+                        // Slow down animation: update frame every 4 ticks
+                        const currentFrame = Math.floor(eff.timer / 4);
+
+                        if (currentFrame < totalFrames) {
+                            const col = currentFrame % cols;
+                            const row = Math.floor(currentFrame / cols);
+
+                            const fw = imgWybuch.width / cols;
+                            const fh = imgWybuch.height / rows;
+
+                            const scale = 3.0; // Make it BIG
+
+                            ctx.drawImage(imgWybuch,
+                                col * fw, row * fh, fw, fh,
+                                eff.x - (fw * scale) / 2, eff.y - (fh * scale) / 2,
+                                fw * scale, fh * scale
+                            );
+
+                            // Timer is auto-incremented in update loop now
+                        } else {
+                            eff.finished = true; // Mark for removal (handled by maxTimer check in update)
+                        }
+                    }
                 }
             });
 
@@ -3582,6 +3676,14 @@
                             ctx.translate(e.x + ew, e.y + bob);
                             ctx.scale(-1, 1);
                             ctx.drawImage(currentImg, 0, 0, ew, eh);
+                            ctx.restore();
+                        } else if (e.type === 'ally_przyjaciel') {
+                            // Breathing effect for Przyjaciel
+                            const breath = 1.0 + Math.sin(Date.now() / 300) * 0.03;
+                            ctx.save();
+                            ctx.translate(e.x + ew / 2, e.y + bob + eh / 2);
+                            ctx.scale(breath, breath);
+                            ctx.drawImage(currentImg, -ew / 2, -eh / 2, ew, eh);
                             ctx.restore();
                         } else {
                             ctx.drawImage(currentImg, e.x, e.y + bob, ew, eh);
@@ -3695,15 +3797,28 @@
 
                 // BOSS Body
                 ctx.save();
+
+                // Menacing Pulse & Glow Effect
+                const bossPulse = Math.sin(Date.now() / 400); // Oscillation -1 to 1
+                const scalePulse = 1.0 + bossPulse * 0.05; // Scale 0.95 to 1.05
+
+                // Glow Effect
+                const glowIntensity = 40 + bossPulse * 20; // Increased: 20-60 blur
+                ctx.shadowColor = 'rgba(255, 0, 0, 0.8)'; // Stronger Red glow
+                ctx.shadowBlur = glowIntensity;
+
                 if (bossHealing.active && bossHealing.flashTimer < 5) {
-                    ctx.filter = 'brightness(3)';
+                    // Healing flash changed to Red
+                    ctx.filter = 'brightness(1.5) sepia(1) saturate(5) hue-rotate(-50deg)';
                 } else if (boss.flash > 0) {
-                    ctx.filter = 'brightness(2) sepia(1) saturate(100) hue-rotate(-50deg)';
+                    // Hit flash changed to Red (was purple-ish)
+                    ctx.filter = 'brightness(1.5) sepia(1) saturate(5) hue-rotate(-50deg)';
                 }
 
-                const drawScale = bossHealing.scale;
+                const drawScale = bossHealing.scale * scalePulse;
                 const dw = boss.width * drawScale;
                 const dh = boss.height * drawScale;
+                // Recalculate dx/dy to keep centered based on new size
                 const dx = bx - (dw - boss.width) / 2;
                 const dy = by - (dh - boss.height) / 2;
 

@@ -521,6 +521,10 @@
         preloadSFX('cios', 'cios.opus', 5);
         preloadSFX('solarny_strzal', 'solarny_strzal.opus', 5);
         preloadSFX('game_over', 'gameover.opus', 1);
+        preloadSFX('detoks_shot', 'pocisk.chmielus.opus', 5);
+        preloadSFX('ally_shot', 'pocisk.przyjaciel.opus', 5);
+        preloadSFX('boss_die_explosion', 'explosion.opus', 1);
+        preloadSFX('power_up', 'power_up.opus', 5);
 
         function playSFX(name) {
             if (!sfxPools[name]) return;
@@ -798,6 +802,9 @@
         const imgAniol2 = loadImage('aniol2', 'aniol2.webp');
         const imgDziekuje = loadImage('dziekuje', 'dziekuje.webp');
         const imgGrajPonownie = loadImage('grajponownie', 'grajponownie.webp');
+        const imgPociskEnemy = loadImage('pocisk_enemy', 'pocisk.enemy.png');
+        const imgPociskBohater = loadImage('pocisk_bohater', 'pocisk.bohater.png');
+        const imgPociskPrzyjaciel = loadImage('pocisk_przyjaciel', 'pocisk.przyjaciel.webp');
         const imgWyjscie = loadImage('wyjscie', 'wyjscie.webp');
         const imgWPrawo = loadImage('w_prawo', 'w_prawo.webp');
         const imgPokonanie = loadImage('pokonanie', 'pokonanie.webp');
@@ -2162,7 +2169,7 @@
                     playerBullets.push({
                         x: player.x + (player.facingRight ? player.width : 0),
                         y: player.y + player.height / 2,
-                        vx: player.facingRight ? 15 : -15,
+                        vx: player.facingRight ? 10 : -10,
                         vy: 0,
                         owner: 'player',
                         isFlame: player.isSober && player.soberArmor !== 4
@@ -2519,15 +2526,18 @@
                     e.shootTimer--;
                     if (e.shootTimer <= 0) {
                         e.shootTimer = 14; // increased by 25% speed (was 18)
+                        // Don't shoot if boss is dying
+                        if (boss && boss.isDying) return;
+
                         const target = enemies.find(en => en.type === 'karczmarz_turret') || boss;
                         if (target) {
                             const angle = Math.atan2((target.y + target.height / 2) - (e.y + e.height / 2), (target.x + target.width / 2) - (e.x + e.width / 2));
                             playerBullets.push({
-                                x: e.x + e.width, y: e.y + e.height / 2 - 30, // Spawning higher (was center)
+                                x: e.x + e.width, y: e.y + e.height / 2 - 10, // Lower spawn (was -30)
                                 vx: Math.cos(angle) * 12, vy: Math.sin(angle) * 12,
-                                owner: 'ally', isFlame: true // Visual matches Sober Shot
+                                owner: 'ally', isAllyShot: true // Changed from isFlame to isAllyShot
                             });
-                            playSFX(sfxShot);
+                            playSFX('ally_shot');
                         }
                     }
                 }
@@ -2591,9 +2601,11 @@
                                 frame: 0
                             });
                             playSFX('wybuch'); // Optional: Play explosion sound if available or use existing
+                            playSFX('boss_die_explosion'); // Play explosion sound at start of death animation
                         }
                     }
                     if (boss.deathTimer <= 0) {
+                        // playSFX('boss_die_explosion'); // Moved to start
                         boss = null;
                         // Clean up all boss entities
                         enemies = enemies.filter(e => e.type !== 'karczmarz_turret' && e.type !== 'ally_przyjaciel');
@@ -2708,7 +2720,7 @@
                 if (boss.hp <= 170 && !boss.event170) {
                     boss.event170 = true;
                     enemies.push({
-                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 15, maxHp: 15,
+                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 10, maxHp: 10,
                         type: 'karczmarz_runner', vx: -3, shootTimer: 20, speechImg: imgBieg1
                     });
                 }
@@ -2747,7 +2759,7 @@
                 if (boss.hp <= 130 && !boss.event130) {
                     boss.event130 = true;
                     enemies.push({
-                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 15, maxHp: 15,
+                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 10, maxHp: 10,
                         type: 'karczmarz_runner', vx: -3, shootTimer: 20, speechImg: imgBieg1
                     });
                 }
@@ -2765,7 +2777,7 @@
                 if (boss.hp <= 80 && !boss.event80) {
                     boss.event80 = true;
                     enemies.push({
-                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 15, maxHp: 15,
+                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 10, maxHp: 10,
                         type: 'karczmarz_runner', vx: -3, shootTimer: 20, speechImg: imgBieg2
                     });
                     // Laser bullet at upper height
@@ -2818,7 +2830,7 @@
                 if (boss.hp <= 30 && !boss.event30) {
                     boss.event30 = true;
                     enemies.push({
-                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 15, maxHp: 15,
+                        x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 10, maxHp: 10,
                         type: 'karczmarz_runner', vx: -3, shootTimer: 20, speechImg: imgBieg3
                     });
                 }
@@ -2852,6 +2864,8 @@
 
                         // Pocisk 2: Ukośny w dół (lekko rozrzucony, mniej stromo)
                         bullets.push({ x: bx, y: by - 20, vx: -5, vy: 0.8, img: imgDetoks });
+
+                        playSFX('detoks_shot');
 
                         boss.phaseIndex++;
                         boss.phaseTimer = 180; // 3 sekundy (było 240 = 4 sekundy)
@@ -3799,6 +3813,12 @@
                     } else {
                         ctx.drawImage(b.img, b.x, b.y, 30, 30); // Others - small
                     }
+                } else if (imgPociskEnemy.complete) {
+                    // 537x636 -> aspect ratio ~0.84.
+                    // Target width around 24px. Height around 28px.
+                    const w = 24;
+                    const h = 28;
+                    ctx.drawImage(imgPociskEnemy, b.x - w / 2, b.y - h / 2, w, h);
                 } else {
                     ctx.fillStyle = '#ef4444';
                     ctx.beginPath();
@@ -3813,31 +3833,57 @@
 
             // Player Bullets
             playerBullets.forEach(pb => {
-                if (pb.isFlame && imgPlomien.complete) {
+                if (pb.isAllyShot && imgPociskPrzyjaciel.complete) {
+                    // Pocisk przyjaciela - mniejszy (z 45 na 25)
+                    const size = 25;
+                    ctx.drawImage(imgPociskPrzyjaciel, pb.x - size / 2, pb.y - size / 2, size, size);
+                } else if (pb.isFlame && imgPlomien.complete) {
                     ctx.save();
+                    // Zwiększona grafika: 40x40 (proporcje 408x408)
+                    const fw = 40;
+                    const fh = 40;
                     if (pb.vx < 0) {
-                        ctx.translate(pb.x + 40, pb.y - 15);
+                        ctx.translate(pb.x + fw, pb.y - fh / 2);
                         ctx.scale(-1, 1);
-                        ctx.drawImage(imgPlomien, 0, 0, 40, 30);
+                        ctx.drawImage(imgPlomien, 0, 0, fw, fh);
                     } else {
-                        ctx.drawImage(imgPlomien, pb.x - 40, pb.y - 15, 40, 30);
+                        ctx.drawImage(imgPlomien, pb.x - fw, pb.y - fh / 2, fw, fh);
                     }
                     ctx.restore();
-                } else if (pb.isSolar && imgSolarnePocisk.complete) {
-                    // Pocisk solarny - długa wiązka/promień
+                } else if (pb.isSolar) {
+                    // Pocisk solarny - proceduralny (Canvas API)
                     ctx.save();
-                    const beamHeight = 120; // Jeszcze grubszy promień (z 80 na 120)
+                    const beamHeight = 40; // Core thickness
                     const beamWidth = Math.abs(pb.x - pb.startX) + 20;
-                    if (pb.vx < 0) {
-                        ctx.translate(pb.startX, pb.y - beamHeight / 2);
-                        ctx.scale(-1, 1);
-                        ctx.drawImage(imgSolarnePocisk, 0, 0, beamWidth, beamHeight);
-                    } else {
-                        ctx.drawImage(imgSolarnePocisk, pb.startX, pb.y - beamHeight / 2, beamWidth, beamHeight);
-                    }
+
+                    // Ustalanie współrzędnych rysowania (zawsze od startX do x)
+                    const startX = Math.min(pb.startX, pb.x);
+                    const endX = Math.max(pb.startX, pb.x);
+                    const centerY = pb.y;
+
+                    // 1. Outer Glow (Blue/Cyan)
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = '#00ffff';
+                    ctx.fillStyle = 'rgba(0, 255, 255, 0.4)';
+                    ctx.fillRect(startX, centerY - beamHeight / 2 - 10, beamWidth, beamHeight + 20);
+
+                    // 2. Inner Core (White/Bright Cyan)
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = 'white';
+                    ctx.fillStyle = '#e0f7fa';
+                    ctx.fillRect(startX, centerY - beamHeight / 2, beamWidth, beamHeight);
+
                     ctx.restore();
                 } else if (pb.isMecha && imgMechShot.complete) {
-                    ctx.drawImage(imgMechShot, pb.x, pb.y - 25, 60, 50);
+                    // 821x423 -> aspect ratio ~1.94
+                    // Target size 90x46
+                    ctx.drawImage(imgMechShot, pb.x, pb.y - 23, 90, 46);
+                } else if (imgPociskBohater.complete) {
+                    // 408x408 -> aspect ratio 1:1
+                    // Target size 30x30
+                    const w = 30;
+                    const h = 30;
+                    ctx.drawImage(imgPociskBohater, pb.x - w / 2, pb.y - h / 2, w, h);
                 } else {
                     ctx.fillStyle = '#3b82f6';
                     ctx.beginPath(); ctx.arc(pb.x, pb.y, 10, 0, Math.PI * 2); ctx.fill();

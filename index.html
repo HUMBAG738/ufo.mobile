@@ -337,7 +337,14 @@
             height: auto;
             cursor: pointer;
             z-index: 1000;
-            transition: transform 0.2s;
+            transition: transform 0.2s, opacity 0.5s;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        body.playing #btn-pause {
+            opacity: 1;
+            pointer-events: auto;
         }
 
         #btn-pause:hover {
@@ -1485,13 +1492,13 @@
 
             initLevel();
             introTimer = 0; // Reset intro
+            repositionPauseButton(); // Ensure correct position on start
             document.body.classList.add('playing');
             document.getElementById('menu').classList.add('hidden');
             document.getElementById('controls-settings').classList.add('hidden');
             document.getElementById('gameover').classList.add('hidden');
             document.getElementById('level-complete').classList.add('hidden');
             document.getElementById('final-screen').classList.add('hidden');
-            repositionPauseButton(); // Ensure correct position on start
         }
 
         function repositionPauseButton() {

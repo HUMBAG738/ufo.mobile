@@ -61,6 +61,7 @@
             border: 2px solid var(--accent);
             border-radius: 8px;
             overflow: hidden;
+            margin-top: 25px;
         }
 
         canvas {
@@ -1007,6 +1008,7 @@
         }
 
         function togglePause() {
+            playSFX(sfxButton);
             isPaused = !isPaused;
             const overlay = document.getElementById('pause-overlay');
             if (overlay) overlay.style.display = isPaused ? 'flex' : 'none';
@@ -2950,7 +2952,12 @@
         function startUpliftLevel() {
             gameState = 'uplift';
             document.body.classList.remove('playing');
+            document.body.classList.remove('playing');
             document.querySelector('.ui-overlay').style.opacity = '0';
+
+            // Custom Uplift Styling
+            document.documentElement.style.setProperty('--bg', '#808080');
+            document.documentElement.style.setProperty('--accent', '#505050');
 
             // Upewnij się, że przycisk strzelania jest aktywny na poziomie Uplifting, a solarny ukryty
             const shootBtn = document.getElementById('btn-shoot');
@@ -3149,6 +3156,9 @@
                             bgMusicZakonczenie.play().catch(e => console.log(e));
                         }
                     } else if (finalCutsceneStep === 11) { // Show "dziekuje.webp" and end
+                        // Final screen styling
+                        document.documentElement.style.setProperty('--bg', '#347DDD');
+                        document.documentElement.style.setProperty('--accent', '#1A4580'); // Darker blue for contrast
                         if (!buttonsAdded) {
                             buttonsAdded = true;
                             addFinalScreenButtons();

@@ -475,6 +475,12 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
+        // Opening Music - Move to top for faster load
+        const bgMusicOpening = new Audio('opening.opus');
+        bgMusicOpening.loop = true;
+        bgMusicOpening.volume = 1;
+        bgMusicOpening.play().catch(e => console.log("Autoplay blocked/loading:", e));
+
         // Game Constants
         const GAME_WIDTH = 800;
         const GAME_HEIGHT = 600;
@@ -558,8 +564,7 @@
         bgMusicKarczma.loop = true;
         bgMusicKarczma.volume = 0.8;
 
-        const sfxKlepsydra = new Audio('klepsydra.opus');
-        sfxKlepsydra.volume = 1;
+
 
         const bgMusicKoncowka = new Audio('koncowka.opus');
         bgMusicKoncowka.loop = false; // Usually ending music is played once or looped? Assuming loop for now or long enough
@@ -569,14 +574,20 @@
         bgMusicZakonczenie.loop = true;
         bgMusicZakonczenie.volume = 1;
 
+        // bgMusicOpening moved to top
+
         let musicStarted = false;
 
         function startMusic() {
             if (!musicStarted) {
-                // Hide settings if they are still visible (e.g. clicking body to start music)
-                // Actually startMusic is bound to click/touch once.
-                // It's safer to not hide settings here, but only in startGame.
+                // Jeśli jesteśmy w menu, graj Opening
+                if (gameState === 'menu') {
+                    bgMusicOpening.play().then(() => musicStarted = true).catch(e => console.log(e));
+                    return;
+                }
+
                 if (level === 7) {
+                    bgMusicBoss.volume = 1.0;
                     bgMusicBoss.play().then(() => musicStarted = true).catch(e => console.log(e));
                 } else if (level === 6) {
                     bgMusicKarczma.play().then(() => musicStarted = true).catch(e => console.log(e));
@@ -1426,21 +1437,33 @@
         function startGame() {
             if (!assets.isReady) return;
             playSFX(sfxButton);
-            bgMusic.volume = 0.4;
+            bgMusic.volume = 0.6;
             bgMusicBoss.pause();
-            bgMusicBoss.currentTime = 0;
             bgMusicBoss.currentTime = 0;
             bgMusicEnding.pause();
             bgMusicEnding.currentTime = 0;
             bgMusicKarczma.pause();
             bgMusicKarczma.currentTime = 0;
+
+            // Zatrzymaj Opening
+            bgMusicOpening.pause();
+            bgMusicOpening.currentTime = 0;
+
             bgMusic.currentTime = 0;
             musicStarted = false;
             level6IntroSeen = false; // Reset seen flag on full restart
-            startMusic();
-            level = 1; score = 0; totalScore = 0; lives = MAX_LIVES;
-            initLevel();
+
+            // Ustaw stan nry na 'playing' i zresetuj poziom PRZED uruchomieniem muzyki
+            // aby startMusic() wiedziało co grać (muzyka poziomu 1)
             gameState = 'playing';
+            level = 1;
+            score = 0;
+            totalScore = 0;
+            lives = MAX_LIVES;
+
+            startMusic();
+
+            initLevel();
             introTimer = 0; // Reset intro
             document.body.classList.add('playing');
             document.getElementById('menu').classList.add('hidden');
@@ -1526,7 +1549,7 @@
 
         function nextLevel() {
             playSFX(sfxButton);
-            bgMusic.volume = 0.4;
+            bgMusic.volume = 0.6;
             level++;
             introTimer = 0;
             solarInfoTimer = 0;
@@ -1833,7 +1856,7 @@
                     timeFreezeActive = false;
                     // Restore background music volume
                     if (level === 6) {
-                        bgMusicKarczma.volume = 0.4;
+                        // bgMusicKarczma.volume = 0.4; // Removed request: don't change volume
                     }
                 }
             } else if (level === 6 && level6IntroStep === 5) {
@@ -2298,13 +2321,12 @@
                             timeFreezeActive = true;
                             timeFreezeTimer = 372; // 6.2 seconds at 60 FPS
 
-                            // Play hourglass music
-                            sfxKlepsydra.currentTime = 0;
-                            sfxKlepsydra.play().catch(() => { });
+                            // Play hourglass music removed
+
 
                             // Lower background music volume
                             if (level === 6) {
-                                bgMusicKarczma.volume = 0.15;
+                                // bgMusicKarczma.volume = 0.15; // Removed request: don't lower volume
                             }
 
                             // Play power-up sound
@@ -3461,13 +3483,13 @@
                 let shouldUpdate = true;
                 if (slowMoTimer > 0) {
                     slowMoTimer--;
-                    setMusicPlaybackRate(0.6); // Spowolnienie muzyki i obniżenie tonu
+                    // setMusicPlaybackRate(0.6); // REMOVED: Music tempo change disabled
                     // Aktualizuj co 3 klatkę
                     if (frameCount % 3 !== 0) {
                         shouldUpdate = false;
                     }
                 } else {
-                    setMusicPlaybackRate(1.0); // Powrót do normalnej prędkości muzyki
+                    // setMusicPlaybackRate(1.0); // REMOVED
                 }
 
                 if (shouldUpdate) update();

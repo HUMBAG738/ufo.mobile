@@ -23,6 +23,7 @@
     <meta name="twitter:url" content="https://humbag738.github.io/ufo.mobile/" />
     <title>UFO MOBILE</title>
     <link rel="icon" sizes="16x16 32x32 48x48" type="image/png" href="ikona.png" />
+    <link rel="preload" href="opening.opus" as="audio">
     <style>
         :root {
             --accent: #c084fc;
@@ -269,8 +270,8 @@
             margin-top: 150px;
             /* Obniżenie przycisku */
             transition: transform 0.2s;
-            width: 225px;
-            /* Zmniejszono z 300px o 25% */
+            width: 112px;
+            /* Zmniejszono z 225px o 50% */
             aspect-ratio: 847 / 400;
             /* Dopasowanie proporcji do grafiki ramka.webp */
         }
@@ -402,9 +403,9 @@
         </div>
 
         <div id="gameover" class="hidden">
-            <div class="modal-content">
-                <img src="gameover.webp" alt="GAME OVER" style="max-width: 250px; margin-bottom: 10px;">
-                <button class="start-btn" onclick="startGame()"></button>
+            <div class="modal-content" style="display: flex; flex-direction: column; align-items: center;">
+                <img src="gameover.webp" alt="GAME OVER" style="max-width: 180px; margin-bottom: 10px;">
+                <button class="start-btn" onclick="startGame()" style="margin-top: 30px;"></button>
             </div>
         </div>
 
@@ -512,7 +513,7 @@
         preloadSFX('spodek', 'spodek.opus', 1);
         preloadSFX('cios', 'cios.opus', 5);
         preloadSFX('solarny_strzal', 'solarny_strzal.opus', 5);
-        preloadSFX('game_over', 'game_over.opus', 1);
+        preloadSFX('game_over', 'gameover.opus', 1);
 
         function playSFX(name) {
             if (!sfxPools[name]) return;
@@ -577,6 +578,20 @@
         // bgMusicOpening moved to top
 
         let musicStarted = false;
+
+        function playOpeningMusic() {
+            // Spróbuj odegrać opening jeśli jeszcze nie gra
+            if (bgMusicOpening && bgMusicOpening.paused) {
+                bgMusicOpening.volume = 1.0;
+                bgMusicOpening.currentTime = 0;
+                bgMusicOpening.play().then(() => {
+                    console.log("Autoplay success");
+                    musicStarted = true;
+                }).catch(e => {
+                    console.log("Autoplay prevented:", e);
+                });
+            }
+        }
 
         function startMusic() {
             if (!musicStarted) {
@@ -679,6 +694,11 @@
                     btn.style.opacity = '1';
                     btn.style.pointerEvents = 'auto';
                 }
+
+                playOpeningMusic();
+
+                // Próba automatycznego uruchomienia muzyki opening (jeśli przeglądarka pozwoli)
+                playOpeningMusic();
             } else {
                 if (btn) {
                     btn.style.display = 'none'; // Hide button during loading
@@ -1486,7 +1506,7 @@
 
             // If space is too small, maybe clamp it? But user asked for center.
             // Let's just set it.
-            btn.style.top = `${centerY}px`;
+            btn.style.top = `${centerY + 30}px`;
         }
 
         window.addEventListener('resize', repositionPauseButton);
@@ -1626,6 +1646,10 @@
                         player.width = 70;
                         player.y += (oldH - 70); // Drop down to align feet
                         // player.isSober = true; // Keep true to render peka4
+
+                        // Ukryj przycisk solarny przy zniszczeniu pancerza (peka4)
+                        const btnSolar = document.getElementById('btn-solar');
+                        if (btnSolar) btnSolar.classList.add('hidden');
                     }
                     playSFX(sfxShot); // Dźwięk uderzenia w pancerz
                     effects.push({ x: player.x + player.width / 2, y: player.y + player.height / 2, type: 'cloud', timer: 30 });
@@ -1648,6 +1672,15 @@
                 gameState = 'gameover';
                 document.body.classList.remove('playing');
                 document.getElementById('gameover').classList.remove('hidden');
+
+                // Stop all music
+                if (bgMusic) { bgMusic.pause(); bgMusic.currentTime = 0; }
+                if (bgMusicBoss) { bgMusicBoss.pause(); bgMusicBoss.currentTime = 0; }
+                if (bgMusicKarczma) { bgMusicKarczma.pause(); bgMusicKarczma.currentTime = 0; }
+                if (bgMusicEnding) { bgMusicEnding.pause(); bgMusicEnding.currentTime = 0; }
+
+                // Play Game Over Sound
+                playSFX('game_over');
             } else {
                 initLevel();
                 player.invincibilityTimer = 120; // Longer i-frames after respawm (2 seconds)
@@ -3827,8 +3860,8 @@
 
                 if (imgBossInfo.complete) {
                     // Boss info graphic on left top side under indicators
-                    // Moved up 15px as requested (80 -> 65)
-                    ctx.drawImage(imgBossInfo, 70, 0, 200, 100);
+                    // Moved up 15px as requested (80 -> 65) -> And moved right (70 -> 85)
+                    ctx.drawImage(imgBossInfo, 85, 0, 200, 100);
                 }
 
                 // BOSS Body

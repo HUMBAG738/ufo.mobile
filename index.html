@@ -3574,10 +3574,17 @@
                     c.scale(breath, breath);
                     c.translate(-pw / 2, -ph / 2);
 
-                    // Korekta proporcji dla Pomarańczowej Zbroi (200x223)
-                    if (currentImg === imgPomaranczowaZbroja) { // 200x211
-                        drawH = pw * (211 / 200);
+                    // Obliczanie proporcji w zależności od grafiki
+                    let drawH = ph;
+                    let drawY = 0;
+                    let drawW = pw;
+                    let drawX = 0;
+
+                    if (currentImg === imgPomaranczowaZbroja) { // 200x211 scaled 1.2x
+                        drawW = pw * 1.2;
+                        drawH = (pw * 1.2) * (211 / 200);
                         drawY = ph - drawH; // Wyrównaj do dołu
+                        drawX = (pw - drawW) / 2; // Wyśrodkuj w poziomie
                     } else if (currentImg === imgPancerzNiebieski) { // 200x215
                         drawH = pw * (215 / 200);
                         drawY = ph - drawH;
@@ -3589,7 +3596,7 @@
                         drawY = ph - drawH;
                     }
 
-                    c.drawImage(currentImg, 0, drawY, pw, drawH);
+                    c.drawImage(currentImg, drawX, drawY, drawW, drawH);
                 } else {
                     c.translate(px + pw / 2, py + ph / 2);
                     c.scale(breath, breath);
@@ -3597,14 +3604,18 @@
                     // Obliczanie proporcji w zależności od grafiki
                     let drawH = ph;
                     let drawY = -ph / 2;
+                    let drawW = pw;
+                    let drawX = -pw / 2;
 
-                    if (currentImg === imgPomaranczowaZbroja) { // 200x211
-                        drawH = pw * (211 / 200);
+                    if (currentImg === imgPomaranczowaZbroja) { // 200x211 scaled 1.2x
+                        drawW = pw * 1.2;
+                        drawH = (pw * 1.2) * (211 / 200);
                         // Standardowy środek to 0,0 (przed translate do rogu).
                         // Po translate do środka: góra = -ph/2, dół = ph/2.
                         // Chcemy, aby dół nowej grafiki (Y + H) = ph/2.
                         // Y = ph/2 - H.
                         drawY = (ph / 2) - drawH;
+                        drawX = -drawW / 2; // Wyśrodkuj względem osi Y (która jest środkiem gracza)
                     } else if (currentImg === imgPancerzNiebieski) { // 200x215
                         drawH = pw * (215 / 200);
                         drawY = (ph / 2) - drawH;
@@ -3616,7 +3627,7 @@
                         drawY = (ph / 2) - drawH;
                     }
 
-                    c.drawImage(currentImg, -pw / 2, drawY, pw, drawH);
+                    c.drawImage(currentImg, drawX, drawY, drawW, drawH);
                 }
                 c.restore();
                 return;

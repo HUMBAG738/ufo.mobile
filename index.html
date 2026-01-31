@@ -370,6 +370,48 @@
             max-height: 80%;
             filter: drop-shadow(0 0 10px var(--accent));
         }
+
+        /* REGUŁY DETEKCJI DOTYKU */
+
+        /* LAPTOP (is-desktop) */
+        /* LAPTOP (is-desktop) */
+        /* LAPTOP (is-desktop) */
+        body.is-desktop #controls-settings {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        body.is-desktop .controls {
+            display: none !important;
+            /* Ukryj przyciski gry na laptopie */
+        }
+
+        body.is-desktop #keyboard-info {
+            display: block !important;
+            width: 600px;
+            /* Sztywne 600px */
+            max-width: 100%;
+            height: auto;
+            /* Zachowaj proporcje */
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 300;
+        }
+
+        /* TELEFON (is-touch) */
+        body.is-touch #controls-settings {
+            display: flex !important;
+            /* Pokaż sterowanie dotykowe */
+        }
+
+        body.is-touch #keyboard-info {
+            display: none !important;
+            /* Ukryj instrukcję klawiatury */
+        }
     </style>
 </head>
 
@@ -427,6 +469,11 @@
             </div>
         </div>
 
+        <div id="boss-notification" class="hidden"
+            style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 500; opacity: 0; transition: opacity 1s; width: 100%; text-align: center;">
+            <img src="prawie.webp" alt="Prawie..." style="width: 50%; height: auto;">
+        </div>
+
         <div id="final-screen" class="hidden"
             style="position: absolute; inset: 0; background: #1a1a2e; z-index: 200; flex-direction: column; justify-content: center; align-items: center;">
             <canvas id="finalCanvas" width="800" height="600" style="position: absolute;"></canvas>
@@ -479,6 +526,10 @@
             <img src="strzalki.webp" class="layout-btn-img" onclick="setControlLayout('keyboard')" alt="Strzałki">
         </div>
     </div>
+
+    <!-- Nowa grafika dla laptopów, domyślnie ukryta -->
+    <img id="keyboard-info" src="klawiatura.webp" alt="Instrukcja Klawiatury" class="hidden"
+        style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 300;">
 
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -747,6 +798,7 @@
         const imgKosmita = loadImage('kosmita', 'kosmita.webp');
         const imgTarczaZielona = loadImage('tarcza_zielona', 'tarcza_zielona.webp');
         const imgTarczaNiebieska = loadImage('tarcza_niebieska', 'tarcza_niebieska.webp');
+        const imgTarczaPomaranczowa = loadImage('tarcza_pomaranczowa', 'tarcza_pomaranczowa.webp');
         const imgPiwoStrzela = loadImage('piwo_strzela', 'piwo_strzela.webp');
         const imgPiwoFaint = loadImage('piwo_faint', 'piwo_faint.webp');
         const imgBoss = loadImage('boss', 'boss.webp');
@@ -776,6 +828,7 @@
         const imgNieSam = loadImage('nie_sam', 'nie_sam.webp');
         const imgPancerzZielony = loadImage('pancerz_zielony', 'pancerz_zielony.webp');
         const imgPancerzNiebieski = loadImage('pancerz_niebieski', 'pancerz_niebieski.webp');
+        const imgPomaranczowaZbroja = loadImage('pomaranczowa_zbroja', 'pomaranczowa_zbroja.webp');
         const imgWybuch = new Image(); imgWybuch.src = 'wybuch.webp';
         const imgPancerzCzerwony = new Image(); imgPancerzCzerwony.src = 'pancerz_czerwony.webp';
         const imgMegaMechIcon = loadImage('mega_mech', 'mega_mech.webp');
@@ -982,6 +1035,17 @@
             }
 
             window.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const btns = document.querySelectorAll('button.start-btn');
+                    for (let btn of btns) {
+                        // Sprawdź czy przycisk jest widoczny i aktywny
+                        const style = window.getComputedStyle(btn);
+                        if (btn.offsetParent !== null && style.display !== 'none' && style.visibility !== 'hidden' && style.pointerEvents !== 'none') {
+                            btn.click();
+                            return;
+                        }
+                    }
+                }
                 if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
                 if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
                 if (e.key === 'ArrowDown' || e.key === 's') keys.down = true;
@@ -1143,45 +1207,49 @@
 
                 enemies = [];
                 bullets = [];
-                if (lvl === 1 || lvl === 2) {
-                    const enemyCount = lvl === 1 ? 4 : 2;
+                if (lvl === 1) {
+                    const enemyCount = 4;
                     const spawnWidth = GAME_WIDTH - 300;
-                    const step = lvl === 1 ? spawnWidth / (enemyCount - 1) : 400;
+                    const step = spawnWidth / (enemyCount - 1);
                     for (let i = 0; i < enemyCount; i++) {
-                        let shootType = lvl === 2 ? 'horizontal' : 'none';
                         enemies.push({
-                            x: lvl === 1 ? 150 + (i * step) : 200 + (i * step),
+                            x: 150 + (i * step),
                             y: GAME_HEIGHT - 85,
                             width: 40,
                             height: 50,
                             hp: 2,
-                            shootType: shootType,
+                            shootType: 'none',
                             shootTimer: 100 + Math.random() * 300
                         });
                     }
-                    if (lvl === 2) {
-                        // 3rd enemy on middle right side platform (yPos for i=2 is 300)
-                        enemies.push({ x: GAME_WIDTH - 120, y: 300 - 50, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 150 });
-                    }
+                } else if (lvl === 2) {
+                    // Level 2: Manual placement
+                    // 1. Center Ground
+                    enemies.push({ x: GAME_WIDTH / 2 - 20, y: GAME_HEIGHT - 85, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 100 + Math.random() * 300 });
+                    // 2. Right Ground
+                    enemies.push({ x: GAME_WIDTH - 100, y: GAME_HEIGHT - 85, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 150 + Math.random() * 300 });
+                    // 3. Right Beam (Middle Right)
+                    enemies.push({ x: GAME_WIDTH - 100, y: 300 - 50, width: 40, height: 50, hp: 2, shootType: 'horizontal', shootTimer: 150 });
+
                 } else if (lvl === 3) {
                     // Level 3: 2 shooters - ground and middle right
-                    enemies.push({ x: 300, y: GAME_HEIGHT - 85, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 100 });
-                    enemies.push({ x: GAME_WIDTH - 100, y: 300 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 200 });
+                    enemies.push({ x: GAME_WIDTH / 2 - 20, y: GAME_HEIGHT - 85, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 100 });
+                    enemies.push({ x: GAME_WIDTH - 100, y: 120 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 200 });
                     // Additional enemies on right side beams (2nd from bottom and bottom)
                     // Beams at indices 3 and 4 -> center roughly GAME_WIDTH - 100
-                    enemies.push({ x: GAME_WIDTH - 100, y: 390 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 250 });
+                    enemies.push({ x: GAME_WIDTH - 100, y: 300 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 250 });
                     enemies.push({ x: GAME_WIDTH - 100, y: 480 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 280 });
 
                     // Shield on 2nd platform from bottom on the left (i=3 per loop logic)
                     items.push({ x: 80, y: 390 - 40, type: 'shield', collected: false });
                 } else if (lvl === 4) {
                     // Level 4: 6 shooters - ground, middle right, middle bottom beam, upper right, + 2 extra on right side beams
-                    enemies.push({ x: 400, y: GAME_HEIGHT - 85, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 100 });
+                    enemies.push({ x: GAME_WIDTH / 2 - 20, y: GAME_HEIGHT - 85, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 100 });
                     enemies.push({ x: GAME_WIDTH - 100, y: 120 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 250 });
                     // Extra 2 kufles on right side beams (idx 4 and 7 usually)
-                    enemies.push({ x: GAME_WIDTH - 150, y: 300 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 160 });
-                    enemies.push({ x: GAME_WIDTH - 150, y: 480 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 130 });
-                    enemies.push({ x: GAME_WIDTH - 150, y: 560 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 150 });
+                    enemies.push({ x: GAME_WIDTH - 100, y: 300 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 160 });
+                    enemies.push({ x: GAME_WIDTH - 100, y: 480 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 130 });
+                    enemies.push({ x: GAME_WIDTH - 100, y: 560 - 50, width: 40, height: 50, hp: 2, shootType: 'aimed', shootTimer: 150 });
 
                     // Double Shield on 2nd platform from bottom on the left (i=3)
                     items.push({ x: 80, y: 390 - 45, type: 'doubleShield', collected: false });
@@ -1261,7 +1329,7 @@
                             // Spawn armor immediately when skipping intro
                             const rx = 50 + Math.random() * (GAME_WIDTH - 100);
                             const ry = 150 + Math.random() * (300);
-                            items.push({ x: rx, y: ry, type: 'doubleShield', collected: false });
+                            items.push({ x: rx, y: ry, type: 'orangeShield', collected: false });
                         } else {
                             level6IntroSeen = true;
                         }
@@ -1288,7 +1356,7 @@
                             let count = 2;
                             for (let k = 0; k < count; k++) {
                                 let spacing = pLeft.width / (count + 1);
-                                coins.push({ x: pLeft.x + spacing * (k + 1), y: pLeft.y - 25, collected: false });
+                                coins.push({ x: pLeft.x + spacing * (k + 1) - 6, y: pLeft.y - 25, collected: false });
                             }
 
                             // Right
@@ -1297,7 +1365,7 @@
                             // Coins on Right
                             for (let k = 0; k < count; k++) {
                                 let spacing = pRight.width / (count + 1);
-                                coins.push({ x: pRight.x + spacing * (k + 1), y: pRight.y - 25, collected: false });
+                                coins.push({ x: pRight.x + spacing * (k + 1) - 6, y: pRight.y - 25, collected: false });
                             }
                             // Enemy on Right (Aimed Shooter)
                             enemies.push({
@@ -1343,7 +1411,7 @@
                         for (let k = 0; k < 4; k++) {
                             let spacing = pMove.width / (5);
                             coins.push({
-                                x: pMove.x + spacing * (k + 1),
+                                x: pMove.x + spacing * (k + 1) - 6,
                                 y: pMove.y - 25,
                                 collected: false,
                                 attachedTo: pMove,
@@ -1366,12 +1434,12 @@
                         // Na prośbę: ostatnie dwa coiny umieść na podłodze na samym dole, po prawej stronie ekranu obok siebie
 
                         // Ground Right (As requested)
-                        coins.push({ x: GAME_WIDTH - 60, y: GAME_HEIGHT - 80, collected: false });
-                        coins.push({ x: GAME_WIDTH - 100, y: GAME_HEIGHT - 80, collected: false });
+                        coins.push({ x: GAME_WIDTH - 60 - 6, y: GAME_HEIGHT - 80, collected: false });
+                        coins.push({ x: GAME_WIDTH - 100 - 6, y: GAME_HEIGHT - 80, collected: false });
 
                         // Ground Left (Added to reach 28 total coins, to balance gameplay)
-                        coins.push({ x: 60, y: GAME_HEIGHT - 80, collected: false });
-                        coins.push({ x: 100, y: GAME_HEIGHT - 80, collected: false });
+                        coins.push({ x: 60 - 6, y: GAME_HEIGHT - 80, collected: false });
+                        coins.push({ x: 100 - 6, y: GAME_HEIGHT - 80, collected: false });
 
                         // Total Calculation:
                         // Sides: 10 beams * 2 coins = 20.
@@ -1414,7 +1482,7 @@
 
                             for (let i = 0; i < count; i++) {
                                 let spacing = p.width / (count + 1);
-                                coins.push({ x: p.x + spacing * (i + 1), y: p.y - 25, collected: false });
+                                coins.push({ x: p.x + spacing * (i + 1) - 6, y: p.y - 25, collected: false });
                             }
                         }
                     });
@@ -1507,7 +1575,12 @@
             document.getElementById('controls-settings').classList.add('hidden');
             document.getElementById('gameover').classList.add('hidden');
             document.getElementById('level-complete').classList.add('hidden');
+            document.getElementById('level-complete').classList.add('hidden');
             document.getElementById('final-screen').classList.add('hidden');
+
+            // Ukryj instrukcję klawiatury na laptopie po starcie gry
+            const kbInfo = document.getElementById('keyboard-info');
+            if (kbInfo) kbInfo.style.setProperty('display', 'none', 'important');
         }
 
         function repositionPauseButton() {
@@ -1526,9 +1599,30 @@
         }
 
         window.addEventListener('resize', repositionPauseButton);
-        window.addEventListener('load', repositionPauseButton);
+        window.addEventListener('load', () => {
+            repositionPauseButton();
+            detectDeviceType(); // Wykryj typ urządzenia przy starcie
+        });
         // Call periodically in case of layout shifts
         setInterval(repositionPauseButton, 500);
+
+        function detectDeviceType() {
+            function isTouchDevice() {
+                return (('ontouchstart' in window) ||
+                    (navigator.maxTouchPoints > 0) ||
+                    (navigator.msMaxTouchPoints > 0));
+            }
+
+            if (isTouchDevice()) {
+                document.body.classList.add('is-touch');
+                document.body.classList.remove('is-desktop');
+                console.log("Device detected: TOUCH");
+            } else {
+                document.body.classList.add('is-desktop');
+                document.body.classList.remove('is-touch');
+                console.log("Device detected: DESKTOP");
+            }
+        }
 
         function showShootNotification() {
             showGenericNotification('<img src="strzelaj.webp" style="max-width: 100%;">', 'transparent');
@@ -1889,7 +1983,7 @@
                         // Losowa lokalizacja między X: 50-750, Y: 150-450
                         const rx = 50 + Math.random() * (GAME_WIDTH - 100);
                         const ry = 150 + Math.random() * (300);
-                        items.push({ x: rx, y: ry, type: 'doubleShield', collected: false });
+                        items.push({ x: rx, y: ry, type: 'orangeShield', collected: false });
                     }
                 }
 
@@ -2044,7 +2138,7 @@
                                 e.aiShotCount = 0;
                             }
                             playSFX(sfxShotEnemy);
-                            e.shootTimer = 240; // 4 sekundy między seriami
+                            e.shootTimer = 300; // 5 sekund między seriami
                         } else {
                             // Faza 2: Szybkie pociski w górę (5 razy - "w serii")
                             // 2 pociski prosto w górę
@@ -2239,11 +2333,31 @@
                 const bossHitMarginX = 30; // Margines poziomy (pocisk trafi głębiej w sprite)
                 const bossHitMarginY = 20; // Margines pionowy
                 if (boss && pb.x < boss.x + boss.width - bossHitMarginX && pb.x + 5 > boss.x + bossHitMarginX && pb.y < boss.y + boss.height - bossHitMarginY && pb.y + 5 > boss.y + bossHitMarginY) {
-                    const damage = pb.isSolar ? 10 : (pb.isMecha ? 2 : (pb.isFlame ? 1.33 : 1));
+                    const damage = pb.isSolar ? 10 : (pb.isMecha ? 4 : (pb.isFlame ? 1 : 1));
                     boss.hp -= damage;
                     boss.flash = 5;
                     playerBullets.splice(i, 1);
                     updateUI();
+
+                    // LOGIKA "PRAWIE" - Powiadomienie przy 380 HP (po leczeniu)
+                    if (boss.hp <= 380 && !boss.prawieShown && boss.hasHealedOnce) {
+                        boss.prawieShown = true;
+                        const notif = document.getElementById('boss-notification');
+                        if (notif) {
+                            notif.classList.remove('hidden');
+                            // Wymuś reflow, żeby animacja opacity zadziałała
+                            void notif.offsetWidth;
+                            notif.style.opacity = '1';
+
+                            setTimeout(() => {
+                                notif.style.opacity = '0';
+                                setTimeout(() => {
+                                    notif.classList.add('hidden');
+                                }, 1000); // Czas tranzycji CSS
+                            }, 8000); // 8 sekund widoczności
+                        }
+                    }
+
                     if (boss.hp <= 0 && !boss.isDying) {
                         if (boss.hasHealedOnce) {
                             boss.isDying = true;
@@ -2359,6 +2473,12 @@
                         if (it.type === 'doubleShield') {
                             player.shieldLevel = 2; // 2 trafienia dla niebieskiej zbroi
                             // Odt  wórz dźwięk power-up
+                            sfxPowerUp.currentTime = 0;
+                            sfxPowerUp.play().catch(() => { });
+                        }
+                        if (it.type === 'orangeShield') {
+                            player.shieldLevel = 3; // 3 trafienia dla pomarańczowej zbroi
+                            // Odtwórz dźwięk power-up
                             sfxPowerUp.currentTime = 0;
                             sfxPowerUp.play().catch(() => { });
                         }
@@ -2953,7 +3073,7 @@
 
             // Stylówa Wzniesienia - na szaro i smutno (do czasu)
             document.documentElement.style.setProperty('--bg', '#808080');
-            document.documentElement.style.setProperty('--accent', '#505050');
+            document.documentElement.style.setProperty('--accent', '#FFFFFF');
 
             // Upewnij się, że przycisk strzelania jest aktywny na poziomie Uplifting, a solarny ukryty
             const shootBtn = document.getElementById('btn-shoot');
@@ -3154,7 +3274,7 @@
                     } else if (finalCutsceneStep === 11) { // Pokaz "dziekuje.webp" i koniec
                         // Stylizacja ekranu końcowego
                         document.documentElement.style.setProperty('--bg', '#347DDD');
-                        document.documentElement.style.setProperty('--accent', '#1A4580'); // Ciemniejszy niebieski dla kontrastu
+                        document.documentElement.style.setProperty('--accent', '#5C87FF'); // Ciemniejszy niebieski dla kontrastu
                         if (!buttonsAdded) {
                             buttonsAdded = true;
                             addFinalScreenButtons();
@@ -3428,7 +3548,8 @@
                         currentImg = imgPancerzCzerwony;
                     }
                 } else if (player.shieldLevel > 0) {
-                    if (player.shieldLevel === 2) currentImg = imgPancerzNiebieski; // Poziom 2 = Niebieski
+                    if (player.shieldLevel === 3) currentImg = imgPomaranczowaZbroja; // Poziom 3 = Pomarańczowy
+                    else if (player.shieldLevel === 2) currentImg = imgPancerzNiebieski; // Poziom 2 = Niebieski
                     else currentImg = imgPancerzZielony; // Poziom 1 = Zielony
                 }
                 // Nie ma else if (surprised) tutaj, ponieważ nadpisałoby to obrazy tarczy/trzeźwości.
@@ -3655,31 +3776,41 @@
 
             items.forEach(it => {
                 if (!it.collected) {
-                    const bob = Math.sin(Date.now() / 400 + it.x) * 5;
-                    let img = null;
-                    let iw = it.width || 40;
-                    let ih = it.height || 40;
+                    try {
+                        const bob = Math.sin(Date.now() / 400 + it.x) * 5;
+                        let img = null;
+                        let iw = it.width || 40;
+                        let ih = it.height || 40;
 
-                    if (it.type === 'shield') { img = imgTarczaZielona; iw = 80; ih = 80; } // 2x size
-                    else if (it.type === 'doubleShield') { img = imgTarczaNiebieska; iw = 80; ih = 80; } // 2x size
-                    else if (it.type === 'hourglass') img = imgKlepsydra;
-                    else if (it.type === 'sober') { img = imgTrzezwosc; iw = 150; ih = 150; }
-                    else if (it.type === 'solar') { img = imgDzialoSolarne; iw = 240; ih = 240; }
-                    else if (it.type === 'mega_mech') { img = imgMegaMechIcon; iw = 100; ih = 100; }
+                        if (it.type === 'shield') { img = imgTarczaZielona; iw = 80; ih = 80; } // 2x size
+                        else if (it.type === 'doubleShield') { img = imgTarczaNiebieska; iw = 80; ih = 80; } // 2x size
+                        else if (it.type === 'orangeShield') {
+                            if (typeof imgTarczaPomaranczowa !== 'undefined') img = imgTarczaPomaranczowa;
+                            iw = 80; ih = 80;
+                        } // 2x size
+                        else if (it.type === 'hourglass') img = imgKlepsydra;
+                        else if (it.type === 'sober') { img = imgTrzezwosc; iw = 150; ih = 150; }
+                        else if (it.type === 'solar') { img = imgDzialoSolarne; iw = 240; ih = 240; }
+                        else if (it.type === 'mega_mech') { img = imgMegaMechIcon; iw = 100; ih = 100; }
 
-                    if (img && img.complete) {
-                        ctx.drawImage(img, it.x - iw / 2, it.y - ih / 2 + bob, iw, ih);
+                        if (img && img.complete) {
+                            ctx.drawImage(img, it.x - iw / 2, it.y - ih / 2 + bob, iw, ih);
 
-                        if (it.type === 'mega_mech') {
-                            ctx.fillStyle = 'white';
-                            ctx.font = 'bold 20px "Courier New", Courier, monospace';
-                            ctx.textAlign = 'center';
-                            ctx.shadowColor = 'black';
-                            ctx.shadowBlur = 4;
-                            ctx.fillText('MEGA MECH', it.x, it.y - ih / 2 - 10 + bob);
-                            ctx.shadowBlur = 0;
+                            if (it.type === 'mega_mech') {
+                                ctx.fillStyle = 'white';
+                                ctx.font = 'bold 20px "Courier New", Courier, monospace';
+                                ctx.textAlign = 'center';
+                                ctx.shadowColor = 'black';
+                                ctx.shadowBlur = 4;
+                                ctx.fillText('MEGA MECH', it.x, it.y - ih / 2 - 10 + bob);
+                                ctx.shadowBlur = 0;
+                            }
+                        } else {
+                            // Fallback
+                            ctx.fillStyle = it.type === 'orangeShield' ? 'orange' : 'magenta';
+                            ctx.fillRect(it.x - iw / 2, it.y - ih / 2 + bob, iw, ih);
                         }
-                    }
+                    } catch (e) { console.error(e); }
                 }
             });
 

@@ -120,7 +120,7 @@
             right: 0;
             width: 100%;
             padding: 0 2px;
-            /* Zmniejszono marginesy boczne z 20px na 2px */
+            /* Marginesy fit */
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
@@ -130,7 +130,7 @@
 
         .control-btn {
             width: 76px;
-            /* Zmniejszone o 10% z 85px */
+            /* Mniejszy guzik */
             height: 76px;
             background: transparent;
             border: none;
@@ -140,7 +140,7 @@
             pointer-events: auto;
             transition: transform 0.1s;
             touch-action: none;
-            /* Blokuje gesty systemowe na przyciskach */
+            /* Bez macania systemu */
             -webkit-user-select: none;
             user-select: none;
             -webkit-touch-callout: none;
@@ -172,7 +172,7 @@
         .action-btns {
             display: flex;
             flex-direction: column;
-            /* Domyślnie pionowo: Ogień nad Skokiem */
+            /* Pionowo: Ogień/Skok */
             gap: 1px;
             align-items: center;
         }
@@ -188,7 +188,7 @@
             align-items: center;
         }
 
-        /* ZMIANA: Powiększone TYLKO strzałki (dół, lewo, prawo) dla trybu strzałek */
+        /* WIELKIE STRZAŁKI */
         .controls.layout-keyboard .d-pad .control-btn {
             width: 95px;
             /* Powiększone */
@@ -200,7 +200,7 @@
             height: 100px;
         }
 
-        /* ZMIANA: Przyciski akcji (Skok, Strzał, Solar) powiększone o 20% (76px -> 91px) */
+        /* WIELKIE GUZIKI (76->91px) */
         .controls.layout-keyboard .action-btns .control-btn {
             width: 91px;
             height: 91px;
@@ -484,13 +484,13 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Opening Music - Move to top for faster load
+        // Muzyka wjazdu - dajemy na górę, żeby grało od razu!
         const bgMusicOpening = new Audio('opening.opus');
         bgMusicOpening.loop = true;
         bgMusicOpening.volume = 1;
         bgMusicOpening.play().catch(e => console.log("Autoplay blocked/loading:", e));
 
-        // Game Constants
+        // Stałe Gry - Nie ruszać, bo się posypie
         const GAME_WIDTH = 800;
         const GAME_HEIGHT = 600;
         const GRAVITY = 0.6;
@@ -499,7 +499,7 @@
         const COINS_TO_WIN = 28;
         const MAX_LIVES = 20;
 
-        // Simple SFX Pools (Works on local files without CORS issues)
+        // Basen Dźwięków (Działa lokalnie bez płaczu o CORS)
         const sfxPools = {};
         function preloadSFX(name, url, count = 5) {
             sfxPools[name] = {
@@ -638,7 +638,7 @@
             { bg: '#1e0a0a', platforms: '#7f1d1d', accent: '#ef4444', ground: '#450a0a', stars: '#fecaca' }, // Level 7 (Czerwień - Boss)
         ];
 
-        // Assets Loader
+        // Ładowarka Zasobów - Karmimy grę obrazkami
         const assets = {
             images: {},
             total: 0,
@@ -723,7 +723,7 @@
             }
         }
 
-        // Preload Images
+        // Wstępne Ładowanie - Żeby nie mrugało jak stroboskop
 
         const imgTlo = [];
         for (let i = 1; i <= 4; i++) imgTlo.push(loadImage(`tlo_${i}`, `tlo_${i}.webp`));
@@ -827,7 +827,7 @@
         const sfxPowerUp = new Audio('power_up.opus'); sfxPowerUp.volume = 1;
         const sfxMech = new Audio('mech.opus'); sfxMech.volume = 1;
 
-        // Performance Optimization: Offscreen Canvas for Background and Stars
+        // Optymalizacja: Płótno w tle renderowane na boku
         const bgBufferCanvas = document.createElement('canvas');
         bgBufferCanvas.width = GAME_WIDTH;
         bgBufferCanvas.height = GAME_HEIGHT;
@@ -836,7 +836,7 @@
         function preRenderBackground() {
             const scheme = COLOR_SCHEMES[(level - 1) % COLOR_SCHEMES.length];
 
-            // Draw Background Image or Solid Color
+            // Rysuj tło albo chociaż kolor, jak bida
             if (currentLevelTlo && currentLevelTlo instanceof HTMLImageElement && currentLevelTlo.complete) {
                 bgBufferCtx.drawImage(currentLevelTlo, 0, 0);
             } else {
@@ -849,7 +849,7 @@
 
         const starsCanvas = document.createElement('canvas'); // Deprecated
 
-        // Game State
+        // Stan Gry - Co się tu w ogóle wyprawia
         let gameState = 'menu';
         let level = 1;
         let score = 0;
@@ -911,9 +911,9 @@
         let lastTime = 0;
         let shotPressedPrev = false; // For debouncing skip
 
-        // Input Utilities
+        // Obsługa Paluchów i Klawiszy
         function setupControls() {
-            // Mapping IDs to keys
+            // Mapa guzików - co jest czym
             const btnMap = {
                 'btn-left': 'left',
                 'btn-right': 'right',
@@ -931,7 +931,7 @@
             const updateTouchKeys = (e) => {
                 const activeKeys = new Set();
 
-                // Iterate over ALL active touches
+                // Przelecimy przez WSZYSTKIE paluchy na ekranie
                 for (let i = 0; i < e.touches.length; i++) {
                     const touch = e.touches[i];
                     const element = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -945,7 +945,7 @@
                     }
                 }
 
-                // Apply to global keys object (Touch logic overwrites)
+                // Zaktualizuj globalne klawisze (Dotyk rządzi)
                 Object.values(btnMap).forEach(k => {
                     // Simple OR logic with existing keyboard state would be better if we tracked them separately,
                     // but here we just blindly update based on touch.
@@ -1046,7 +1046,7 @@
 
             generateLevel(level);
 
-            // Cache level assets for performance
+            // Chomikujemy zasoby dla wydajności
             const schemeLvl = COLOR_SCHEMES[(level - 1) % COLOR_SCHEMES.length];
             currentLevelTlo = imgTlo[level - 1] || imgTlo[0];
 
@@ -1128,14 +1128,14 @@
             boss = null;
 
             if (lvl <= 6) {
-                // Fixed platforms on sides (5 on each side)
+                // Sztywne platformy po bokach (5 sztuk na stronę)
                 for (let i = 0; i < 5; i++) {
                     const yPos = 120 + (i * 90);
                     platforms.push({ x: 20, y: yPos, width: 120, height: 20, isGround: false });
                     platforms.push({ x: GAME_WIDTH - 140, y: yPos, width: 120, height: 20, isGround: false });
                 }
 
-                // Fixed middle platforms (3 short ones)
+                // Środkowe platformy (3 krótasy)
                 const middleWidth = (lvl === 4 || lvl === 3) ? 120 : 80;
                 platforms.push({ x: GAME_WIDTH / 2 - middleWidth / 2, y: 200, width: middleWidth, height: 20, isGround: false });
                 platforms.push({ x: GAME_WIDTH / 2 - middleWidth / 2, y: 350, width: middleWidth, height: 20, isGround: false });
@@ -1189,7 +1189,7 @@
 
                 if (lvl >= 5) {
                     if (lvl === 6) {
-                        // Level 6: COMPLEX LAYOUT & FALLING COINS & KARCZMARZ
+                        // Level 6: CHAOS TOTALNY - MONETY LECĄ, KARCZMARZ SZALEJE
                         platforms = [{ x: 0, y: GAME_HEIGHT - 40, width: GAME_WIDTH, height: 40, isGround: true }];
                         enemies = [];
                         coins = [];
@@ -1232,13 +1232,13 @@
                             stunCooldown: 0
                         });
 
-                        // Falling Coins Setup
-                        // We do NOT generate initial coins. They will spawn in update()
+                        // Deszcz Monet - Konfiguracja
+                        // NIE generujemy monet na starcie. Będą spadać w update()
                         coinsCollected = 0;
                         level6CoinSpawnTimer = 0;
                         level6CoinsSpawned = 0;
 
-                        // Intro Setup
+                        // Ustawienia Intro - Gadające Głowy
                         level6IntroStep = 0;
                         level6IntroTimer = 0;
                         level6OutroActive = false;
@@ -1255,7 +1255,7 @@
                         player.x = 100;
                         player.y = GAME_HEIGHT - 120 - player.height;
 
-                        // Skip intro on retry
+                        // Pomiń intro przy restarcie - ileż można słuchać
                         if (level6IntroSeen) {
                             level6IntroStep = 5;
                             // Spawn armor immediately when skipping intro
@@ -1363,7 +1363,7 @@
                         });
 
                         // 3. Ground Coins
-                        // User requested "ostatnie dwa coiny umieść na podłodze na samym dole, po prawej stronie ekranu obok siebie"
+                        // Na prośbę: ostatnie dwa coiny umieść na podłodze na samym dole, po prawej stronie ekranu obok siebie
 
                         // Ground Right (As requested)
                         coins.push({ x: GAME_WIDTH - 60, y: GAME_HEIGHT - 80, collected: false });
@@ -1420,7 +1420,7 @@
                     });
                 }
             } else if (lvl === 7) {
-                // BOSS LEVEL - Simplified
+                // POZIOM BOSSA - Ręczna robota, bez automatu
                 // BOSS LEVEL - Manualne ustawienie belek
                 // format: { x: POZYCJA_X, y: POZYCJA_Y, width: SZEROKOSC, height: 20, isGround: false }
 
@@ -1516,7 +1516,7 @@
             if (!btn || !container) return;
 
             const rect = container.getBoundingClientRect();
-            // Calculate center of the space below the canvas
+            // Obliczrodek miejsca pod płótnem
             const spaceBelow = window.innerHeight - rect.bottom;
             const centerY = rect.bottom + (spaceBelow / 2);
 
@@ -1538,7 +1538,7 @@
             const notify = document.createElement('div');
             notify.className = 'game-notification';
             notify.style.position = 'absolute';
-            notify.style.top = '20%'; // Always on top as requested
+            notify.style.top = '20%'; // Zawsze na górze
             notify.style.left = '50%';
             notify.style.transform = 'translate(-50%, -50%)';
             notify.style.opacity = '0';
@@ -1558,7 +1558,7 @@
             notify.style.maxWidth = '80%';
             notify.innerHTML = html;
 
-            // Re-ensure no older notifications stay behind
+            // Usuń stare powiadomienia
             document.querySelectorAll('.game-notification').forEach(n => {
                 if (n !== notify) {
                     n.style.opacity = '0';
@@ -1568,7 +1568,7 @@
 
             document.getElementById('game-container').appendChild(notify);
 
-            // Fade-in trigger
+            // Zanikanie
             setTimeout(() => notify.style.opacity = '1', 50);
             setTimeout(() => {
                 notify.style.opacity = '0';
@@ -1577,7 +1577,7 @@
         }
 
         function spawnHourglass() {
-            // Spawn hourglass at random location
+            // Pojawienie się klepsydry w losowym miejscu
             const rx = 100 + Math.random() * (GAME_WIDTH - 200);
             const ry = 150 + Math.random() * (300);
             items.push({ x: rx, y: ry, type: 'hourglass', collected: false });
@@ -1593,7 +1593,7 @@
             screenFlashTimer = 0;
             if (level === 7) {
                 bgMusicKarczma.pause();
-                bgMusic.pause(); // Safety
+                bgMusic.pause(); // Bezpieczeństwo
                 musicStarted = false;
                 startMusic();
             } else if (level === 6) {
@@ -1641,7 +1641,7 @@
                     const oldH = player.height;
                     player.width = 70;
                     player.height = 70;
-                    player.y += (oldH - 70); // Adjust feet to stay on ground
+                    player.y += (oldH - 70); // Ustaw stopy na ziemi
 
                     // Przywróć przycisk solarny jeśli gracz ma bonus
                     if (player.hasSolarBonus) {
@@ -1656,12 +1656,12 @@
                 if (player.soberArmor < 4) {
                     player.soberArmor++;
                     if (player.soberArmor === 4) {
-                        // Reset size to normal
+                        // Reset rozmiaru do normalnego
                         const oldH = player.height;
                         player.height = 70;
                         player.width = 70;
-                        player.y += (oldH - 70); // Drop down to align feet
-                        // player.isSober = true; // Keep true to render peka4
+                        player.y += (oldH - 70); // Ustaw stopy na ziemi
+                        // player.isSober = true; // Zostawić true, żeby pokazać peka4
 
                         // Ukryj przycisk solarny przy zniszczeniu pancerza (peka4)
                         const btnSolar = document.getElementById('btn-solar');
@@ -1675,7 +1675,7 @@
             }
 
             if (player.shieldLevel > 0) {
-                // If Blue (2), 1st hit drops to Green (1). 2nd hit returns to Normal (0).
+                // Jeśli niebieski (2), pierwsze uderzenie spada do zielonego (1). Drugie uderzenie wraca do normalnego (0).
                 player.shieldLevel--;
                 effects.push({ x: player.x + player.width / 2, y: player.y + player.height / 2, type: 'cloud', timer: 30 });
                 player.invincibilityTimer = 60; // 1 second of i-frames
@@ -1689,17 +1689,17 @@
                 document.body.classList.remove('playing');
                 document.getElementById('gameover').classList.remove('hidden');
 
-                // Stop all music
+                // Zatrzymaj wszystkie muzyki
                 if (bgMusic) { bgMusic.pause(); bgMusic.currentTime = 0; }
                 if (bgMusicBoss) { bgMusicBoss.pause(); bgMusicBoss.currentTime = 0; }
                 if (bgMusicKarczma) { bgMusicKarczma.pause(); bgMusicKarczma.currentTime = 0; }
                 if (bgMusicEnding) { bgMusicEnding.pause(); bgMusicEnding.currentTime = 0; }
 
-                // Play Game Over Sound
+                // Dźwięk game over
                 playSFX('game_over');
             } else {
                 initLevel();
-                player.invincibilityTimer = 120; // Longer i-frames after respawm (2 seconds)
+                player.invincibilityTimer = 120; // Dłuższe i-frames po respawnie (2 sekundy)
             }
         }
 
@@ -1711,12 +1711,12 @@
             showCelebration = true;
             document.body.classList.remove('playing');
 
-            // Cleanup entities to remove frozen bullets/enemies
+            // Sprzątamy bałagan - usuwamy zamrożone pociski i wrogów
             bullets = [];
             enemies = [];
             items = [];
 
-            // Player Lying Down Logic
+            // Logika leżenia
             player.isMegaMech = false;
             player.isSober = false;
             player.hasSolarBonus = false;
@@ -1724,15 +1724,15 @@
             player.vx = 0;
             player.vy = 0;
 
-            // Simple Ending Flags - Default False
+            // Flagi zakończenia - Domyślnie fałsz
             bossEndingSimple = false;
 
             if (level === 7) {
                 bossEndingSimple = true;
                 lezyAnimX = GAME_WIDTH / 2 - 75; // Center 150px width
-                lezyAnimY = GAME_HEIGHT - 80; // Ground level
+                lezyAnimY = GAME_HEIGHT - 80; // Poziom ziemi
 
-                // Stop all music
+                // Zatrzymaj wszystkie muzyki
                 [bgMusic, bgMusicBoss, bgMusicKarczma, bgMusicEnding].forEach(m => {
                     if (m) {
                         m.pause();
@@ -1748,9 +1748,9 @@
                 bgMusic.volume = 0.2;
             }
 
-            // Extended Sequence Timings
+            // Rozszerzone czasy sekwencji
             if (level === 7) {
-                // Boss Level - Slow & Dramatic (Delay added +4s)
+                // Poziom Bossa - Powoli i z Dramą (+4s napięcia)
                 setTimeout(() => abductionPhase = 1, 500);
                 setTimeout(() => abductionPhase = 2, 6000);
                 setTimeout(() => abductionPhase = 3, 8000);
@@ -1766,7 +1766,7 @@
                     startUpliftLevel();
                 }, 13000);
             } else {
-                // Normal Levels - Fast Abduction
+                // Zwykłe Levele - Szybka akcja, porywamy i lecimy
                 setTimeout(() => abductionPhase = 1, 500);
                 setTimeout(() => abductionPhase = 2, 1500); // Quick wait
                 setTimeout(() => abductionPhase = 3, 3000); // Beam quick
@@ -1775,21 +1775,21 @@
                     playerAbductX = player.x;
                     playerAbductY = player.y;
                     playerAbductStartTime = Date.now();
-                    // For normal levels, player stands (isLyingDown was set true globally, maybe we should set false?)
-                    // Actually let's force false here just in case visual implies standing
+                    // Dla normalnych poziomów, gracz stoi (isLyingDown było ustawione globalnie, może powinniśmy ustawić false?)
+                    // Właściwie wymuśmy false tutaj na wszelki wypadek, gdyby wizualnie sugerowało stanie
                     player.isLyingDown = false;
-                }, 4500); // Lift
+                }, 4500); // Poziom uplifting, po zabraniu po Bossie przez UFO
                 setTimeout(() => {
                     abductionPhase = 5;
                     document.getElementById('level-complete').classList.remove('hidden');
-                }, 7000); // End
+                }, 7000); // Koniec
             }
         }
 
         function update() {
             if (gameState !== 'playing' && gameState !== 'celebrating') return;
 
-            // dt removed, game speed now depends on FPS
+            // dt usunięte, prędkość gry zależy teraz od FPS
 
             if (player.isAutoWalking) {
                 const targetX = GAME_WIDTH / 2 - player.width / 2;
@@ -1805,7 +1805,7 @@
                     startUfoAbduction();
                 }
 
-                // Keep physics for auto-walk (gravity/platforms)
+                // Fizyka dla auto-walku (grawitacja/platformy)
                 player.vy += 0.8;
                 player.y += player.vy;
                 player.onGround = false;
@@ -1823,112 +1823,112 @@
 
             if (showCelebration) return;
 
-            // Level 6 Outro: Collected all coins
+            // Level 6 Outro: Zebrałeś wszystko, czas na nagrodę
             if (level === 6 && coinsCollected >= 56 && !level6OutroActive) {
                 level6OutroActive = true;
                 level6OutroTimer = 0;
             }
 
             if (level6OutroActive) {
-                if (level6OutroTimer === 0) playSFX(sfxButton); // Add sound
+                if (level6OutroTimer === 0) playSFX(sfxButton); // Dodaj dźwięk
 
-                // Only increment timer if not fully faded
+                // Zwiększaj timer tylko jeśli nie jest w pełni wyblakły
                 if (level6OutroFade < 1) {
                     if (level6OutroFade === 0) {
                         level6OutroTimer += 16.6;
-                        // Allow skip with shoot - jumps to fade start
+                        // Pozwól na pominięcie strzałem - przeskocz do początku wyblaknięcia
                         if (keys.shoot && !shotPressedPrev) {
                             level6OutroTimer = 6001;
                         }
                         shotPressedPrev = keys.shoot;
                     }
 
-                    // After 6 seconds (previously 4), start fading
+                    // Po 6 sekundach (wcześniej 4), zacznij wyblaknięcie
                     if (level6OutroTimer > 6000) {
-                        level6OutroFade += 0.01; // Fade speed (approx 1.5s)
+                        level6OutroFade += 0.01; // Prędkość wyblaknięcia (ok. 1.5s)
                     }
                 } else {
-                    // Fade complete (>= 1)
+                    // Wyblaknięcie zakończone (>= 1)
                     level6OutroActive = false;
                     level6OutroComplete = true;
                     level6OutroFade = 0;
-                    nextLevel(); // Go directly to Boss Level (Level 7)
+                    nextLevel(); // Przejdź bezpośrednio do Poziomu Bossa (Poziom 7)
                     return;
                 }
                 return;
             }
 
-            // Boss Intro Logic
+            // Logika intro Bossa
             if (level === 7 && introTimer < INTRO_DURATION) {
-                introTimer += 16.6; // approx 60fps step
-                return; // During boss intro, game is paused
+                introTimer += 16.6; // około 60fps
+                return; // W trakcie intro Bossa, gra jest zatrzymana
             }
 
-            // Level 6 Intro Cutscene
+            // Scena wprowadzająca do Poziomu 6
             if (level === 6 && level6IntroStep < 5) {
-                if (level6IntroTimer === 0) playSFX(sfxButton); // Sound on step start
+                if (level6IntroTimer === 0) playSFX(sfxButton); // Dźwięk na start kroku
                 level6IntroTimer += 16.6;
-                // Allow skip with shoot button
+                // Pozwól na pominięcie strzałem
                 if (keys.shoot && !shotPressedPrev) {
                     level6IntroStep++;
                     level6IntroTimer = 0;
                 }
-                // Auto advance after 4 seconds
+                // Automatyczne przejście po 4 sekundach
                 if (level6IntroTimer > 4000) {
                     level6IntroStep++;
                     level6IntroTimer = 0;
                 }
 
-                // Trigger notification when cutscene ends (step becomes 5) - Gameplay Starts
+                // Wyświetl powiadomienie, gdy scena cutscenki się zakończy (krok staje się 5) - Rozpoczęcie rozgrywki
                 if (level6IntroStep === 5) {
                     showGenericNotification('<img src="karczma.webp" style="max-width: 100%;">', 'transparent');
 
                     // ZMIANA: Pancerz pojawia się losowo tuż po dialogach
                     if (!armorDropped) {
                         armorDropped = true;
-                        // Random location between X: 50-750, Y: 150-450
+                        // Losowa lokalizacja między X: 50-750, Y: 150-450
                         const rx = 50 + Math.random() * (GAME_WIDTH - 100);
                         const ry = 150 + Math.random() * (300);
                         items.push({ x: rx, y: ry, type: 'doubleShield', collected: false });
                     }
                 }
 
-                shotPressedPrev = keys.shoot; // Track previous state to prevent rapid skipping
-                return; // Pause game logic during cutscene
+                shotPressedPrev = keys.shoot; // Śledź poprzedni stan, aby zapobiec szybkiemu pomijaniu
+                return; // Wstrzymaj logikę gry podczas cutscenki
             }
             shotPressedPrev = keys.shoot;
 
-            // BONUS: Klepsydra Logic
+            // BONUS: Logika Klepsydry
             if (timeFreezeActive) {
                 timeFreezeTimer--;
                 if (timeFreezeTimer <= 0) {
                     timeFreezeActive = false;
-                    // Restore background music volume
+                    // Przywróć głośność muzyki w tle
                     if (level === 6) {
-                        // bgMusicKarczma.volume = 0.4; // Removed request: don't change volume
+                        // bgMusicKarczma.volume = 0.4; // Usunięto żądanie: nie zmieniaj głośności
                     }
                 }
             } else if (level === 6 && level6IntroStep === 5) {
-                // Gameplay active, no freeze
+                // Aktywna rozgrywka, brak zamrożenia
                 level6GameplayTimer += 16.6; // ms
                 const seconds = level6GameplayTimer / 1000;
 
-                // Spawn hourglass: first at 18s, then every 15s
+                // Pojawienie się klepsydry: najpierw o 18s, potem co 15s
                 if (seconds >= 18 && lastHourglassSpawnTime === 0) {
-                    // First spawn at 18 seconds
+                    // Pierwsze pojawienie się o 18 sekund
                     lastHourglassSpawnTime = level6GameplayTimer;
                     spawnHourglass();
                 } else if (lastHourglassSpawnTime > 0 && (seconds - lastHourglassSpawnTime / 1000) >= 15) {
-                    // Subsequent spawns every 15 seconds
+                    // Kolejne pojawienia co 15 sekund
                     lastHourglassSpawnTime = level6GameplayTimer;
                     spawnHourglass();
                 }
             }
 
-            // Moving Platforms Logic (Level 5 & 6)
+            // Ruchome Platformy - Winda w górę, winda w dół
             platforms.forEach(p => {
                 if (p.moving) {
-                    // STOP PLATFORMS IF FREEZE ACTIVE
+                    // ZATRZYMAJ PLATFORMY, JEŚLI AKTYWNE JEST ZAMROŻENIE
                     if (timeFreezeActive) return;
 
                     p.y += p.vy;
@@ -1938,7 +1938,7 @@
                 }
             });
 
-            // Attached Coins Logic
+            // Przyklejone Monety - Jeżdżą na gapę
             coins.forEach(c => {
                 if (c.attachedTo) {
                     c.y = c.attachedTo.y - 25;
@@ -1946,11 +1946,11 @@
                 }
             });
 
-            // Level 6 Falling Coins Logic
+            // Level 6: Deszcz Monet - Niech pada hajs
             if (level === 6) {
-                if (level6CoinsSpawned < 56) { // Target 84 total spawns
+                if (level6CoinsSpawned < 56) { // Cel 84 monet
                     level6CoinSpawnTimer++;
-                    // Spawn every ~0.8 seconds (50 frames)
+                    // Pojawienie się co ~0.8 sekundy (50 klatek)
                     if (level6CoinSpawnTimer > 50) {
                         level6CoinSpawnTimer = 0;
                         level6CoinsSpawned++;
@@ -1959,34 +1959,31 @@
                             y: -50,
                             collected: false,
                             falling: true,
-                            vy: 3 // Falling speed
+                            vy: 3 // Prędkość spadania
                         });
                     }
                 }
 
-                // Physics for falling coins
+                // Fizyka spadających monet - grawitacja robi swoje
                 coins.forEach(c => {
                     if (c.falling) {
-                        // Freeze coins too? User said "platforms stop", "karczmarz stops", "bullets disappear".
-                        // Assuming new physics pauses too if we want "everything returns to state".
-                        // Coins keep falling during time freeze (removed check)
 
                         c.y += c.vy;
-                        // Stop on platforms
+                        // Zatrzymaj się na platformach
                         platforms.forEach(p => {
                             if (c.x > p.x && c.x < p.x + p.width &&
                                 c.y + 10 > p.y && c.y - 10 < p.y) {
                                 c.falling = false;
                                 c.y = p.y - 25;
 
-                                // Attach to moving platform
+                                // Przyczep się do ruchomej platformy
                                 if (p.moving) {
                                     c.attachedTo = p;
                                     c.offsetX = c.x - p.x;
                                 }
                             }
                         });
-                        // Stop on ground
+                        // Zatrzymaj się na ziemi
                         if (c.y > GAME_HEIGHT - 80) {
                             c.falling = false;
                             c.y = GAME_HEIGHT - 80;
@@ -1995,46 +1992,46 @@
                 });
             }
 
-            // Karczmarz Logic Update
+            // Karczmarz Logika update
             enemies.forEach(e => {
                 if (e.type === 'karczmarz') {
                     // ZMIANA: Karczmarz NIE zatrzymuje się podczas time freeze
                     // (usunięto warunek: if (timeFreezeActive) return;)
 
-                    // Update Stun Timer
+                    // Aktualizuj Licznik Ogłuszenia
                     if (e.stunTimer > 0) {
                         e.stunTimer--;
                         if (e.stunTimer <= 0) {
                             e.isCiosany = false;
-                            e.vx = Math.sign(e.vx) * 2; // Restore speed
-                            e.stunCooldown = 0; // Removed cooldown - every hit can now stun
+                            e.vx = Math.sign(e.vx) * 2; // Przywróć prędkość
+                            e.stunCooldown = 0; // Usunięto cooldown - każde uderzenie może teraz ogłuszyć
                         }
                     }
 
-                    // Patrol logic (modified for speed)
-                    // If stunned, vx should be already slowed.
-                    // Just ensure boundary checks preserve current direction sign.
+                    // Logika patrolu (zmodyfikowana pod kątem prędkości)
+                    // Jeśli ogłuszony, vx powinien być już spowolniony.
+                    // Wystarczy upewnić się, że sprawdzenia granic zachowują znak bieżącego kierunku.
                     if (e.x <= 20) { e.x = 20; e.vx = Math.abs(e.vx); }
                     if (e.x >= GAME_WIDTH - e.width - 20) { e.x = GAME_WIDTH - e.width - 20; e.vx = -Math.abs(e.vx); }
                     e.x += e.vx;
 
-                    // Shooting logic - Karczmarz strzela nawet podczas time freeze
+                    // Logika strzelania - Karczmarz strzela nawet podczas time freeze
 
                     e.shootTimer--;
                     if (e.shootTimer <= 0) {
                         if (e.aiPhase === 'aimed') {
-                            // Phase 1: Slow Aimed (5 times)
+                            // Faza 1: Powolne celowanie (5 razy)
                             const dx = (player.x + player.width / 2) - (e.x + e.width / 2);
                             const dy = (player.y + player.height / 2) - (e.y + 20);
                             const angle = Math.atan2(dy, dx);
-                            // Bullet 1 (Slightly up)
+                            // Pocisk 1 (lekko w górę)
                             bullets.push({
                                 x: e.x + e.width / 2, y: e.y + 20,
-                                vx: Math.cos(angle - 0.1) * 2.5, // Even slower (was 3)
+                                vx: Math.cos(angle - 0.1) * 2.5, // Jeszcze wolniej (było 3)
                                 vy: Math.sin(angle - 0.1) * 2.5,
                                 radius: 12
                             });
-                            // Bullet 2 (Slightly down)
+                            // Pocisk 2 (lekko w dół)
                             bullets.push({
                                 x: e.x + e.width / 2, y: e.y + 20,
                                 vx: Math.cos(angle + 0.1) * 2.5,
@@ -2047,10 +2044,10 @@
                                 e.aiShotCount = 0;
                             }
                             playSFX(sfxShotEnemy);
-                            e.shootTimer = 240; // 4 seconds between volleys
+                            e.shootTimer = 240; // 4 sekundy między seriami
                         } else {
-                            // Phase 2: Fast Vertical (5 times - "w serii")
-                            // 2 bullets straight up
+                            // Faza 2: Szybkie pociski w górę (5 razy - "w serii")
+                            // 2 pociski prosto w górę
                             bullets.push({ x: e.x + e.width / 2 - 10, y: e.y, vx: 0, vy: -6, radius: 12 });
                             bullets.push({ x: e.x + e.width / 2 + 10, y: e.y, vx: 0, vy: -6, radius: 12 });
 
@@ -2060,28 +2057,28 @@
                                 e.aiShotCount = 0;
                             }
                             playSFX(sfxShotEnemy);
-                            e.shootTimer = 40; // Fast fire rate (0.6s)
+                            e.shootTimer = 40; // Szybkie tempo strzelania (0.6s)
                         }
                     }
                 }
                 else if (e.type === 'karczmarz_runner') {
-                    // Karczmarz Runner Logic
-                    e.x += e.vx; // Move left
+                    // Karczmarz biegnący Logika
+                    e.x += e.vx; // Poruszaj się w lewo
                     e.shootTimer--;
                     if (e.shootTimer <= 0) {
-                        e.shootTimer = 120; // 2 seconds
-                        // Burst Fire (3 shots rapid vertical)
+                        e.shootTimer = 120; // 2 sekundy
+                        // Salwa (3 strzały szybko w górę)
                         bullets.push({ x: e.x + e.width / 2 - 15, y: e.y, vx: 0, vy: -6, radius: 12 });
                         bullets.push({ x: e.x + e.width / 2, y: e.y - 20, vx: 0, vy: -7, radius: 12 });
                         bullets.push({ x: e.x + e.width / 2 + 15, y: e.y, vx: 0, vy: -6, radius: 12 });
                         playSFX(sfxShotEnemy);
                     }
-                    if (e.x < -100) e.hp = 0; // Remove if far off screen
+                    if (e.x < -100) e.hp = 0; // Usuń jeśli daleko poza ekranem
                 } else if (e.type === 'boss_helper_50') {
                     // Stationary Shooter Logic
                     e.shootTimer--;
                     if (e.shootTimer <= 0) {
-                        e.shootTimer = 120; // 2 seconds
+                        e.shootTimer = 120; // 2 sekundy
                         bullets.push({ x: e.x + 20, y: e.y + 25, vx: -4, vy: -3, radius: 10 });
                         bullets.push({ x: e.x + 20, y: e.y + 25, vx: -4, vy: 3, radius: 10 });
                         playSFX(sfxShotEnemy);
@@ -2089,7 +2086,7 @@
                 }
             });
 
-            // Attached Enemies Logic
+            // Przyczepieni wrogowie Logika
             enemies.forEach(e => {
                 if (e.attachedTo) {
                     e.y = e.attachedTo.y - 50;
@@ -2097,22 +2094,22 @@
                 }
             });
 
-            // Sober Freeze Timer
+            // Trzeźwy Zamrożenie Timer
             if (soberFreezeTimer > 0) {
                 soberFreezeTimer -= 1;
             }
 
-            // Invincibility Timer
+            // Niezwyciężony Timer
             if (player.invincibilityTimer > 0) {
                 player.invincibilityTimer -= 1;
             }
 
-            // Movement
+            // Ruch
             if (keys.left) { player.vx = -MOVE_SPEED; player.facingRight = false; }
             else if (keys.right) { player.vx = MOVE_SPEED; player.facingRight = true; }
             else { player.vx *= 0.8; }
 
-            // Rising Edge Jump Logic: Jump only on fresh press
+            // Skok tylko na świeże wciśnięcie - bez spamowania
             if (keys.jump && !player.prevJumpState && player.onGround) {
                 player.vy = JUMP_FORCE;
                 player.onGround = false;
@@ -2124,19 +2121,19 @@
             player.x += player.vx;
             player.y += player.vy;
 
-            // Boundaries
+            // Granice
             if (player.x < 0) player.x = 0;
             if (player.x > GAME_WIDTH - player.width) player.x = GAME_WIDTH - player.width;
 
-            // Player Shooting
+            // Strzelanie gracza
             let shootCooldown = player.isSober ? 150 : 700;
             if (player.isSober && player.soberArmor === 4) {
-                shootCooldown = 350 * 1.4; // 40% slower when armor is broken
+                shootCooldown = 350 * 1.4; // 40% wolniej gdy zbroja jest zepsuta
             }
 
             if (player.isMegaMech && keys.shoot) {
                 const now = Date.now();
-                if (now - player.lastShootTime > 96) { // 25% Faster (was 120)
+                if (now - player.lastShootTime > 96) { // 25% Szybszy (było 120)
                     playerBullets.push({
                         x: player.x + (player.facingRight ? player.width : 0),
                         y: player.y + player.height / 2,
@@ -2193,7 +2190,7 @@
                     continue;
                 }
 
-                // Collision with ordinary enemies
+                // Kolizja z zwykłymi wrogami
                 let bulletRemoved = false;
                 for (let j = enemies.length - 1; j >= 0; j--) {
                     const e = enemies[j];
@@ -2201,27 +2198,27 @@
                         if (e.type === 'ally_przyjaciel') continue;
 
                         if (e.type === 'karczmarz') {
-                            // Valid Hit Logic
+                            // Prawidłowa logika trafienia
                             if (!e.wasHit) {
                                 karczmarzHitCount++;
                                 e.wasHit = true;
                                 setTimeout(() => e.wasHit = false, 200);
                             }
 
-                            // Stun Logic - ALWAYS stun on hit (removed cooldown check)
+                            // Logika ogłuszenia - ZAWSZE ogłuszaj przy trafieniu (usunięto sprawdzanie limitu czasu)
                             if (e.stunTimer <= 0) {
                                 e.isCiosany = true;
-                                e.stunTimer = 120; // 2 seconds
-                                e.vx = Math.sign(e.vx) * 0.5; // Slow down significantly
+                                e.stunTimer = 120; // 2 sekundy
+                                e.vx = Math.sign(e.vx) * 0.5; // Znaczne spowolnienie
                             }
 
-                            // Blue Armor Drop Logic (Once per level)
-                            // REMOVED: Now drops at start of level
+                            // Logika upuszczania niebieskiej zbroi (raz na poziom)
+                            // USUNIĘTO: Teraz upuszcza się na początku poziomu
                             /* if (karczmarzHitCount === 4 && !armorDropped) { 
                                 ...
                             } */
 
-                            // Don't reduce HP (Invincible)
+                            // Nie zmniejszaj HP (Niezwyciężony)
                         } else {
                             e.hp--;
                         }
@@ -2250,14 +2247,14 @@
                     if (boss.hp <= 0 && !boss.isDying) {
                         if (boss.hasHealedOnce) {
                             boss.isDying = true;
-                            boss.deathTimer = 1500; // Total duration
+                            boss.deathTimer = 1500; // Całkowity czas trwania
                         } else {
                             boss.hp = 0; // Zatrzymaj na 0, pętla update aktywuje Karczmarza
                         }
                     }
                 }
 
-                // Karczmarz Turret Damage
+                // Obrażenia turret Karczmarza
                 enemies.forEach((e, idxE) => {
                     if (e.type === 'karczmarz_turret' && pb.x < e.x + e.width && pb.x + 5 > e.x && pb.y < e.y + e.height && pb.y + 5 > e.y) {
                         const damage = pb.isMecha ? 2 : (pb.isSolar ? 10 : 1);
@@ -2266,23 +2263,23 @@
                         if (e.hp <= 0) {
                             effects.push({ x: e.x + e.width / 2, y: e.y + e.height / 2, type: 'defeat', timer: 90, maxTimer: 90 });
                             enemies.splice(idxE, 1);
-                            if (boss) boss.karczmarzDefeated = true; // Trigger Ally transformation
+                            if (boss) boss.karczmarzDefeated = true; // Aktywuj transformację sojusznika
                         }
                     }
                 });
             }
 
-            // Shoot button opacity based on level
+            // Przezroczystość strzelania - żeby nie kusiło na 1 levelu
             const shootBtn = document.getElementById('btn-shoot');
             if (shootBtn) {
                 shootBtn.style.opacity = level >= 2 ? '1' : '0.3';
                 shootBtn.style.pointerEvents = level >= 2 ? 'auto' : 'none';
             }
 
-            // Collisions
+            // Kolizje - Kto w kogo i dlaczego
             player.onGround = false;
             platforms.forEach(p => {
-                // Simple Jump down logic: ignore platforms if pressing down
+                // Prosta logika zeskakiwania: ignoruj platformy, jeśli naciskasz dół
                 if (keys.down && !p.isGround) {
                     if (player.x < p.x + p.width && player.x + player.width > p.x &&
                         Math.abs((player.y + player.height) - p.y) < 20) {
@@ -2335,12 +2332,12 @@
             for (let i = items.length - 1; i >= 0; i--) {
                 const it = items[i];
                 if (!it.collected) {
-                    // Collision Logic: Use rectangle intersection for large items (Solar), distance for others
+                    // Logika Kolizji: Prostokąt dla bydlaków (Solar), kółko dla reszty
                     let collision = false;
                     if (it.type === 'solar') {
-                        // Solar Hitbox: 100x100 centered at it.x, it.y (visual is 240x240 centered there-ish)
-                        // Actually visual is drawImage(at x, y). So visual rect is [x, y, 240, 240].
-                        // Let's make hitbox generous: [x+40, y+40, 160, 160]
+                        // Hitbox Solar: 100x100 wyśrodkowany na it.x, it.y (wizualny jest 240x240 wyśrodkowany tam-ish)
+                        // W rzeczywistości wizualny jest drawImage(at x, y). Zatem wizualny prostokąt to [x, y, 240, 240].
+                        // Zróbmy hitbox hojny: [x+40, y+40, 160, 160]
                         if (player.x < it.x + 200 && player.x + player.width > it.x + 40 &&
                             player.y < it.y + 200 && player.y + player.height > it.y + 40) {
                             collision = true;
@@ -2348,52 +2345,52 @@
                     } else {
                         const dx = (player.x + player.width / 2) - it.x;
                         const dy = (player.y + player.height / 2) - it.y;
-                        if (Math.sqrt(dx * dx + dy * dy) < 40) collision = true; // Increased from 30 to 40 for better feel
+                        if (Math.sqrt(dx * dx + dy * dy) < 40) collision = true; // Zwiększono z 30 do 40 dla lepszego wyczucia
                     }
 
                     if (collision) {
                         it.collected = true;
                         if (it.type === 'shield') {
                             player.shieldLevel = 1;
-                            // Play power-up sound
+                            // Odtwórz dźwięk power-up
                             sfxPowerUp.currentTime = 0;
                             sfxPowerUp.play().catch(() => { });
                         }
                         if (it.type === 'doubleShield') {
-                            player.shieldLevel = 2; // 2 hits for Blue armor
-                            // Play power-up sound
+                            player.shieldLevel = 2; // 2 trafienia dla niebieskiej zbroi
+                            // Odt  wórz dźwięk power-up
                             sfxPowerUp.currentTime = 0;
                             sfxPowerUp.play().catch(() => { });
                         }
                         if (it.type === 'hourglass') {
-                            // BONUS: Time Freeze Effect - 6.2 seconds
+                            // BONUS: Efekt zamrożenia czasu - 6.2 sekundy
                             timeFreezeActive = true;
-                            timeFreezeTimer = 372; // 6.2 seconds at 60 FPS
+                            timeFreezeTimer = 372; // 6.2 sekundy przy 60 FPS
 
-                            // Play hourglass music removed
+                            //  Usunięto muzykę z klepsydry
 
 
-                            // Lower background music volume
+                            // Obniż głośność muzyki w tle
                             if (level === 6) {
-                                // bgMusicKarczma.volume = 0.15; // Removed request: don't lower volume
+                                // bgMusicKarczma.volume = 0.15; // Usunięto prośbę: nie obniżaj głośności
                             }
 
-                            // Play power-up sound
+                            // Odtwórz dźwięk power-up
                             sfxPowerUp.currentTime = 0;
                             sfxPowerUp.play().catch(() => { });
 
-                            // Clear all bullets when time freezes
+                            // Wyczyść wszystkie pociski, gdy czas zamarznie
                             bullets = [];
                         }
                         if (it.type === 'sober') {
                             const oldHeight = player.height;
                             player.isSober = true;
-                            player.height = 150; // Visual scale matches logic
+                            player.height = 150; // Wizualna skala pasuje do logiki
                             player.width = 150;
-                            player.y -= (player.height - oldHeight); // Lift player so feet stay at same Y
-                            // Text notification removed as requested
+                            player.y -= (player.height - oldHeight); // Podnieś gracza, aby stopy pozostały na tej samej wysokości Y
+                            // Usunięto powiadomienie tekstowe zgodnie z prośbą
 
-                            // Play power-up sound
+                            // Odtwórz dźwięk power-up
                             sfxPowerUp.currentTime = 0;
                             sfxPowerUp.play().catch(() => { });
 
@@ -2401,7 +2398,7 @@
                             if (level === 7) {
                                 // Aktywacja pauzy i dźwięku
                                 sfxTrzezwosc.play().catch(() => { });
-                                soberFreezeTimer = 240; // 4 seconds freeze
+                                soberFreezeTimer = 240; // 4 sekundy zamrożenia
 
                                 // Usuń wrogów z "ziemi" (tych nisko położonych), zostaw tylko na belkach
                                 enemies = enemies.filter(e => e.y < GAME_HEIGHT - 100);
@@ -2414,15 +2411,15 @@
                         }
                         if (it.type === 'solar') {
                             player.hasSolarBonus = true;
-                            player.isSober = true; // Ensure sober state for visual
-                            player.width = 150; // Match visual scale (2.14 * 70)
+                            player.isSober = true; // Upewnij się, że stan trzeźwości jest wizualny
+                            player.width = 150; // Dopasuj skalę wizualną (2.14 * 70)
                             player.height = 150;
-                            player.y -= 80; // Offset head/feet
+                            player.y -= 80; // Przesunięcie głowy/stóp
                             player.invincibilityTimer = 180; // 3s
                             solarImmunityTimer = 180; // 3s
                             screenFlashTimer = 90; // 1.5s biały ekran (krótko)
                             player.soberArmor = -1; // Stan pancerza solarnego
-                            solarInfoTimer = 0; // Hide "Zbierz działo" text immediately
+                            solarInfoTimer = 0; // Ukryj tekst "Zbierz działo"
                             const btnSolar = document.getElementById('btn-solar');
                             if (btnSolar) btnSolar.classList.remove('hidden');
                             sfxPowerUp.currentTime = 0;
@@ -2432,9 +2429,9 @@
                             const oldH = player.height;
                             player.isMegaMech = true;
                             player.mechArmor = 20;
-                            player.width = 170; // Larger than Sober (150)
+                            player.width = 170; // Większy niż Sober (150)
                             player.height = 190;
-                            player.y -= (player.height - oldH); // Keep feet on ground
+                            player.y -= (player.height - oldH); // Utrzymaj stopy na ziemi
                             sfxMech.currentTime = 0;
                             sfxMech.play().catch(() => { });
 
@@ -2450,7 +2447,7 @@
                 const e = enemies[i];
                 if (player.x < e.x + e.width && player.x + player.width > e.x &&
                     player.y < e.y + e.height && player.y + player.height > e.y) {
-                    // Ignore Ally collision (Friednly Fire OFF)
+                    // Ignoruj kolizję z sojusznikami (ogień przyjacielski WYŁĄCZONY)
                     if (e.type === 'ally_przyjaciel') continue;
 
                     // ZMIANA: Nieśmiertelność działa też na kolizje z wrogami (w tym karczmarzem)
@@ -2459,10 +2456,10 @@
                         continue;
                     }
                     loseLife();
-                    return; // Stop processing this frame after death to avoid freeze/glitches
+                    return; // Zatrzymaj przetwarzanie tej klatki po śmierci, aby uniknąć zamrożenia/błędów
                 }
 
-                // Shooting logic (Level 2+)
+                // Logika Strzelania (Lvl 2+) - uruchomienie strzelania od drugiego poziomu!
                 if (level >= 2 && !showCelebration && e.shootType !== 'none' && soberFreezeTimer <= 0) {
                     e.shootTimer -= 1;
                     if (e.shootTimer <= 0) {
@@ -2476,16 +2473,16 @@
                             vx = e.x > player.x ? -2.5 : 2.5;
                             vy = 0;
                         } else if (e.shootType === 'spread_left') {
-                            // Double shot: Diagonal Top-Left and Diagonal Bottom-Left
+                            // Podwójny strzał: ukos w lewo górny i ukos w lewo dolny
                             bullets.push({ x: e.x + 20, y: e.y + 25, vx: -4, vy: -3, radius: 10 });
                             bullets.push({ x: e.x + 20, y: e.y + 25, vx: -4, vy: 3, radius: 10 });
 
-                            e.shootTimer = 180; // Fixed interval
+                            e.shootTimer = 180; // Stały interwał
                             playSFX(sfxShotEnemy);
-                            return; // Skip default bullet push
+                            return; // Pomiń domyślne dodawanie pocisku
                         }
 
-                        // Use consistent bullet image
+                        // Użyj spójnego obrazu pocisku
                         bullets.push({ x: e.x + 20, y: e.y + 25, vx, vy, radius: 10 });
 
                         e.shootTimer = 250 + Math.random() * 300;
@@ -2494,25 +2491,25 @@
                 }
 
                 if (e.type === 'ally_przyjaciel') {
-                    // ALLY AI
+                    // MÓZG PRZYJACIELA (AI)
                     if (e.speechTimer > 0) e.speechTimer--;
 
                     if (!e.isFlying) {
-                        // Simple movement logic: walk in from left to slightly left of center
+                        // Prosta logika ruchu: wejdź od lewej do lekko lewej od środka
                         const centerX = GAME_WIDTH / 2 - e.width / 2 - 50;
-                        if (e.x < centerX) e.x += 2.5; // Slightly faster entrance
+                        if (e.x < centerX) e.x += 2.5; // Trochę szybsze wejście
                         else {
                             e.x = centerX;
                             e.vx = 0;
                             e.jumpTimer--;
                             if (e.jumpTimer <= 0 && e.onGround) {
-                                e.vy = -14.4; // High jump to hit boss (was -18, reduced by 20%)
+                                e.vy = -14.4; // Wysoki skok, żeby trafić bossa (było -18, zmniejszone o 20%)
                                 e.onGround = false;
                                 e.jumpTimer = 180 + Math.random() * 200;
                             }
                         }
 
-                        e.vy += 0.5; // Gravity
+                        e.vy += 0.5; // Grawitacja
                         e.y += e.vy;
                         e.onGround = false;
                         platforms.forEach(p => {
@@ -2524,58 +2521,58 @@
                         });
                     }
 
-                    // Ally Shooting at Boss or Karczmarz
+                    // Ally strzela do bossa lub karczmarza
                     e.shootTimer--;
                     if (e.shootTimer <= 0) {
-                        e.shootTimer = 14; // increased by 25% speed (was 18)
-                        // Don't shoot if boss is dying
+                        e.shootTimer = 14; // zwiększone o 25% prędkości (było 18)
+                        // Nie strzelaj, jeśli boss umiera
                         if (boss && boss.isDying) return;
 
                         const target = enemies.find(en => en.type === 'karczmarz_turret') || boss;
                         if (target) {
                             const angle = Math.atan2((target.y + target.height / 2) - (e.y + e.height / 2), (target.x + target.width / 2) - (e.x + e.width / 2));
                             playerBullets.push({
-                                x: e.x + e.width, y: e.y + e.height / 2 - 10, // Lower spawn (was -30)
+                                x: e.x + e.width, y: e.y + e.height / 2 - 10, // Niższe miejsce wystrzelenia (było -30)
                                 vx: Math.cos(angle) * 12, vy: Math.sin(angle) * 12,
-                                owner: 'ally', isAllyShot: true // Changed from isFlame to isAllyShot
+                                owner: 'ally', isAllyShot: true // Zmieniono z isFlame na isAllyShot
                             });
                             playSFX('ally_shot');
                         }
                     }
                 }
 
-                // Check for Boss Death Transformation OR Boss HP <= 386 (AND not healing)
+                // Sprawdź czy Boss pada, albo HP niskie (i się nie leczy)
                 if (boss && boss.hp <= 386 && !bossHealing.active && e.type === 'ally_przyjaciel') {
                     if (!e.isFlying) {
                         e.isFlying = true;
-                        // Transform to flying mode (Fix Aspect Ratio for 819x1528) + 40% larger total
+                        // Transformacja w samolot (Poprawione proporcje) + 40% większy bydlak
                         e.width = 92;
                         e.height = 172;
                     }
-                    // Positioning: Hover to hit the bottom of the Boss
+                    // Pozycjonowanie: Celuj w tyłek Bossa
                     // Boss bottom is boss.y + boss.height.
                     // User requested: Higher by 50px (so -50 from +110 = +60).
-                    // Update: Shift left by another 20px (total -270)
+                    // Update: Na lewo o 20px (total -270)
                     const targetY = boss.y + 60;
                     const targetX = boss.x - 270; // Hover more to the left (was -250)
 
-                    // Fly smoothly to target
+                    // Do celu leci powoli
                     const dx = targetX - e.x;
                     const dy = targetY - e.y;
 
                     e.x += dx * 0.05;
                     e.y += dy * 0.05;
                     e.vx = 0;
-                    e.vy = 0; // Disable gravity
+                    e.vy = 0; // Wyłącz grawitację
                 }
             }
 
             for (let i = effects.length - 1; i >= 0; i--) {
                 if (effects[i].type === 'explosion') {
-                    // Explosion handles its own timing increment in render, or we can do it here.
-                    // Let's rely on the render loop incrementing 'timer' upwards for frame calculation, 
-                    // BUT 'effects' loop usually decrements timer.
-                    // Let's CHANGE 'explosion' to Increment Timer logic.
+                    // Eksplozja liczy czas w render, albo robimy to tutaj.
+                    // Opieramy się na pętli render, która zwiększa 'timer' do obliczenia klatki, 
+                    // ALE pętla 'effects' zazwyczaj zmniejsza timer.
+                    // ZMIENIAMY 'explosion' na logikę liczenia czasu.
                     effects[i].timer += 1;
                     if (effects[i].timer >= 64) effects.splice(i, 1);
                 } else {
@@ -2584,14 +2581,14 @@
                 }
             }
 
-            // Boss Logic - Pattern: 3 horizontal shots @ heights + 4s speech bubble
+            // Logika Bossa - Schemat: 3 serie na klatę + 4s gadania
             if (boss && !showCelebration) {
                 if (boss.isDying) {
                     boss.deathTimer -= 16.6;
                     boss.flash = 5;
-                    // Explosion particles
+                    // Eksplozja cząsteczek
 
-                    if (boss.deathTimer > 1400) { // Trigger explosion ONCE at start of death
+                    if (boss.deathTimer > 1400) { // Wyzwalacz eksplozji RAZ na początku śmierci
                         if (!boss.explosionTriggered) {
                             boss.explosionTriggered = true;
                             effects.push({
@@ -2599,17 +2596,17 @@
                                 y: boss.y + boss.height / 2,
                                 type: 'explosion',
                                 timer: 0,
-                                maxTimer: 64, // 16 frames * 4 ticks per frame
+                                maxTimer: 64, // 16 klatek * 4 ticki na klatkę
                                 frame: 0
                             });
-                            playSFX('wybuch'); // Optional: Play explosion sound if available or use existing
-                            playSFX('boss_die_explosion'); // Play explosion sound at start of death animation
+                            playSFX('wybuch'); // Opcjonalnie: Odtwórz dźwięk eksplozji, jeśli dostępny lub użyj istniejącego
+                            playSFX('boss_die_explosion'); // Odtwórz dźwięk eksplozji na początku animacji śmierci
                         }
                     }
                     if (boss.deathTimer <= 0) {
-                        // playSFX('boss_die_explosion'); // Moved to start
+                        // playSFX('boss_die_explosion'); // Przeniesiono na początek
                         boss = null;
-                        // Clean up all boss entities
+                        // Usuń wszystkie jednostki bossa
                         enemies = enemies.filter(e => e.type !== 'karczmarz_turret' && e.type !== 'ally_przyjaciel');
                         startUfoAbduction();
                     }
@@ -2620,7 +2617,7 @@
                 if (!boss.spawnTimer) boss.spawnTimer = 0;
                 boss.spawnTimer--;
 
-                // STANDARDOWY SPAWN - Teraz 2 duże piwa (normalnej wielkości)
+                // STANDARDOWY SPAWN - Dwa browary na zachętę
                 if (boss.spawnTimer <= 0 && boss.hp > 50 && !boss.isDying && !bossHealing.active && !boss.hasHealedOnce) {
                     // 1. Kufel na górze: obniżony na górną belkę (y=150)
                     enemies.push({
@@ -2641,7 +2638,7 @@
                     };
                     enemies.push(k);
 
-                    // Remove all Running Karczmarz instances to clean up the screen
+                    // Usuń wszystkie działające instancje Karczmarza, aby posprzątać ekran
                     enemies = enemies.filter(e => e.type !== 'karczmarz_runner');
 
                     heartDrop.active = true;
@@ -2677,7 +2674,7 @@
                     if (bossHealing.scale < 1.25) bossHealing.scale += 0.002;
                     if (boss.hp < 400) {
                         boss.hp += 1.0;
-                        boss.maxHp = 400; // Increase maxHp during healing phase
+                        boss.maxHp = 400; // Zwiększ maxHp podczas fazy leczenia
                         if (boss.hp >= 100 && !boss.megaMechSpawned) {
                             boss.megaMechSpawned = true;
                             // Ikona na górnej belce: x=400, y=150
@@ -2695,7 +2692,7 @@
                     if (e.type === 'karczmarz_turret' && !showCelebration) {
                         if (e.state === 'walking') {
                             if (e.x < e.targetX) {
-                                e.x += 1.5; // Chód w prawo
+                                e.x += 1.5; // Chodzenie w prawo
                             } else {
                                 e.state = 'shooting';
                             }
@@ -2717,7 +2714,7 @@
                     }
                 });
 
-                // Boss HP Events
+                // Eventy HP Bossa - Co się dzieje jak Boss dostaje bęcki
                 // 170 HP - Karczmarz Runner (Burst)
                 if (boss.hp <= 170 && !boss.event170) {
                     boss.event170 = true;
@@ -2727,7 +2724,7 @@
                     });
                 }
 
-                // 200 HP after heal - ALLY SPAWN
+                // 200 HP po leczeniu - Przyjaciel wbija na rewir
                 if (boss.hasHealedOnce && boss.hp <= 200 && !boss.allySpawned) {
                     boss.allySpawned = true;
                     enemies.push({
@@ -2736,28 +2733,27 @@
                         shootTimer: 36, jumpTimer: 120, speechTimer: 600
                     });
                 }
-                // 150 HP - LASER BULLET ATTACK
+                // 150 HP - ATAK LASEROWY
                 if (boss.hp <= 150 && !boss.event150) {
                     boss.event150 = true;
-                    // Spawn laser bullet at middle height
+                    // Grafika lasera
                     bullets.push({ x: boss.x, y: 300, vx: -4, vy: 0, img: imgLaser, isLaser: true });
-                    // Play laser sound
+                    // Dźwięk lasera
                     sfxLaser.currentTime = 0;
                     sfxLaser.play().catch(() => { });
                 }
-                // 120 HP - SOLAR BONUS SPAWN
+                // 120 HP - SOLAR DLA LUDU (SPAWN)
                 if (boss.hp <= 120 && !boss.solarBonusSpawned) {
                     boss.solarBonusSpawned = true;
                     // Spawn bonus wyżej (podniesienie o 180px względem ziemi), uwzględniając rozmiar 240px
-                    // User wanted visual at Y - 100 from previous Y.
-                    // Previous Y was GAME_HEIGHT - 140.
-                    // Visual was at GAME_HEIGHT - 140 - 100 = GAME_HEIGHT - 240.
-                    // So let's spawn logical Y at GAME_HEIGHT - 240 so logic matches visual.
+                    // Poprzednie Y było GAME_HEIGHT - 140.
+                    // Wizualne było na GAME_HEIGHT - 140 - 100 = GAME_HEIGHT - 240.
+                    // Więc spawnujemy logiczne Y na GAME_HEIGHT - 240, aby logika pasowała do wizualnej.
                     items.push({ x: GAME_WIDTH / 2 - 120, y: GAME_HEIGHT - 240, type: 'solar', collected: false });
                     solarInfoTimer = 240; // 4s info_solarne.webp
                 }
 
-                // 130 HP - Karczmarz Runner (Burst)
+                // 130 HP - Karczmarz Biegacz (Seria)
                 if (boss.hp <= 130 && !boss.event130) {
                     boss.event130 = true;
                     enemies.push({
@@ -2766,69 +2762,69 @@
                     });
                 }
 
-                // 90 HP - LASER BULLET ATTACK
+                // 90 HP - Laser (pierwotne zmiany w kodzie)
                 if (boss.hp <= 90 && !boss.event90) {
                     boss.event90 = true;
-                    // Spawn laser bullet at middle height
+                    // Strzał laserem w połowie wysokości
                     bullets.push({ x: boss.x, y: 300, vx: -4, vy: 0, img: imgLaser, isLaser: true });
-                    // Play laser sound
+                    // Dźwięk lasera
                     sfxLaser.currentTime = 0;
                     sfxLaser.play().catch(() => { });
                 }
-                // 80 HP - Karczmarz Runner + LASER BULLET
+                // 80 HP - Karczmarz Biegacz + LASER
                 if (boss.hp <= 80 && !boss.event80) {
                     boss.event80 = true;
                     enemies.push({
                         x: GAME_WIDTH + 50, y: GAME_HEIGHT - 40 - 120, width: 100, height: 120, hp: 10, maxHp: 10,
                         type: 'karczmarz_runner', vx: -3, shootTimer: 20, speechImg: imgBieg2
                     });
-                    // Laser bullet at upper height
+                    // Laser pocisk na górnej wysokości
                     bullets.push({ x: boss.x, y: 200, vx: -4, vy: 0, img: imgLaser, isLaser: true });
-                    // Play laser sound
+                    // Dźwięk lasera
                     sfxLaser.currentTime = 0;
                     sfxLaser.play().catch(() => { });
                 }
-                // 70 HP - LASER BULLET ATTACK
+                // 70 HP - Laser (pierwotne zmiany w kodzie)
                 if (boss.hp <= 70 && !boss.event70) {
                     boss.event70 = true;
-                    // Spawn laser bullet at middle height
+                    // Laser na średniej wysokości (pierwotne zmiany w kodzie)
                     bullets.push({ x: boss.x, y: 300, vx: -4, vy: 0, img: imgLaser, isLaser: true });
-                    // Play laser sound
+                    // Dźwięk lasera
                     sfxLaser.currentTime = 0;
                     sfxLaser.play().catch(() => { });
                 }
 
 
-                // 60 HP - LASER BULLET ATTACK
+                // 60 HP - Laser (pierwotne zmiany w kodzie)
                 if (boss.hp <= 60 && !boss.event60) {
                     boss.event60 = true;
-                    // Spawn laser bullet at middle height
+                    // Laser na średniej wysokości (pierwotne zmiany w kodzie)
                     bullets.push({ x: boss.x, y: 300, vx: -4, vy: 0, img: imgLaser, isLaser: true });
-                    // Play laser sound
+                    // Dźwięk lasera
                     sfxLaser.currentTime = 0;
                     sfxLaser.play().catch(() => { });
                 }
 
-                // 50 HP - LASER BULLET ATTACK
+                // 50 HP - Laser (pierwotne zmiany w kodzie)
                 if (boss.hp <= 50 && !boss.event50) {
                     boss.event50 = true;
-                    // Spawn laser bullet at middle height
+                    // Laser na średniej wysokości (pierwotne zmiany w kodzie)
                     bullets.push({ x: boss.x, y: 300, vx: -4, vy: 0, img: imgLaser, isLaser: true });
-                    // Play laser sound
+                    // Dźwięk lasera
                     sfxLaser.currentTime = 0;
                     sfxLaser.play().catch(() => { });
                 }
-                // 40 HP - Nie Pij + LASER BULLET
+                // 40 HP - Nie Pij + Laser (pierwotne zmiany w kodzie)
                 if (boss.hp <= 40 && !boss.event40) {
                     boss.event40 = true;
                     boss.showNiePij = 300; // 5 seconds
-                    // Laser bullet at lower height
+                    // Laser na dolnej wysokości (pierwotne zmiany w kodzie)
                     bullets.push({ x: boss.x, y: 450, vx: -4, vy: 0, img: imgLaser, isLaser: true });
-                    // Play laser sound
+                    // Dźwięk lasera
                     sfxLaser.currentTime = 0;
                     sfxLaser.play().catch(() => { });
                 }
-                // 30 HP - Karczmarz Runner 3
+                // 30 HP - Karczmarz Biegnący 3
                 if (boss.hp <= 30 && !boss.event30) {
                     boss.event30 = true;
                     enemies.push({
@@ -2839,7 +2835,7 @@
 
                 if (boss.showNiePij > 0) boss.showNiePij--;
 
-                // Collision with player
+                // Kolizja z graczem
                 const hitMarginX = 50;
                 const hitMarginY = 20;
 
@@ -2854,12 +2850,12 @@
                 boss.phaseTimer -= 1;
                 if (boss.phaseTimer <= 0) {
                     if (boss.phaseIndex < 3) {
-                        // Shooting Phase - 2 POCISKI z każdej wysokości
+                        // Faza Strzelania - 2 POCISKI z każdej wysokości
                         const bx = boss.x;
                         let by = 0;
-                        if (boss.phaseIndex === 0) by = 210 + 10; // Upper beam
-                        else if (boss.phaseIndex === 1) by = 360 + 10; // Middle beam
-                        else if (boss.phaseIndex === 2) by = 480 + 10; // Lower beam
+                        if (boss.phaseIndex === 0) by = 210 + 10; // Górna wiązka
+                        else if (boss.phaseIndex === 1) by = 360 + 10; // Środkowa wiązka
+                        else if (boss.phaseIndex === 2) by = 480 + 10; // Dolna wiązka
 
                         // Pocisk 1: Poziomy (jak wcześniej)
                         bullets.push({ x: bx, y: by, vx: -5, vy: 0, img: imgDetoks });
@@ -2892,7 +2888,7 @@
                 }
             }
 
-            // Bullet update and collision
+            // Aktualizacja pocisków i kolizje
             for (let i = bullets.length - 1; i >= 0; i--) {
                 const b = bullets[i];
                 b.x += b.vx;
@@ -2908,7 +2904,7 @@
                     }
                 }
 
-                // Collision with player
+                // Kolizja z graczem
                 const dx = (player.x + player.width / 2) - b.x;
                 const dy = (player.y + player.height / 2) - b.y;
 
@@ -2918,10 +2914,10 @@
 
                 if (boss) {
                     if (b.img) {
-                        // Boss bullet image is drawn at b.x, b.y with 96x72 size
+                        // Obraz pocisku bossa jest rysowany w b.x, b.y o rozmiarze 96x72
                         cx = b.x + 48;
                         cy = b.y + 36;
-                        bSize = 25; // Smaller, tighter hitbox
+                        bSize = 25; // Mniejszy, ciaśniejszy hitbox
                     } else {
                         bSize = 15;
                     }
@@ -2955,7 +2951,7 @@
             document.body.classList.remove('playing');
             document.querySelector('.ui-overlay').style.opacity = '0';
 
-            // Custom Uplift Styling
+            // Stylówa Wzniesienia - na szaro i smutno (do czasu)
             document.documentElement.style.setProperty('--bg', '#808080');
             document.documentElement.style.setProperty('--accent', '#505050');
 
@@ -2972,7 +2968,7 @@
             finalScreen.classList.remove('hidden');
             finalScreen.style.display = 'flex';
 
-            // Clean up old elements and text
+            // Sprzątanko starych śmieci
             finalScreen.innerHTML = '<canvas id="upliftCanvas" width="800" height="600"></canvas>';
 
             bgMusicBoss.pause();
@@ -2980,7 +2976,7 @@
 
             const uCanvas = document.getElementById('upliftCanvas');
             const uctx = uCanvas.getContext('2d');
-            // uctx.scale(0.5, 0.5); // REMOVED: Native 800x600 resolution
+            // uctx.scale(0.5, 0.5); // USUNIĘTO: Natywna rozdzielczość 800x600
 
             let pWidth = 157 * (70 / 70);
             let pHeight = 157;
@@ -2997,7 +2993,7 @@
             let shakeTimer = 0;
             let currentDialogImg = null;
             let currentBackgroundImg = null;
-            let upliftStartTimer = 100; // 3 seconds to show imgWPrawo
+            let upliftStartTimer = 100; // 3 sekundy, aby pokazać imgWPrawo
             let buttonsAdded = false;
             let shootKeyWasPressed = false;
 
@@ -3005,7 +3001,7 @@
             upliftFade = 0;
             isUpliftFading = false;
 
-            // Background dimensions for scaling
+            // Wymiary tła do skalowania
             const bgHeightActual = 600;
             const bgScale = (imgPlansza.complete && imgPlansza.height > 0) ? (bgHeightActual / imgPlansza.height) : 1;
             const doorXScaled = 4717 * bgScale;
@@ -3027,7 +3023,7 @@
             function runUpliftStep() {
                 if (gameState !== 'uplift') return;
 
-                const dt_ref = 1; // logical replacement for dt
+                const dt_ref = 1; // logika zmiana dt
 
                 if (!finalSceneActive) {
                     if (upliftStartTimer > 0) {
@@ -3048,7 +3044,7 @@
                         }
                     }
 
-                    // Gravity and physics
+                    // Grawitacja i fizyka
                     pvy += 0.7;
                     py += pvy;
                     if (py >= groundY) {
@@ -3061,7 +3057,7 @@
 
                     if (px < 50) px = 50;
 
-                    // Boundary check for the end of the level
+                    // Sprawdzenie granicy dla końca poziomu
                     if (imgPlansza.complete) {
                         const bgHeight = 600;
                         const bgScale = bgHeight / imgPlansza.height;
@@ -3070,11 +3066,11 @@
                         if (px > rightLimit) px = rightLimit;
                     }
 
-                    // Scrolling: Follow player
+                    // Przewijanie: Podążanie za graczem
                     const screenCenterX = 400;
                     upliftCameraX = Math.max(0, px - screenCenterX);
 
-                    // Interaction with door
+                    // Interakcja z drzwiami
                     const distToDoor = Math.abs(px - doorXScaled);
 
                     if (distToDoor < 150 && keys.shoot && !isUpliftFading) {
@@ -3093,33 +3089,33 @@
                         }
                     }
                 } else {
-                    // Allow skipping dialogs with shoot key
+                    // Pozwala na pominięcie dialogów za pomocą klawisza strzelania
                     if (keys.shoot && !shootKeyWasPressed) {
-                        // Skip many frames if it's a dialog or pause step
-                        // (Steps 2, 3, 4, 7 are dialogs)
+                        // Pomijanie wielu klatek, jeśli to dialog lub krok pauzy
+                        // (Kroki 2, 3, 4, 7 to dialogi)
                         if ([1, 2, 3, 4, 7, 9].includes(finalCutsceneStep)) {
-                            finalTimer += 1000; // Jump ahead
+                            finalTimer += 1000; // Przeskok do przodu
                             sfxPrzycisk.currentTime = 0; sfxPrzycisk.play().catch(() => { });
                         }
                     }
                     shootKeyWasPressed = keys.shoot;
 
-                    // Sound trigger for new steps (Dialogues)
+                    // Dźwięk dla nowych kroków (Dialogi)
                     if ([2, 3, 4, 7].includes(finalCutsceneStep) && finalTimer === 0) {
                         playSFX(sfxButton);
                     }
 
                     finalTimer += 1;
-                    // FINAL CUTSCENE STATE MACHINE
-                    if (finalCutsceneStep === 1) { // Show ostatnia_scena.webp
+                    // MASZYNA STANÓW KOŃCOWEJ SCENKI
+                    if (finalCutsceneStep === 1) { // Pokaz ostatnia_scena.webp
                         if (finalTimer > 60) { finalCutsceneStep = 2; finalTimer = 0; }
-                    } else if (finalCutsceneStep === 2) { // Dialog 1 (top right)
-                        updateDialog(imgDialog1, 900, 0); // 900 frames = 15s
-                    } else if (finalCutsceneStep === 3) { // Dialog 2 (top left)
+                    } else if (finalCutsceneStep === 2) { // Dialog 1 (górny prawy)
+                        updateDialog(imgDialog1, 900, 0); // 900 klatek = 15s
+                    } else if (finalCutsceneStep === 3) { // Dialog 2 (górny lewy)
                         updateDialog(imgDialog2, 900, 0);
-                    } else if (finalCutsceneStep === 4) { // Dialog 3 (top right)
+                    } else if (finalCutsceneStep === 4) { // Dialog 3 (górny prawy)
                         updateDialog(imgDialog3, 900, 0);
-                    } else if (finalCutsceneStep === 5) { // Fade to white
+                    } else if (finalCutsceneStep === 5) { // Przejście do bieli
                         finalOpacity += 0.01;
                         if (finalOpacity >= 1) {
                             finalOpacity = 1;
@@ -3127,38 +3123,38 @@
                             finalTimer = 0;
                             currentBackgroundImg = imgAniol;
                         }
-                    } else if (finalCutsceneStep === 6) { // Fade from white to aniol.webp
+                    } else if (finalCutsceneStep === 6) { // Przejście od bieli do aniol.webp
                         finalOpacity -= 0.01;
                         if (finalOpacity <= 0) {
                             finalOpacity = 0;
                             finalCutsceneStep = 7;
                             finalTimer = 0;
                         }
-                    } else if (finalCutsceneStep === 7) { // Dialog 4 (11 seconds)
+                    } else if (finalCutsceneStep === 7) { // Dialog 4 (11 sekund)
                         updateDialog(imgDialog4, 1000, 0);
-                    } else if (finalCutsceneStep === 8) { // Violent shake
+                    } else if (finalCutsceneStep === 8) { // Silne trzęsienie
                         shakeTimer = 30;
                         finalCutsceneStep = 9;
                         finalTimer = 0;
                         currentBackgroundImg = imgAniol2;
-                    } else if (finalCutsceneStep === 9) { // Post shake delay
+                    } else if (finalCutsceneStep === 9) { // Opóźnienie po trzęsieniu
                         if (finalTimer > 300) { finalCutsceneStep = 10; finalTimer = 0; }
-                    } else if (finalCutsceneStep === 10) { // Fade to white again
+                    } else if (finalCutsceneStep === 10) { // Przejście do bieli
                         finalOpacity += 0.01;
                         if (finalOpacity >= 1) {
                             finalOpacity = 1;
                             finalCutsceneStep = 11;
                             finalTimer = 0;
-                            // Switch to Zakonczenie Music
+                            // Zmiana na muzykę z zakończenia
                             bgMusicEnding.pause();
                             bgMusicEnding.currentTime = 0;
                             bgMusicZakonczenie.currentTime = 0;
                             bgMusicZakonczenie.play().catch(e => console.log(e));
                         }
-                    } else if (finalCutsceneStep === 11) { // Show "dziekuje.webp" and end
-                        // Final screen styling
+                    } else if (finalCutsceneStep === 11) { // Pokaz "dziekuje.webp" i koniec
+                        // Stylizacja ekranu końcowego
                         document.documentElement.style.setProperty('--bg', '#347DDD');
-                        document.documentElement.style.setProperty('--accent', '#1A4580'); // Darker blue for contrast
+                        document.documentElement.style.setProperty('--accent', '#1A4580'); // Ciemniejszy niebieski dla kontrastu
                         if (!buttonsAdded) {
                             buttonsAdded = true;
                             addFinalScreenButtons();
@@ -3173,17 +3169,17 @@
 
             function updateDialog(img, duration, gap) {
                 currentDialogImg = img;
-                if (finalTimer < 60) finalOpacity = finalTimer / 60; // Fade in
-                else if (finalTimer < duration - 60) finalOpacity = 1; // Stay
-                else finalOpacity = (duration - finalTimer) / 60; // Fade out
+                if (finalTimer < 60) finalOpacity = finalTimer / 60; // Wygasanie
+                else if (finalTimer < duration - 60) finalOpacity = 1; // Normalnie
+                else finalOpacity = (duration - finalTimer) / 60; // Wygasanie odwrotnie
 
                 if (finalTimer >= duration) {
                     finalCutsceneStep++;
                     finalTimer = 0;
                     finalOpacity = 0;
                     currentDialogImg = null;
-                    if (finalCutsceneStep <= 7) { // Play sound on next step start if it's still part of the dialog flow
-                        // Sound moved to main loop for immediate trigger
+                    if (finalCutsceneStep <= 7) { // Dźwięk dla następnego kroku, jeśli jest to nadal część przepływu dialogu
+                        // Dźwięk przeniesiony do głównej pętli dla natychmiastowego wyzwalania
                     }
                 }
             }
@@ -3197,16 +3193,16 @@
                         uctx.translate((Math.random() - 0.5) * 30, (Math.random() - 0.5) * 30);
                     }
 
-                    // Background
+                    // Tło
                     if (currentBackgroundImg && currentBackgroundImg.complete) {
                         uctx.drawImage(currentBackgroundImg, 0, 0, 800, 600);
                     }
 
-                    // Dialogs
+                    // Dialogi
                     if (currentDialogImg && currentDialogImg.complete) {
                         uctx.save();
                         uctx.globalAlpha = finalOpacity;
-                        // Positioning
+                        // Pozycjonowanie
                         // dScale - kontroluje ROZMIAR dialogów (0.28 = 28% oryginalnego rozmiaru)
                         let dScale = 0.30; // Zwiększ wartość aby powiększyć dialogi, zmniejsz aby pomniejszyć
 
@@ -3243,7 +3239,7 @@
                         uctx.restore();
                     }
 
-                    // White flash/fade
+                    // Biały błysk/wygaszanie
                     if (finalCutsceneStep === 5 || finalCutsceneStep === 6 || finalCutsceneStep === 10 || finalCutsceneStep === 11) {
                         uctx.fillStyle = `rgba(255, 255, 255, ${finalOpacity})`;
                         uctx.fillRect(0, 0, 800, 600);
@@ -3263,7 +3259,7 @@
                     return;
                 }
 
-                // Draw background (plansza.webp) stretched to height 600
+                // Rysuj tło (plansza.webp) rozciągnięte do wysokości 600
                 if (imgPlansza.complete) {
                     const bgHeight = 600;
                     const bgScale = bgHeight / imgPlansza.height;
@@ -3276,13 +3272,13 @@
 
                 if (imgBohater.complete) {
                     uctx.save();
-                    // Breathing effect for Uplift Hero
+                    // Efekt oddychania dla bohatera Uplift
                     const breath = 1.0 + Math.sin(Date.now() / 300) * 0.03;
 
                     if (!pFacingRight) {
                         uctx.translate(px - upliftCameraX + pWidth, py - pHeight);
                         uctx.scale(-1, 1);
-                        // Apply breath center relative
+                        // Pseudoanimacja oddychania
                         uctx.translate(pWidth / 2, pHeight / 2);
                         uctx.scale(breath, breath);
                         uctx.translate(-pWidth / 2, -pHeight / 2);
@@ -3302,13 +3298,13 @@
                     }
                 }
 
-                // Fade to black
+                // Wygasanie do czerni
                 if (upliftFade > 0 && !finalSceneActive) {
                     uctx.fillStyle = `rgba(0, 0, 0, ${upliftFade})`;
                     uctx.fillRect(0, 0, 800, 600);
                 }
 
-                // Go Right indicator at the start
+                // Wskaźnik "Idź w prawo" na początku
                 if (upliftStartTimer > 0) {
                     if (imgWPrawo.complete) {
                         uctx.drawImage(imgWPrawo, 400 - 150, 150, 300, 150);
@@ -3360,14 +3356,14 @@
         function drawPlayerOnCtx(c, px, py, right, surprised) {
             if (player.isMegaMech && imgMegaPlayer.complete) {
                 c.save();
-                // Blinking effect when invincible OR Time Freeze
+                // Efekt migotania, gdy jest niewrażliwy LUB zamrożony w czasie
                 if ((player.invincibilityTimer > 0 || timeFreezeActive || solarImmunityTimer > 0) && Math.floor(Date.now() / 100) % 2 === 0) {
                     c.globalAlpha = 0.3;
                 }
                 if (!right) {
                     c.translate(px + player.width, py);
                     c.scale(-1, 1);
-                    // Breathing Effect for MegaMech
+                    // Efekt oddychania dla MegaMecha
                     const breath = 1.0 + Math.sin(Date.now() / 300) * 0.03;
                     c.translate(player.width / 2, player.height / 2);
                     c.scale(breath, breath);
@@ -3375,7 +3371,7 @@
 
                     c.drawImage(imgMegaPlayer, 0, 0, player.width, player.height);
                 } else {
-                    // Breathing Effect for MegaMech
+                    // Efekt oddychania dla MegaMecha
                     c.save();
                     c.translate(px + player.width / 2, py + player.height / 2);
                     const breath = 1.0 + Math.sin(Date.now() / 300) * 0.03;
@@ -3385,7 +3381,7 @@
                 }
                 c.restore();
 
-                // Draw shield icons above player's head in Mech mode (2 rows of 10)
+                // Rysuj ikony tarcz nad głową gracza w trybie Mecha (2 rzędy po 10)
                 if (player.mechArmor > 0 && imgTarczaNiebieska.complete) {
                     const iconSize = 15;
                     const gap = 3;
@@ -3407,12 +3403,12 @@
 
 
 
-            let scale = 1; // Base scale for player model
+            let scale = 1; // Podstawowa skala dla modelu gracza
             if (player.isSober || player.hasSolarBonus) {
-                scale = 2.14; // ~150px for Red Armor / Solar Armor (was 2.5)
+                scale = 2.14; // ~150px dla Czerwonego Pancerza / Pancerza Słonecznego (było 2.5)
             }
-            if (player.isSober && player.soberArmor === 4) scale = 1.0; // Reset scale if broken
-            if (gameState === 'final') scale = 5.5; // Giant on final screen
+            if (player.isSober && player.soberArmor === 4) scale = 1.0; // Reset skali, jeśli zniszczony
+            if (gameState === 'final') scale = 5.5; // Gigant na ekranie końcowym
 
             const pw = 70 * scale;
             const ph = 70 * scale;
@@ -3421,7 +3417,7 @@
                 let currentImg = imgBohater;
                 if (player.isSober || player.hasSolarBonus) {
                     if (level === 7 && player.soberArmor >= -1 && player.soberArmor <= 4) {
-                        // Boss Armor Damage States
+                        // W poziomie boss poziomy pancerza
                         if (player.soberArmor === -1 && imgPancerzSolarny.complete && imgPancerzSolarny.naturalWidth > 0) currentImg = imgPancerzSolarny;
                         else if (player.soberArmor === 0 && imgPancerzCzerwony.complete && imgPancerzCzerwony.naturalWidth > 0) currentImg = imgPancerzCzerwony;
                         else if (player.soberArmor === 1 && imgPancerzPeka1.complete && imgPancerzPeka1.naturalWidth > 0) currentImg = imgPancerzPeka1;
@@ -3432,27 +3428,27 @@
                         currentImg = imgPancerzCzerwony;
                     }
                 } else if (player.shieldLevel > 0) {
-                    if (player.shieldLevel === 2) currentImg = imgPancerzNiebieski; // Level 2 = Blue
-                    else currentImg = imgPancerzZielony; // Level 1 = Green
+                    if (player.shieldLevel === 2) currentImg = imgPancerzNiebieski; // Poziom 2 = Niebieski
+                    else currentImg = imgPancerzZielony; // Poziom 1 = Zielony
                 }
-                // No else if (surprised) here, as it would override shield/sober images.
-                // If surprised is needed, it should be applied on top or as a separate layer.
+                // Nie ma else if (surprised) tutaj, ponieważ nadpisałoby to obrazy tarczy/trzeźwości.
+                // Jeśli potrzebna jest zaskoczona mina, powinna być nałożona na wierzch lub jako oddzielna warstwa.
 
                 c.save();
 
-                // Blinking effect when invincible OR Time Freeze
+                // Efekt migotania, gdy jest niewrażliwy LUB zamrożony w czasie
                 if ((player.invincibilityTimer > 0 || timeFreezeActive || solarImmunityTimer > 0) && Math.floor(Date.now() / 100) % 2 === 0) {
                     c.globalAlpha = 0.3;
                 }
 
-                // Breathing effect
+                // Efekt oddychania
                 const breath = 1.0 + Math.sin(Date.now() / 300) * 0.03;
 
                 if (!right) {
                     c.translate(px + pw, py);
                     c.scale(-1, 1);
 
-                    // Apply breath center relative
+                    // Zastosuj oddech względem środka
                     c.translate(pw / 2, ph / 2);
                     c.scale(breath, breath);
                     c.translate(-pw / 2, -ph / 2);
@@ -3467,18 +3463,18 @@
                 return;
             }
 
-            // Lying Down Sprite (Boss Ending)
+            // Leżący Sprite (Koniec Bossa)
             if (player.isLyingDown && imgLezy.complete) {
-                // 877x457 -> ~1.9 ratio. Width approx 130px?
+                // 877x457 -> ~1.9 ratio. Szerokość ok 130px?
                 const lRatio = imgLezy.height / imgLezy.width;
                 const lWidth = 130;
                 const lHeight = lWidth * lRatio;
-                // Adjust Y to align with ground (player.y is top-left, we want bottom to match)
-                // Assuming py is top-left of standard 70x70 box. 
-                // We want bottom of ly (py + 70) to match.
-                // so drawY = (py + 70) - lHeight.
+                // Dostosuj Y, aby wyrównać z ziemią (player.y to lewy górny róg, chcemy, aby dół pasował)
+                // Zakładając, że py to lewy górny róg standardowego pudełka 70x70. 
+                // Chcemy, aby dół leżącego (py + 70) pasował.
+                // więc drawY = (py + 70) - lHeight.
                 const drawY = (py + 70) - lHeight;
-                // Breathing effect for Lezy
+                // Efekt oddychania dla Lezy
                 const breath = 1.0 + Math.sin(Date.now() / 300) * 0.03;
                 c.save();
                 c.translate(px - 30 + lWidth / 2, drawY + lHeight / 2);
@@ -3488,31 +3484,31 @@
                 return;
             }
 
-            // Fallback: Original drawing logic
-            // Limbs
+            // Oryginalna logika rysowania
+            // Kończyny
             c.strokeStyle = '#ffdbac';
             c.lineWidth = 4 * scale;
             c.lineCap = 'round';
 
-            // Legs
+            // Nogi
             const walk = Math.abs(Math.sin(Date.now() / 150)) * 10 * scale;
             c.beginPath(); c.moveTo(px + 10 * scale, py + 45 * scale); c.lineTo(px + 10 * scale - walk, py + 55 * scale); c.stroke();
             c.beginPath(); c.moveTo(px + 20 * scale, py + 45 * scale); c.lineTo(px + 20 * scale + walk, py + 55 * scale); c.stroke();
 
-            // Arms
+            // Ręce
             c.beginPath(); c.moveTo(px + 2 * scale, py + 30 * scale); c.lineTo(px - 5 * scale, py + 40 * scale); c.stroke();
             c.beginPath(); c.moveTo(px + 28 * scale, py + 30 * scale); c.lineTo(px + 35 * scale, py + 40 * scale); c.stroke();
 
-            // Body (Gruba osoba / Kula)
-            if (player.shieldLevel === 2) c.fillStyle = '#3b82f6'; // Blue for Level 2
-            else if (player.shieldLevel === 1) c.fillStyle = '#10b981'; // Green for Level 1
-            else c.fillStyle = '#ffdbac'; // Normal
+            // Ciało (Gruba osoba / Kula)
+            if (player.shieldLevel === 2) c.fillStyle = '#3b82f6'; // Niebieski dla Poziomu 2
+            else if (player.shieldLevel === 1) c.fillStyle = '#10b981'; // Zielony dla Poziomu 1
+            else c.fillStyle = '#ffdbac'; // Normalny
 
             c.beginPath();
             c.arc(px + 15 * scale, py + 32 * scale, 16 * scale, 0, Math.PI * 2);
             c.fill();
 
-            // Head
+            // Głowa
             c.fillStyle = '#fcd34d'; c.beginPath(); c.arc(px + 15 * scale, py + 12 * scale, 12 * scale, 0, Math.PI * 2); c.fill();
             c.fillStyle = '#92400e'; c.beginPath(); c.ellipse(px + 15 * scale, py + 5 * scale, 10 * scale, 6 * scale, 0, Math.PI, Math.PI * 2); c.fill();
 
@@ -3530,7 +3526,7 @@
         let lastFrameTime = 0;
         let frameCount = 0;
         const FPS_LIMIT = 60;
-        const FRAME_DURATION = 1000 / FPS_LIMIT;
+        const FRAME_DURATION = 1000 / FPS_LIMIT; // Czas ramki
 
         function draw(timestamp) {
             if (isPaused) {
@@ -3547,13 +3543,13 @@
                 let shouldUpdate = true;
                 if (slowMoTimer > 0) {
                     slowMoTimer--;
-                    // setMusicPlaybackRate(0.6); // REMOVED: Music tempo change disabled
+                    // setMusicPlaybackRate(0.6); // USUNIĘTO: Zmiana tempa muzyki wyłączona
                     // Aktualizuj co 3 klatkę
                     if (frameCount % 3 !== 0) {
                         shouldUpdate = false;
                     }
                 } else {
-                    // setMusicPlaybackRate(1.0); // REMOVED
+                    // setMusicPlaybackRate(1.0); // USUNIĘTO
                 }
 
                 if (shouldUpdate) update();
@@ -3570,28 +3566,28 @@
         let lezyAnimY = 0;
 
         function drawBossEnding() {
-            // Black Background
+            // Czarne Tło - Mrok
             ctx.fillStyle = 'black';
             ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
             if (!imgLezy.complete) return;
 
-            // Lezy Dimensions
+            // Wymiary Lezy
             const lWidth = 150;
             const lRatio = imgLezy.height / imgLezy.width;
             const lHeight = lWidth * lRatio;
 
-            // Lift Animation (Phase 4)
+            // Animacja Wciągania (Faza 4)
             if (abductionPhase >= 4) {
                 lezyAnimY -= 2;
             }
 
-            // Draw Lezy First
+            // Rysuj Lezy First
             if (lezyAnimY > -100) {
                 ctx.drawImage(imgLezy, lezyAnimX, lezyAnimY, lWidth, lHeight);
             }
 
-            // Draw UFO (and Beam) on Top - Centered
+            // UFO i Promień na wierzch - wisienka na torcie
             drawUFO(GAME_WIDTH / 2);
         }
 
@@ -3601,10 +3597,10 @@
                 return;
             }
 
-            ctx.save(); // Save context for shake effect i scale
-            // ctx.scale(0.5, 0.5); // REMOVED: Native 800x600 resolution
+            ctx.save(); // Zapisz stan kontekstu dla efektu drżenia i skali
+            // ctx.scale(0.5, 0.5); // USUNIĘTO: Natywna rozdzielczość 800x600
 
-            // Sober Freeze Effect (Red Shake) lub Solar Shake
+            // Efekt Trzeźwości (Czerwone Drgawki) lub Solar Shake
             if (soberFreezeTimer > 0 || solarShakeTimer > 0) {
                 const intensity = soberFreezeTimer > 0 ? 10 : 25; // Znacznie mocniejsze drżenie dla działa (25)
                 const shakeX = (Math.random() - 0.5) * intensity;
@@ -3612,7 +3608,7 @@
                 ctx.translate(shakeX, shakeY);
 
                 if (soberFreezeTimer > 0) {
-                    // Red tint background override
+                    // Czerwony tint background override
                     ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
                     ctx.fillRect(-20, -20, GAME_WIDTH + 40, GAME_HEIGHT + 40);
                 }
@@ -3620,12 +3616,12 @@
 
             const scheme = COLOR_SCHEMES[(level - 1) % COLOR_SCHEMES.length];
 
-            // Use the pre-rendered background buffer
+            // Użyj bufora tła wstępnie wyrenderowanego
             ctx.drawImage(bgBufferCanvas, 0, 0);
 
-            // Blinking stars effect removed as requested
+            // Efekt migoczących gwiazd usunięty zgodnie z prośbą
 
-            // Platforms
+            // Platformy
             platforms.forEach(p => {
                 if (p.isGround) {
                     if (currentLevelPodloga && currentLevelPodloga instanceof HTMLImageElement && currentLevelPodloga.complete && currentLevelPodloga.naturalWidth !== 0) {
@@ -3646,7 +3642,7 @@
                 }
             });
 
-            // Items (Coins/Power-ups)
+            // Przedmioty (Monety/Power-upy)
             coins.forEach(c => {
                 if (!c.collected) {
                     const bob = Math.sin(Date.now() / 350 + c.x) * 3;
@@ -3688,7 +3684,7 @@
             });
 
 
-            // Effects
+            // Efekty
             effects.forEach((eff) => {
                 if (eff.type === 'defeat') {
                     const progress = Math.max(0, Math.min(1, eff.timer / (eff.maxTimer || 90)));
@@ -3696,7 +3692,7 @@
                     ctx.save();
                     ctx.globalAlpha = alpha;
                     if (imgPokonanie.complete) {
-                        // Drawing centered with correct aspect ratio (200x133 -> 1.5 ratio) but scaled down by half
+                        // Rysowanie wyśrodkowane z poprawnym współczynnikiem proporcji (200x133 -> 1.5 ratio) ale przeskalowane o połowę
                         const w = 100;
                         const h = 66.5;
                         ctx.drawImage(imgPokonanie, eff.x - w / 2, eff.y - h / 2, w, h);
@@ -3722,7 +3718,7 @@
                         const cols = 4;
                         const rows = 4;
 
-                        // Slow down animation: update frame every 4 ticks
+                        // Spowolnij animację: aktualizuj klatkę co 4 tyknięcia
                         const currentFrame = Math.floor(eff.timer / 4);
 
                         if (currentFrame < totalFrames) {
@@ -3732,7 +3728,7 @@
                             const fw = imgWybuch.width / cols;
                             const fh = imgWybuch.height / rows;
 
-                            const scale = 3.0; // Make it BIG
+                            const scale = 3.0; // Zrób to DUŻE
 
                             ctx.drawImage(imgWybuch,
                                 col * fw, row * fh, fw, fh,
@@ -3740,20 +3736,20 @@
                                 fw * scale, fh * scale
                             );
 
-                            // Timer is auto-incremented in update loop now
+                            // Timer jest automatycznie inkrementowany w pętli aktualizacji teraz
                         } else {
-                            eff.finished = true; // Mark for removal (handled by maxTimer check in update)
+                            eff.finished = true; // Oznacz do usunięcia (obsługiwane przez sprawdzenie maxTimer w aktualizacji)
                         }
                     }
                 }
             });
 
-            // Enemies Update
+            // Wrogowie Update
             enemies.forEach(e => {
-                // Bobbing effect ONLY for non-Karczmarz enemies
+                // Efekt kołysania TYLKO dla wrogów innych niż Karczmarz
                 const bob = e.type === 'karczmarz' ? 0 : Math.sin(Date.now() / 300 + e.x) * 2;
 
-                // Shooting logic moved to update() where it belongs!
+                // Logika strzelania przeniesiona do update() gdzie należy!
 
                 if (imgPiwo.complete) {
                     let currentImg = imgPiwo;
@@ -3778,7 +3774,7 @@
                             ctx.drawImage(currentImg, 0, 0, ew, eh);
                             ctx.restore();
                         } else if (e.type === 'ally_przyjaciel') {
-                            // Breathing effect for Przyjaciel
+                            // Efekt oddychania dla Przyjaciela
                             const breath = 1.0 + Math.sin(Date.now() / 300) * 0.03;
                             ctx.save();
                             ctx.translate(e.x + ew / 2, e.y + bob + eh / 2);
@@ -3790,16 +3786,16 @@
                         }
                     }
 
-                    // Render Speech Bubble for NPC
+                    // Renderuj dymek dialogu dla NPC
                     if (e.type === 'ally_przyjaciel' && e.speechTimer > 0 && imgNieSam.complete) {
                         const sw = 300;
                         const sh = sw * (imgNieSam.height / imgNieSam.width);
                         ctx.drawImage(imgNieSam, e.x + e.width / 2 - sw / 2, e.y - sh - 10, sw, sh);
                     }
 
-                    // Render Speech Bubble for Runners
+                    // Renderuj dymek dialogu dla Runnerów
                     if (e.speechImg && e.speechImg.complete) {
-                        const sw = 300; // Enlarged speech bubble
+                        const sw = 300; // Powiększony dymek dialogu
                         const sh = sw * (e.speechImg.height / e.speechImg.width);
                         ctx.drawImage(e.speechImg, e.x + e.width / 2 - sw / 2, e.y - sh - 10, sw, sh);
                     }
@@ -3812,20 +3808,20 @@
                 }
             });
 
-            // Bullets
+            // Pociski
             bullets.forEach(b => {
                 if (b.img && b.img.complete) {
                     if (b.img === imgDetoks) {
-                        ctx.drawImage(b.img, b.x, b.y, 80, 60); // Detoks - bigger
+                        ctx.drawImage(b.img, b.x, b.y, 80, 60); // Detoks - większy
                     } else if (b.isLaser) {
-                        // Laser bullet - pogrubiony, szeroki
-                        ctx.drawImage(b.img, b.x, b.y - 40, 200, 80); // Laser - wide and thick
+                        // Pocisk laserowy - pogrubiony, szeroki
+                        ctx.drawImage(b.img, b.x, b.y - 40, 200, 80); // Laser - szeroki i gruby
                     } else {
-                        ctx.drawImage(b.img, b.x, b.y, 30, 30); // Others - small
+                        ctx.drawImage(b.img, b.x, b.y, 30, 30); // Inne - małe
                     }
                 } else if (imgPociskEnemy.complete) {
-                    // 537x636 -> aspect ratio ~0.84.
-                    // Target width around 24px. Height around 28px.
+                    // 537x636 -> współczynnik proporcji ~0.84.
+                    // Docelowa szerokość około 24px. Wysokość około 28px.
                     const w = 24;
                     const h = 28;
                     ctx.drawImage(imgPociskEnemy, b.x - w / 2, b.y - h / 2, w, h);
@@ -3841,7 +3837,7 @@
                 }
             });
 
-            // Player Bullets
+            // Pociski gracza
             playerBullets.forEach(pb => {
                 if (pb.isAllyShot && imgPociskPrzyjaciel.complete) {
                     // Pocisk przyjaciela - mniejszy (z 45 na 25)
@@ -3871,13 +3867,13 @@
                     const endX = Math.max(pb.startX, pb.x);
                     const centerY = pb.y;
 
-                    // 1. Outer Glow (Blue/Cyan)
+                    // 1. Zewnętrzna poświata (niebieski/cyjan)
                     ctx.shadowBlur = 20;
                     ctx.shadowColor = '#00ffff';
                     ctx.fillStyle = 'rgba(0, 255, 255, 0.4)';
                     ctx.fillRect(startX, centerY - beamHeight / 2 - 10, beamWidth, beamHeight + 20);
 
-                    // 2. Inner Core (White/Bright Cyan)
+                    // 2. Wewnętrzny rdzeń (biały/jasny cyjan)
                     ctx.shadowBlur = 10;
                     ctx.shadowColor = 'white';
                     ctx.fillStyle = '#e0f7fa';
@@ -3885,12 +3881,12 @@
 
                     ctx.restore();
                 } else if (pb.isMecha && imgMechShot.complete) {
-                    // 821x423 -> aspect ratio ~1.94
-                    // Target size 90x46
+                    // 821x423 -> współczynnik proporcji ~1.94
+                    // Docelowy rozmiar 90x46
                     ctx.drawImage(imgMechShot, pb.x, pb.y - 23, 90, 46);
                 } else if (imgPociskBohater.complete) {
-                    // 408x408 -> aspect ratio 1:1
-                    // Target size 30x30
+                    // 408x408 -> współczynnik proporcji 1:1
+                    // Docelowy rozmiar 30x30
                     const w = 30;
                     const h = 30;
                     ctx.drawImage(imgPociskBohater, pb.x - w / 2, pb.y - h / 2, w, h);
@@ -3908,49 +3904,49 @@
                 const by = boss.y + Math.sin(Date.now() / 400) * 10;
 
                 if (imgImieChmielus.complete) {
-                    // Name graphic above boss
-                    const nw = 200; // Adjust size
+                    // Imię Bossa nad głową
+                    const nw = 200; // Dostosuj rozmiar
                     const nh = nw * (imgImieChmielus.height / imgImieChmielus.width);
                     ctx.drawImage(imgImieChmielus, bx + (boss.width - nw) / 2, by - 50, nw, nh);
                 }
 
                 if (boss.showNiePij > 0 && imgNiePij.complete) {
-                    // Draw Nie Pij
+                    // Rysuj Nie Pij
                     const nw = 350;
                     const nh = nw * (imgNiePij.height / imgNiePij.width);
                     ctx.drawImage(imgNiePij, GAME_WIDTH / 2 - nw / 2, 50, nw, nh);
                 }
 
                 if (imgBossInfo.complete) {
-                    // Boss info graphic on left top side under indicators
-                    // Moved up 15px as requested (80 -> 65) -> And moved right (70 -> 85)
+                    // Grafika z informacjami o Bossie w lewym górnym rogu pod wskaźnikami
+                    // Przesunięte w górę o 15px zgodnie z prośbą (80 -> 65) -> I przesunięte w prawo (70 -> 85)
                     ctx.drawImage(imgBossInfo, 85, 0, 200, 100);
                 }
 
-                // BOSS Body
+                // Ciało Bossa
                 ctx.save();
 
-                // Menacing Pulse & Glow Effect
-                const bossPulse = Math.sin(Date.now() / 400); // Oscillation -1 to 1
-                const scalePulse = 1.0 + bossPulse * 0.05; // Scale 0.95 to 1.05
+                // Groźny Puls i Poświata - Strach się bać
+                const bossPulse = Math.sin(Date.now() / 400); // Oscylacja -1 do 1
+                const scalePulse = 1.0 + bossPulse * 0.05; // Skala 0.95 do 1.05
 
-                // Glow Effect
-                const glowIntensity = 40 + bossPulse * 20; // Increased: 20-60 blur
-                ctx.shadowColor = 'rgba(255, 0, 0, 0.8)'; // Stronger Red glow
+                // Efekt poświaty
+                const glowIntensity = 40 + bossPulse * 20; // Zwiększone: 20-60 rozmycia
+                ctx.shadowColor = 'rgba(255, 0, 0, 0.8)'; // Silniejsza czerwona poświata
                 ctx.shadowBlur = glowIntensity;
 
                 if (bossHealing.active && bossHealing.flashTimer < 5) {
-                    // Healing flash changed to Red
+                    // Czerwony błysk leczenia
                     ctx.filter = 'brightness(1.5) sepia(1) saturate(5) hue-rotate(-50deg)';
                 } else if (boss.flash > 0) {
-                    // Hit flash changed to Red (was purple-ish)
+                    // Czerwony błysk trafienia (zamiast fioletowego)
                     ctx.filter = 'brightness(1.5) sepia(1) saturate(5) hue-rotate(-50deg)';
                 }
 
                 const drawScale = bossHealing.scale * scalePulse;
                 const dw = boss.width * drawScale;
                 const dh = boss.height * drawScale;
-                // Recalculate dx/dy to keep centered based on new size
+                // Przelicz dx/dy, aby zachować środek na podstawie nowego rozmiaru
                 const dx = bx - (dw - boss.width) / 2;
                 const dy = by - (dh - boss.height) / 2;
 
@@ -3966,7 +3962,7 @@
                     ctx.drawImage(imgSerce, heartDrop.x - 125, heartDrop.y - 125, 250, 250);
                 }
 
-                // Karczmarz Turret HP Bar & Extra enemies drawing logic adjustment
+                // Pasek HP wieżyczki karczmarza i dodatkowa logika rysowania wrogów
                 enemies.forEach(e => {
                     if (e.type === 'karczmarz_turret') {
                         const bw = 60; const bh = 6;
@@ -3981,10 +3977,10 @@
                     }
                 });
 
-                // HP Bar - moved below boss
+                // Pasek HP - przesunięty pod bossa
                 const barWidth = 200;
                 const barHeight = 20;
-                const barX = bx + (boss.width - barWidth) / 2; // Centered below boss
+                const barX = bx + (boss.width - barWidth) / 2; // Wyśrodkowany pod bossem
                 const barY = by + boss.height + 10;
 
                 ctx.fillStyle = '#333'; ctx.fillRect(barX, barY, barWidth, barHeight);
@@ -4003,11 +3999,11 @@
 
                 ctx.strokeStyle = 'white'; ctx.strokeRect(barX, barY, barWidth, barHeight);
 
-                // Text Indicator
+                // Wskaźnik tekstowy
                 ctx.fillStyle = 'white';
                 ctx.font = 'bold 14px Arial';
                 ctx.textAlign = 'center';
-                ctx.fillText(`HP: ${Math.round(boss.hp)} / 400`, barX + barWidth / 2, barY + 15);
+                ctx.fillText(`HP: ${Math.round(boss.hp)} / ${boss.maxHp}`, barX + barWidth / 2, barY + 15);
             }
 
             // Info Solarne (na samej górze ekranu)
@@ -4062,26 +4058,26 @@
                 screenFlashTimer--;
             }
 
-            // Dekrementacja solarImmunityTimer
+            // solarImmunityTimer
             if (solarImmunityTimer > 0) solarImmunityTimer--;
 
-            // Level Headers - Removed from draw loop to avoid duplicates
-            // Headers are now managed by showGenericNotification fading element in DOM
+            // Nagłówki Leveli - Wywalone z pętli rysowania, żeby nie dublować
+            // Nagłówki są teraz zarządzane przez element zanikający showGenericNotification w DOM
 
-            // Duplicate loop removed
+            // Usunięto pętlę duplikatów
 
 
 
-            // Player / Abduction
+            // Gracz / Porwanie
             if (abductionPhase < 4) {
-                // Flash effect when invincible
+                // Efekt błysku, gdy jest niewrażliwy
                 if (player.invincibilityTimer > 0 && Math.floor(Date.now() / 100) % 2 === 0) {
-                    // Skin rendering
+                    // Renderowanie skórki
                 } else {
                     drawPlayer(player.x, player.y, player.facingRight, false);
                 }
 
-                // MECH ARMOR UI (2 rows of 10) - REMOVED AS DUPLICATE
+                // UI Pancerza Mecha - USUNIĘTE BO DUPLIKAT
             }
 
             const ufoX = GAME_WIDTH / 2;
@@ -4090,7 +4086,7 @@
             if (abductionPhase >= 4) {
                 const pw = 45 * (player.isSober ? 1.5 : 1);
                 const ufoBottomY = 80; // Wlatuje do środka UFO (ufoY to 80)
-                const liftDuration = level === 7 ? 8000 : 2500; // Level 7: Very slow (8s)
+                const liftDuration = level === 7 ? 8000 : 2500; // Poziom 7: Bardzo wolno (8s)
                 const elapsed = Date.now() - playerAbductStartTime;
                 const progress = Math.min(elapsed / liftDuration, 1);
 
@@ -4100,10 +4096,10 @@
 
                 if (progress < 1.0) {
                     if (level === 7) {
-                        // Level 7: Stop before UFO
+                        // Poziom 7: Zatrzymaj się przed UFO - hamuj!
                         // "kawałek przed nią znika"
                         // UFO is at ufoY=80. ufoBottomY=80.
-                        // We want to disappear maybe at Y=150?
+                        // Ma znikać przy Y=150?
                         if (liftY > 150) {
                             drawPlayer(currentX, liftY, true, true);
                         }
@@ -4113,32 +4109,32 @@
                 }
             }
 
-            // Boss Intro Overlay Effects
-            // Boss Intro Overlay Effects
+            // Efekty nakładki wprowadzającej bossa
+            // Efekty nakładki wprowadzającej bossa
             if (level === 7 && introTimer < INTRO_DURATION) {
                 const progress = introTimer / INTRO_DURATION;
 
-                // Shake
+                // Wstrząs
                 const shakeX = (Math.random() - 0.5) * 10 * (1 - progress);
                 const shakeY = (Math.random() - 0.5) * 10 * (1 - progress);
                 ctx.save();
                 ctx.translate(shakeX, shakeY);
 
-                // Red flashes
+                // Czerwone błyski
                 if (Math.random() > 0.95) {
                     ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
                     ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
                 }
                 ctx.restore();
 
-                // Dark fade out
+                // Ciemne wygaszenie
                 ctx.fillStyle = `rgba(0, 0, 0, ${1 - progress})`;
                 ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
             }
 
-            // Level 6 Intro Overlay (Dialogs)
+            // Nakładka Intro Lvl 6 (Dialogi - gadające głowy)
             if (level === 6 && level6IntroStep < 5) {
-                // Dim background
+                // Przyciemnij tło
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
                 ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
@@ -4146,7 +4142,7 @@
                 let targetX = 0;
                 let targetY = 0;
 
-                // Steps:
+                // Kroki:
                 // 0: Karczmarz 1
                 // 1: Bohater 1
                 // 2: Karczmarz 2
@@ -4155,7 +4151,7 @@
 
                 if (level6IntroStep === 0) {
                     currentDialog = imgKarczmarz1;
-                    // Find Karczmarz
+                    // Znajdź Karczmarza
                     const k = enemies.find(e => e.type === 'karczmarz');
                     if (k) { targetX = k.x + k.width / 2; targetY = k.y - 190; }
                 } else if (level6IntroStep === 1) {
@@ -4175,32 +4171,32 @@
                 }
 
                 if (currentDialog && currentDialog.complete) {
-                    // Draw centered above target with clamping
+                    // Rysuj wyśrodkowane nad celem z ograniczaniem
                     // ZMIANA: Rozmiar grafik dialogowych dopasowany do "Bieg" (300px)
                     const w = 500;
                     const h = 200;
 
-                    // Clamp targetX to be within screen bounds with some padding
+                    // Ogranicz targetX, aby mieścił się w granicach ekranu z pewnym marginesem
                     let drawX = targetX - w / 2;
                     if (drawX < 20) drawX = 20;
                     if (drawX + w > GAME_WIDTH - 20) drawX = GAME_WIDTH - w - 20;
 
-                    // Lower position logic
-                    let drawY = targetY + 30; // Lower by 30 pixels
+                    // Logika niższej pozycji
+                    let drawY = targetY + 30; // Obniż o 30 pikseli
 
                     ctx.drawImage(currentDialog, drawX, drawY, w, h);
                 }
             }
 
-            // Level 6 Outro Overlay
+            // Outro Lvl 6 - Koniec gadania, czas na Bossa
             if (level === 6 && level6OutroActive && imgKarczmarz4.complete) {
-                if (level6OutroTimer === 0) { // First frame of outro just triggered
+                if (level6OutroTimer === 0) { // Pierwsza klatka outro właśnie się wyzwoliła
                     sfxPrzycisk.currentTime = 0; sfxPrzycisk.play().catch(() => { });
                 }
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
                 ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-                // Draw Karczmarz 4 dialog - larger
+                // Rysuj dialog Karczmarza 4 - większy
                 // ZMIANA: Powiększenie o 50% ze 400px na 600px
                 const w = 600;
                 const h = w * (imgKarczmarz4.height / imgKarczmarz4.width);
@@ -4210,17 +4206,17 @@
 
                 ctx.drawImage(imgKarczmarz4, (GAME_WIDTH - w) / 2, GAME_HEIGHT / 2 - h / 2 - 50, w, h);
 
-                // Draw Fade Overlay
+                // Rysuj nakładkę wygaszenia
                 if (level6OutroFade > 0) {
                     ctx.fillStyle = `rgba(0, 0, 0, ${level6OutroFade})`;
                     ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
                 }
             }
 
-            // Update previous jump state for rising edge detection
+            // Zapisz poprzedni stan skoku dla wykrywania krawędzi narastającej
             player.prevJumpState = keys.jump;
 
-            ctx.restore(); // Restore scale and shake
+            ctx.restore(); // Przywróć skalę i wstrząs
         }
 
         function drawPlayer(px, py, right, surprised) {
@@ -4235,29 +4231,29 @@
 
             if (abductionPhase >= 3) {
                 if (level === 7) {
-                    // Custom Wide Beam for Boss Level
-                    ctx.fillStyle = scheme.accent; // Or maybe white/cyan?
+                    // Szeroki Promień Bossa - Custom, na bogato
+                    ctx.fillStyle = scheme.accent; // albo biały/cyjan?
                     // "promień rozszerza się od statku w dół na szerokość X canvas"
-                    // Animation: Expand width over time
-                    // Start of phase 3: width small -> expands to full GAME_WIDTH
-                    // We don't have exact timer variable here easily, but phase 3 starts at 4000ms and phase 4 at 8000ms.
-                    // We can use (Date.now() - abductionPhase3Start) if we tracked it, OR just use generic sin/time
-                    // Let's assume full width immediately or pulsing? 
-                    // "animacja promienia jest nieco wydłużona niż normalnie" -> probably refers to timing.
+                    // Animacja: Rozszerzanie szerokości w czasie
+                    // Początek fazy 3: szerokość mała -> rozszerza się do pełnej szerokości GAME_WIDTH
+                    // Nie mamy tutaj łatwo zmiennej timera, ale faza 3 zaczyna się o 4000ms i faza 4 o 8000ms.
+                    // Możemy użyć (Date.now() - abductionPhase3Start), jeśli go śledziliśmy, LUB po prostu użyć ogólnego sin/time
+                    // Załóżmy pełną szerokość natychmiast lub pulsowanie? 
+                    // "animacja promienia jest nieco wydłużona niż normalnie" -> prawdopodobnie odnosi się do czasu.
                     // "promień rozszerza się od statku" -> Beam starts at UFO (width ~100) and expands at bottom to fill screen?
-                    // Let's make it a trapezoid filling the whole screen bottom
+                    // Zróbmy to trapezem wypełniającym całe dno ekranu
 
                     ctx.globalAlpha = 0.3 + Math.sin(Date.now() / 300) * 0.1;
                     ctx.beginPath();
-                    ctx.moveTo(0, 40); // Center of UFO (since translated to ufoX which is center)
-                    // Top width: small (e.g. 20px left/right)
+                    ctx.moveTo(0, 40); // Środek UFO (ponieważ przetłumaczono do ufoX, który jest środkiem)
+                    // Szerokość górna: mała (np. 20px w lewo/prawo)
                     ctx.lineTo(40, 40);
-                    // Bottom width: Full screen. 
-                    // ufoX is at GAME_WIDTH/2 (400). Left screen edge is -400 relative. Right is +400.
-                    ctx.lineTo(450, 520); // Wide bottom right
-                    ctx.lineTo(-450, 520); // Wide bottom left
-                    ctx.moveTo(-40, 40); // Close shape properly? 
-                    // Easier: moveTo(-40, 40) -> lineTo(40,40) -> lineTo(450,520) -> lineTo(-450,520) -> close
+                    // Szerokość dolna: Pełny ekran. 
+                    // ufoX jest na GAME_WIDTH/2 (400). Lewa krawędź ekranu to -400 względnie. Prawa to +400.
+                    ctx.lineTo(450, 520); // Szeroki dół po prawej
+                    ctx.lineTo(-450, 520); // Szeroki dół po lewej
+                    ctx.moveTo(-40, 40); // Zamknij kształt poprawnie? 
+                    // Łatwiej: moveTo(-40, 40) -> lineTo(40,40) -> lineTo(450,520) -> lineTo(-450,520) -> no i elegancko XD
                     ctx.moveTo(-40, 40);
                     ctx.lineTo(40, 40);
                     ctx.lineTo(450, 550);
@@ -4286,33 +4282,33 @@
             }
             ctx.restore();
 
-            // Screen Darkening for Level 7 Ending
+            // Ściemnianie Ekranu na Końcu Levelu 7 - Dobranoc
             if (level === 7 && showCelebration) {
-                // Determine darkening progress based on abductionPhase or time
-                // We know phases: 1 (start), 2(2s), 3(4s), 4(8s), 5(16s)
+                // Określ postęp zaciemnienia na podstawie abductionPhase lub czasu
+                // Wiemy, że fazy: 1 (start), 2(2s), 3(4s), 4(8s), 5(16s)
                 let darkness = 0;
-                // Currently we don't track exact "time since startUfoAbduction" easily in drawUFO.
-                // But we can approximate or add a global timer. 
-                // Or use `playerAbductStartTime` for phase 4.
+                // Obecnie nie śledzimy łatwo dokładnego "czasu od rozpoczęcia porwania przez UFO" w drawUFO.
+                // Ale możemy oszacować lub dodać globalny timer. 
+                // Lub użyj `playerAbductStartTime` dla fazy 4.
 
-                // Let's rely on manual calculation if possible or just use a new timer property if needed.
-                // Assuming we can't easily add a new timer var without risking state issues, let's look at `player.isLyingDown`
+                // Polegajmy na ręcznym obliczeniu, jeśli to możliwe, lub po prostu użyj nowego timera, jeśli jest potrzebny.
+                // Zakładając, że nie możemy łatwo dodać nowej zmiennej timera bez ryzyka problemów ze stanem, spójrzmy na `player.isLyingDown`
 
-                // Hack: We can assume darkness increases continuously.
-                // Let's add a global var `endingDarkness` in update loop if possible?
-                // Or just use a static increase in the draw loop if it is called consistently.
+                // Hack: Możemy założyć, że ciemność stale rośnie.
+                // Dodajmy globalną zmienną `endingDarkness` w pętli aktualizacji, jeśli to możliwe?
+                // Lub po prostu użyj statycznego wzrostu w pętli rysowania, jeśli jest ona konsekwentnie wywoływana.
 
-                // Better: Use `abductionPhase` to step it up.
-                if (abductionPhase >= 1) darkness = 0.3; // Was 0.1
-                if (abductionPhase >= 2) darkness = 0.5; // Was 0.2
-                if (abductionPhase >= 3) darkness = 0.7; // Was 0.35
+                // Lepiej: Użyj `abductionPhase` do zwiększenia go.
+                if (abductionPhase >= 1) darkness = 0.3; // Było 0.1
+                if (abductionPhase >= 2) darkness = 0.5; // Było 0.2
+                if (abductionPhase >= 3) darkness = 0.7; // Było 0.35
                 if (abductionPhase >= 4) {
-                    // Phase 4 lasts 3 seconds (from 6s to 9s).
+                    // Faza 4 trwa 3 sekundy (od 6s do 9s).
                     const elapsed = Date.now() - playerAbductStartTime;
                     const progress = Math.min(elapsed / 3000, 1);
                     darkness = 0.7 + (0.3 * progress); // Fade to full black (1.0)
 
-                    // Music Fading during this phase
+                    // Wyciszanie muzyki podczas tej fazy
                     if (progress > 0.5) {
                         const fadeVol = 1.0 - ((progress - 0.5) * 2);
                         bgMusicKoncowka.volume = Math.max(0, fadeVol);
@@ -4331,7 +4327,7 @@
         if (btnPause) btnPause.onclick = togglePause;
         generateLevel(1);
 
-        // Initial draw or loading state
+        // Początkowe rysowanie lub stan ładowania
         if (!assets.isReady) {
             checkAssetsLoaded();
         }

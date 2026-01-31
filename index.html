@@ -3574,11 +3574,49 @@
                     c.scale(breath, breath);
                     c.translate(-pw / 2, -ph / 2);
 
-                    c.drawImage(currentImg, 0, 0, pw, ph);
+                    // Korekta proporcji dla Pomarańczowej Zbroi (200x223)
+                    if (currentImg === imgPomaranczowaZbroja) { // 200x211
+                        drawH = pw * (211 / 200);
+                        drawY = ph - drawH; // Wyrównaj do dołu
+                    } else if (currentImg === imgPancerzNiebieski) { // 200x215
+                        drawH = pw * (215 / 200);
+                        drawY = ph - drawH;
+                    } else if (currentImg === imgPancerzZielony) { // 175x183
+                        drawH = pw * (183 / 175);
+                        drawY = ph - drawH;
+                    } else if (currentImg === imgBohater) { // 127x129
+                        drawH = pw * (129 / 127);
+                        drawY = ph - drawH;
+                    }
+
+                    c.drawImage(currentImg, 0, drawY, pw, drawH);
                 } else {
                     c.translate(px + pw / 2, py + ph / 2);
                     c.scale(breath, breath);
-                    c.drawImage(currentImg, -pw / 2, -ph / 2, pw, ph);
+
+                    // Obliczanie proporcji w zależności od grafiki
+                    let drawH = ph;
+                    let drawY = -ph / 2;
+
+                    if (currentImg === imgPomaranczowaZbroja) { // 200x211
+                        drawH = pw * (211 / 200);
+                        // Standardowy środek to 0,0 (przed translate do rogu).
+                        // Po translate do środka: góra = -ph/2, dół = ph/2.
+                        // Chcemy, aby dół nowej grafiki (Y + H) = ph/2.
+                        // Y = ph/2 - H.
+                        drawY = (ph / 2) - drawH;
+                    } else if (currentImg === imgPancerzNiebieski) { // 200x215
+                        drawH = pw * (215 / 200);
+                        drawY = (ph / 2) - drawH;
+                    } else if (currentImg === imgPancerzZielony) { // 175x183
+                        drawH = pw * (183 / 175);
+                        drawY = (ph / 2) - drawH;
+                    } else if (currentImg === imgBohater) { // 127x129
+                        drawH = pw * (129 / 127);
+                        drawY = (ph / 2) - drawH;
+                    }
+
+                    c.drawImage(currentImg, -pw / 2, drawY, pw, drawH);
                 }
                 c.restore();
                 return;

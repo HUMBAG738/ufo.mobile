@@ -533,7 +533,8 @@
 
     <script>
         const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+        // OPTYMALIZACJA: alpha: false (bo i tak rysujemy tło), desynchronized: true (mniejszy input lag)
+        const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
 
         // Muzyka wjazdu - dajemy na górę, żeby grało od razu!
         const bgMusicOpening = new Audio('opening.opus');
@@ -2421,7 +2422,8 @@
                 if (!c.collected) {
                     const dx = (player.x + player.width / 2) - c.x;
                     const dy = (player.y + player.height / 2) - c.y;
-                    if (Math.sqrt(dx * dx + dy * dy) < 35) {
+                    // OPTYMALIZACJA: Porównywanie kwadratów (Math.sqrt jest wolne)
+                    if ((dx * dx + dy * dy) < 1225) { // 35 * 35 = 1225
                         c.collected = true;
                         coinsCollected++;
                         score += 100;
@@ -2459,7 +2461,8 @@
                     } else {
                         const dx = (player.x + player.width / 2) - it.x;
                         const dy = (player.y + player.height / 2) - it.y;
-                        if (Math.sqrt(dx * dx + dy * dy) < 40) collision = true; // Zwiększono z 30 do 40 dla lepszego wyczucia
+                        // OPTYMALIZACJA: Porównywanie kwadratów
+                        if ((dx * dx + dy * dy) < 1600) collision = true; // 40 * 40 = 1600
                     }
 
                     if (collision) {
@@ -3846,13 +3849,13 @@
                             ctx.drawImage(img, it.x - iw / 2, it.y - ih / 2 + bob, iw, ih);
 
                             if (it.type === 'mega_mech') {
-                                ctx.fillStyle = 'white';
                                 ctx.font = 'bold 20px "Courier New", Courier, monospace';
                                 ctx.textAlign = 'center';
-                                ctx.shadowColor = 'black';
-                                ctx.shadowBlur = 4;
-                                ctx.fillText('MEGA MECH', it.x, it.y - ih / 2 - 10 + bob);
-                                ctx.shadowBlur = 0;
+                                // OPTYMALIZACJA: Ręczny cień (2x fillText) jest DUŻO szybszy niż shadowBlur
+                                ctx.fillStyle = 'black';
+                                ctx.fillText('MEGA MECH', (it.x + 2) | 0, (it.y - ih / 2 - 8 + bob) | 0);
+                                ctx.fillStyle = 'white';
+                                ctx.fillText('MEGA MECH', (it.x) | 0, (it.y - ih / 2 - 10 + bob) | 0);
                             }
                         } else {
                             // Fallback
@@ -3879,19 +3882,21 @@
                     }
                     ctx.restore();
                 } else if (eff.type === 'particle') {
-                    const alpha = Math.max(0, 0.5 * eff.timer / 20); // Reduced alpha for particles
-                    const radius = Math.max(0, 5 + (20 - eff.timer) * 0.5);
-                    ctx.fillStyle = `rgba(255, 165, 0, ${alpha})`;
-                    ctx.beginPath();
-                    ctx.arc(eff.x, eff.y, radius, 0, Math.PI * 2);
-                    ctx.fill();
+                    const alpha = Math.max(0, 0.5 * eff.timer / 20);
+                    // OPTYMALIZACJA: Kwadraty (fillRect) zamiast Kół (arc) są znacznie szybsze
+                    const size = Math.max(0, (5 + (20 - eff.timer) * 0.5) * 2) | 0; // x2 bo rect to średnica
+                    if (size > 0) {
+                        ctx.fillStyle = `rgba(255, 165, 0, ${alpha})`;
+                        ctx.fillRect((eff.x - size / 2) | 0, (eff.y - size / 2) | 0, size, size);
+                    }
                 } else if (eff.type === 'cloud') {
                     const alpha = Math.max(0, eff.timer / 40);
-                    const radius = Math.max(0, 8 + (40 - eff.timer) * 0.5);
-                    ctx.fillStyle = 'rgba(255,255,255,0.7)';
-                    ctx.beginPath();
-                    ctx.arc(eff.x, eff.y, radius, 0, Math.PI * 2);
-                    ctx.fill();
+                    // OPTYMALIZACJA: Kwadraty (fillRect) zamiast Kół (arc)
+                    const size = Math.max(0, (8 + (40 - eff.timer) * 0.5) * 2) | 0;
+                    if (size > 0) {
+                        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                        ctx.fillRect((eff.x - size / 2) | 0, (eff.y - size / 2) | 0, size, size);
+                    }
                 } else if (eff.type === 'explosion') {
                     if (imgWybuch.complete) {
                         const totalFrames = 16;

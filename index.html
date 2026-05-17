@@ -1773,7 +1773,6 @@
             if (player.shieldLevel > 0) {
                 // Jeśli niebieski (2), pierwsze uderzenie spada do zielonego (1). Drugie uderzenie wraca do normalnego (0).
                 player.shieldLevel--;
-                effects.push({ x: player.x + player.width / 2, y: player.y + player.height / 2, type: 'cloud', timer: 30 });
                 player.invincibilityTimer = 60; // 1 second of i-frames
                 updateUI();
                 return;
@@ -4256,12 +4255,8 @@
 
             // Gracz / Porwanie
             if (abductionPhase < 4) {
-                // Efekt błysku, gdy jest niewrażliwy
-                if (player.invincibilityTimer > 0 && Math.floor(Date.now() / 100) % 2 === 0) {
-                    // Renderowanie skórki
-                } else {
-                    drawPlayer(player.x, player.y, player.facingRight, false);
-                }
+                // Migotanie gracza jest już obsługiwane wewnątrz drawPlayerOnCtx (globalAlpha)
+                drawPlayer(player.x, player.y, player.facingRight, false);
 
                 // UI Pancerza Mecha - USUNIĘTE BO DUPLIKAT
             }
